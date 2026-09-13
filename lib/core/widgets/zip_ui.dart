@@ -74,55 +74,28 @@ class _PathMotifPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+/// Single brand mark used in UI — same asset as launcher / splash.
 class ZipMark extends StatelessWidget {
   const ZipMark({super.key, this.size = 56});
 
   final double size;
 
+  static const assetPath = 'assets/branding/app_icon.png';
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(painter: _ZipMarkPainter()),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(size * 0.22),
+      child: Image.asset(
+        assetPath,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+        gaplessPlayback: true,
+      ),
     );
   }
-}
-
-class _ZipMarkPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final s = size.shortestSide;
-    final r = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(s * 0.28),
-    );
-    canvas.drawRRect(r, Paint()..color = ZipColors.ember);
-
-    final stroke = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = s * 0.14
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final p = Path()
-      ..moveTo(size.width * 0.28, size.height * 0.68)
-      ..lineTo(size.width * 0.28, size.height * 0.38)
-      ..lineTo(size.width * 0.58, size.height * 0.38)
-      ..lineTo(size.width * 0.58, size.height * 0.62)
-      ..lineTo(size.width * 0.78, size.height * 0.62);
-
-    canvas.drawPath(p, stroke);
-    canvas.drawCircle(
-      Offset(size.width * 0.78, size.height * 0.62),
-      s * 0.07,
-      Paint()..color = Colors.white,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class ZipPrimaryButton extends StatelessWidget {
