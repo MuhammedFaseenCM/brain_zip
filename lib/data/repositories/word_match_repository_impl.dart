@@ -1,17 +1,21 @@
 import 'dart:convert';
 
+import 'package:brain_zip/core/firebase/firebase_bootstrap.dart';
+import 'package:brain_zip/domain/entities/word_match_deck.dart';
+import 'package:brain_zip/domain/repositories/word_match_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/firebase/firebase_bootstrap.dart';
-import '../../domain/entities/word_match_deck.dart';
-
-class WordMatchRepository {
-  WordMatchRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ??
-            (FirebaseBootstrap.isReady ? FirebaseFirestore.instance : null);
+class WordMatchRepositoryImpl implements WordMatchRepository {
+  WordMatchRepositoryImpl({
+    FirebaseFirestore? firestore,
+    AssetBundle? assetBundle,
+  })  : _firestore = firestore ??
+            (FirebaseBootstrap.isReady ? FirebaseFirestore.instance : null),
+        _assetBundle = assetBundle ?? rootBundle;
 
   final FirebaseFirestore? _firestore;
+  final AssetBundle _assetBundle;
 
   static const _assetFiles = [
     'assets/word_match/decks/opposites.json',
@@ -19,10 +23,12 @@ class WordMatchRepository {
     'assets/word_match/decks/geography.json',
   ];
 
+  @override
   Future<List<WordMatchDeck>> fetchDecks() async {
-    if (_firestore != null) {
+    final firestore = _firestore;
+    if (firestore != null) {
       try {
-        final snap = await _firestore
+        final snap = await firestore
             .collection('word_match_decks')
             .orderBy('order')
             .get(const GetOptions(source: Source.serverAndCache));
@@ -31,7 +37,9 @@ class WordMatchRepository {
               .map((d) => WordMatchDeck.fromJson(d.data(), id: d.id))
               .toList();
         }
-      } catch (_) {}
+      } catch (_) {
+        // fall through to assets
+      }
     }
     return _loadAssets();
   }
@@ -39,12 +47,11 @@ class WordMatchRepository {
   Future<List<WordMatchDeck>> _loadAssets() async {
     final decks = <WordMatchDeck>[];
     for (final path in _assetFiles) {
-      final raw = await rootBundle.loadString(path);
-      decks.add(
-        WordMatchDeck.fromJson(jsonDecode(raw) as Map<String, dynamic>),
-      );
+      final raw = await _assetBundle.loadString(path);
+      decks.add(WordMatchDeck.fromJson(jsonDecode(raw) as Map<String, dynamic>));
     }
     decks.sort((a, b) => a.order.compareTo(b.order));
     return decks;
   }
 }
+
