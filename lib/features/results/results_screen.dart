@@ -14,7 +14,6 @@ class ResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = data['title'] as String? ?? 'Results';
     final subtitle = data['subtitle'] as String? ?? '';
-    final points = data['points'] as int? ?? 0;
     final time = data['timeSeconds'] as int?;
     final improved = data['improved'] as bool? ?? false;
     final replayDaily = data['replayDaily'] as bool? ?? false;
@@ -71,38 +70,28 @@ class ResultsScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      Text(
-                        '$points',
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                              color: ZipColors.ember,
-                              height: 1,
-                            ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'points',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: ZipColors.inkSoft,
-                            ),
-                      ),
                       if (time != null) ...[
-                        const SizedBox(height: 14),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.schedule_rounded,
-                              size: 18,
-                              color: ZipColors.inkSoft,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _formatTime(time),
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ],
+                        Text(
+                          _formatTime(time),
+                          style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                                color: ZipColors.ember,
+                                height: 1,
+                              ),
                         ),
-                      ],
+                        const SizedBox(height: 4),
+                        Text(
+                          'time',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: ZipColors.inkSoft,
+                              ),
+                        ),
+                      ] else
+                        Text(
+                          'Done',
+                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                color: ZipColors.ember,
+                              ),
+                        ),
                       if (improved) ...[
                         const SizedBox(height: 16),
                         Container(

@@ -221,7 +221,6 @@ class ZipGame extends FlameGame with DragCallbacks {
     super.render(canvas);
     _drawBoardShadow(canvas);
     _drawBoard(canvas);
-    _drawStartEndHints(canvas);
     _drawPathFill(canvas);
     _drawPathStroke(canvas);
     _drawWalls(canvas);
@@ -253,62 +252,40 @@ class ZipGame extends FlameGame with DragCallbacks {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
+
+    final grid = Paint()
+      ..color = const Color(0xFFE2E8F0)
+      ..strokeWidth = 1.2;
+    for (var i = 1; i < level.size; i++) {
+      final x = _origin.dx + i * _cellSize;
+      final y = _origin.dy + i * _cellSize;
+      canvas.drawLine(Offset(x, _origin.dy), Offset(x, _origin.dy + board), grid);
+      canvas.drawLine(Offset(_origin.dx, y), Offset(_origin.dx + board, y), grid);
+    }
   }
 
-  void _drawStartEndHints(Canvas canvas) {
-    Cell? start;
-    Cell? end;
-    for (final e in level.numbers.entries) {
-      if (e.value == 1) start = e.key;
-      if (e.value == level.maxNumber) end = e.key;
-    }
+  void _drawNumbers(Canvas canvas) {
+    for (final entry in level.numbers.entries) {
+      final n = entry.value;
+      final center = _centerOf(entry.key);
+      final visited = path.contains(entry.key);
 
-    if (start != null && !path.contains(start)) {
-      canvas.drawCircle(
-        _centerOf(start),
-        _cellSize * 0.32,
-        Paint()
-          ..color = ZipColors.ember.withValues(alpha: 0.12)
-          ..style = PaintingStyle.fill,
-      );
-      canvas.drawCircle(
-        _centerOf(start),
-        _cellSize * 0.32,
-        Paint()
-          ..color = ZipColors.ember.withValues(alpha: 0.45)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2,
-      );
-    }
-
-    if (end != null) {
-      final visited = path.contains(end);
-      canvas.drawCircle(
-        _centerOf(end),
-        _cellSize * 0.34,
-        Paint()
-          ..color = (visited ? ZipColors.success : ZipColors.ink)
-              .withValues(alpha: visited ? 0.18 : 0.08)
-          ..style = PaintingStyle.fill,
-      );
-      canvas.drawCircle(
-        _centerOf(end),
-        _cellSize * 0.34,
-        Paint()
-          ..color = visited ? ZipColors.success : ZipColors.inkSoft
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.5,
-      );
-      // Inner finish ring
-      canvas.drawCircle(
-        _centerOf(end),
-        _cellSize * 0.26,
-        Paint()
-          ..color = visited
-              ? ZipColors.success.withValues(alpha: 0.5)
-              : ZipColors.ink.withValues(alpha: 0.2)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5,
+      final tp = TextPainter(
+        text: TextSpan(
+          text: '$n',
+          style: TextStyle(
+            color: visited
+                ? ZipColors.number.withValues(alpha: 0.45)
+                : ZipColors.number,
+            fontSize: _cellSize * 0.36,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(
+        canvas,
+        Offset(center.dx - tp.width / 2, center.dy - tp.height / 2),
       );
     }
   }
@@ -355,7 +332,6 @@ class ZipGame extends FlameGame with DragCallbacks {
     }
     canvas.drawPath(p, stroke);
 
-    // Lighter inner highlight for tube feel.
     canvas.drawPath(
       p,
       Paint()
@@ -367,12 +343,7 @@ class ZipGame extends FlameGame with DragCallbacks {
     );
 
     final tip = _centerOf(path.last);
-    final onFinish = level.numbers[path.last] == level.maxNumber;
-    canvas.drawCircle(
-      tip,
-      width * 0.42,
-      Paint()..color = onFinish ? ZipColors.success : ZipColors.ember,
-    );
+    canvas.drawCircle(tip, width * 0.42, Paint()..color = ZipColors.ember);
     canvas.drawCircle(
       tip,
       width * 0.42,
@@ -409,46 +380,6 @@ class ZipGame extends FlameGame with DragCallbacks {
         p2 = Offset(_origin.dx + (col + 1) * _cellSize - inset, y);
       }
       canvas.drawLine(p1, p2, paint);
-    }
-  }
-
-  void _drawNumbers(Canvas canvas) {
-    final next = _validator.nextRequiredAfter(path);
-    for (final entry in level.numbers.entries) {
-      final n = entry.value;
-      final center = _centerOf(entry.key);
-      final isNext = n == next;
-      final visited = path.contains(entry.key);
-      final isEnd = n == level.maxNumber;
-
-      if (isNext && !visited) {
-        canvas.drawCircle(
-          center,
-          _cellSize * 0.3,
-          Paint()..color = ZipColors.emberSoft,
-        );
-      }
-
-      final tp = TextPainter(
-        text: TextSpan(
-          text: '$n',
-          style: TextStyle(
-            color: visited
-                ? (isEnd ? ZipColors.success : ZipColors.number)
-                    .withValues(alpha: 0.55)
-                : isEnd
-                    ? ZipColors.ink
-                    : ZipColors.number,
-            fontSize: _cellSize * (isEnd ? 0.4 : 0.36),
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      tp.paint(
-        canvas,
-        Offset(center.dx - tp.width / 2, center.dy - tp.height / 2),
-      );
     }
   }
 }

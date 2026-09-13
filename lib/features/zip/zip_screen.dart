@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -26,9 +24,6 @@ class _ZipScreenState extends ConsumerState<ZipScreen> {
   ZipGame? _game;
   late final DateTime _day;
   late final ZipLevel _level;
-  int _pathLength = 0;
-  int _elapsed = 0;
-  Timer? _ticker;
   bool _finished = false;
 
   @override
@@ -40,31 +35,13 @@ class _ZipScreenState extends ConsumerState<ZipScreen> {
     _game = ZipGame(
       level: _level,
       onWin: _onWin,
-      onStatsChanged: (len, next) {
-        if (!mounted || _finished) return;
-        setState(() => _pathLength = len);
-      },
+      onStatsChanged: (_, _) {},
     );
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted || _finished || _game?.startedAt == null) return;
-      setState(() {
-        _elapsed = DateTime.now().difference(_game!.startedAt!).inSeconds;
-      });
-    });
   }
-
-  @override
-  void dispose() {
-    _ticker?.cancel();
-    super.dispose();
-  }
-
-  int get _livePoints => (1000 - _elapsed * 5).clamp(50, 1000);
 
   Future<void> _onWin(int points, int elapsedSeconds) async {
     if (_finished) return;
     _finished = true;
-    _ticker?.cancel();
     final improved = await ref.read(scoreRepositoryProvider).submitScore(
           modeKey: 'zip_${_level.id}',
           points: points,
@@ -76,7 +53,6 @@ class _ZipScreenState extends ConsumerState<ZipScreen> {
       '/results',
       extra: {
         'title': 'Puzzle cleared!',
-        'points': points,
         'timeSeconds': elapsedSeconds,
         'improved': improved,
         'replayDaily': true,
@@ -86,10 +62,6 @@ class _ZipScreenState extends ConsumerState<ZipScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final total = _level.size * _level.size;
-    final progress = total == 0 ? 0.0 : _pathLength / total;
-    final urgent = _elapsed >= 60;
-
     return Scaffold(
       body: ZipAtmosphere(
         child: SafeArea(
@@ -109,38 +81,9 @@ class _ZipScreenState extends ConsumerState<ZipScreen> {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                    ZipHudPill(
-                      icon: Icons.schedule_rounded,
-                      label: _formatTime(_elapsed),
-                      emphasize: urgent,
-                    ),
-                    const SizedBox(width: 8),
-                    ZipHudPill(
-                      icon: Icons.bolt_rounded,
-                      label: '$_livePoints',
-                    ),
                   ],
                 ),
               ).animate().fadeIn(duration: 350.ms),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(99),
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: progress),
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
-                    builder: (context, value, _) {
-                      return LinearProgressIndicator(
-                        value: value,
-                        minHeight: 6,
-                        backgroundColor: ZipColors.mistDeep,
-                        color: ZipColors.ember,
-                      );
-                    },
-                  ),
-                ),
-              ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -195,11 +138,5 @@ class _ZipScreenState extends ConsumerState<ZipScreen> {
         ),
       ),
     );
-  }
-
-  String _formatTime(int seconds) {
-    final m = seconds ~/ 60;
-    final s = seconds % 60;
-    return '$m:${s.toString().padLeft(2, '0')}';
   }
 }

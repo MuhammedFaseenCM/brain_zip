@@ -11,6 +11,12 @@ import '../zip/logic/daily_puzzle_generator.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  String _formatBestTime(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final now = DateTime.now();
@@ -19,7 +25,7 @@ class HomeScreen extends ConsumerWidget {
     final scores = ref.watch(scoreRepositoryProvider);
     final bestPoints = scores.getBestPoints('zip_${level.id}');
     final bestTime = scores.getBestTimeSeconds('zip_${level.id}');
-    final cleared = bestPoints > 0;
+    final cleared = bestPoints > 0 || bestTime != null;
 
     return Scaffold(
       body: ZipAtmosphere(
@@ -126,11 +132,10 @@ class HomeScreen extends ConsumerWidget {
                       cleared ? 'Nice work' : 'Ready when you are',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                    if (cleared) ...[
+                    if (cleared && bestTime != null) ...[
                       const SizedBox(height: 12),
                       Text(
-                        'Best $bestPoints pts'
-                        '${bestTime != null ? ' · ${bestTime}s' : ''}',
+                        'Best time ${_formatBestTime(bestTime)}',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: ZipColors.inkSoft,
                             ),
