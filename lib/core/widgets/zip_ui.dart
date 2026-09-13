@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
-/// Soft mist gradient + faint diagonal path motif behind Zip screens.
+/// Soft ink gradient + faint diagonal path motif behind Zip screens.
 class ZipAtmosphere extends StatelessWidget {
   const ZipAtmosphere({super.key, required this.child});
 
@@ -19,9 +19,9 @@ class ZipAtmosphere extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFFEEF3F9),
-                ZipColors.mist,
-                Color(0xFFE4EAF3),
+                Color(0xFF152033),
+                ZipColors.ink,
+                Color(0xFF0B1220),
               ],
             ),
           ),
@@ -41,7 +41,7 @@ class _PathMotifPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = ZipColors.ember.withValues(alpha: 0.06)
+      ..color = ZipColors.ember.withValues(alpha: 0.10)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 18
       ..strokeCap = StrokeCap.round
@@ -57,7 +57,7 @@ class _PathMotifPainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     final paint2 = Paint()
-      ..color = ZipColors.ink.withValues(alpha: 0.03)
+      ..color = ZipColors.onInk.withValues(alpha: 0.04)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 14
       ..strokeCap = StrokeCap.round;
@@ -149,16 +149,16 @@ class ZipHudPill extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: emphasize ? ZipColors.emberSoft : ZipColors.paper,
+        color: emphasize ? ZipColors.emberSoft : ZipColors.wall,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: emphasize
-              ? ZipColors.ember.withValues(alpha: 0.35)
-              : const Color(0xFFD8E0EB),
+              ? ZipColors.ember.withValues(alpha: 0.45)
+              : ZipColors.outlineQuiet,
         ),
         boxShadow: [
           BoxShadow(
-            color: ZipColors.ink.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -170,13 +170,13 @@ class ZipHudPill extends StatelessWidget {
           Icon(
             icon,
             size: 16,
-            color: emphasize ? ZipColors.emberDeep : ZipColors.inkSoft,
+            color: emphasize ? ZipColors.ember : ZipColors.inkSoft,
           ),
           const SizedBox(width: 6),
           Text(
             label,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: emphasize ? ZipColors.emberDeep : ZipColors.ink,
+                  color: emphasize ? ZipColors.ember : ZipColors.onInk,
                 ),
           ),
         ],

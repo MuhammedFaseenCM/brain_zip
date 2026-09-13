@@ -18,6 +18,7 @@ class _BrainZipAppState extends State<BrainZipApp> {
     return MaterialApp.router(
       title: 'Zip',
       theme: buildAppTheme(),
+      themeMode: ThemeMode.dark,
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
     );

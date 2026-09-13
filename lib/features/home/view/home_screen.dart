@@ -60,7 +60,7 @@ class HomeScreen extends StatelessWidget {
                                     .textTheme
                                     .displaySmall
                                     ?.copyWith(
-                                      color: ZipColors.ink,
+                                      color: ZipColors.onInk,
                                       height: 1,
                                     ),
                               ),
@@ -86,12 +86,12 @@ class HomeScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(22),
                       decoration: BoxDecoration(
-                        color: ZipColors.paper,
+                        color: ZipColors.wall,
                         borderRadius: BorderRadius.circular(28),
-                        border: Border.all(color: const Color(0xFFD8E0EB)),
+                        border: Border.all(color: ZipColors.outlineQuiet),
                         boxShadow: [
                           BoxShadow(
-                            color: ZipColors.ember.withValues(alpha: 0.12),
+                            color: Colors.black.withValues(alpha: 0.35),
                             blurRadius: 28,
                             offset: const Offset(0, 14),
                           ),
@@ -117,7 +117,7 @@ class HomeScreen extends StatelessWidget {
                                       .textTheme
                                       .labelLarge
                                       ?.copyWith(
-                                        color: ZipColors.emberDeep,
+                                        color: ZipColors.ember,
                                       ),
                                 ),
                               ),
@@ -225,7 +225,7 @@ class _ParkedRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFD0D8E4)),
+          border: Border.all(color: ZipColors.outlineQuiet),
           color: ZipColors.paper.withValues(alpha: 0.55),
         ),
         child: Row(

@@ -235,7 +235,7 @@ class ZipGame extends FlameGame with DragCallbacks {
         rect.translate(0, 6),
         Radius.circular(_boardRadius),
       ),
-      Paint()..color = ZipColors.ink.withValues(alpha: 0.08),
+      Paint()..color = Colors.black.withValues(alpha: 0.35),
     );
   }
 
@@ -244,17 +244,17 @@ class ZipGame extends FlameGame with DragCallbacks {
     final rect = Rect.fromLTWH(_origin.dx, _origin.dy, board, board);
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(_boardRadius));
 
-    canvas.drawRRect(rrect, Paint()..color = Colors.white);
+    canvas.drawRRect(rrect, Paint()..color = ZipColors.wall);
     canvas.drawRRect(
       rrect,
       Paint()
-        ..color = const Color(0xFFD5DEEA)
+        ..color = ZipColors.outline
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
 
     final grid = Paint()
-      ..color = const Color(0xFFE2E8F0)
+      ..color = ZipColors.mistDeep
       ..strokeWidth = 1.2;
     for (var i = 1; i < level.size; i++) {
       final x = _origin.dx + i * _cellSize;
@@ -292,7 +292,7 @@ class ZipGame extends FlameGame with DragCallbacks {
 
   void _drawPathFill(Canvas canvas) {
     if (path.isEmpty) return;
-    final fill = Paint()..color = ZipColors.emberSoft.withValues(alpha: 0.55);
+    final fill = Paint()..color = ZipColors.emberSoft.withValues(alpha: 0.85);
     for (final cell in path) {
       canvas.drawRRect(
         RRect.fromRectAndRadius(
@@ -356,7 +356,7 @@ class ZipGame extends FlameGame with DragCallbacks {
 
   void _drawWalls(Canvas canvas) {
     final paint = Paint()
-      ..color = ZipColors.wall
+      ..color = ZipColors.onInk.withValues(alpha: 0.85)
       ..strokeWidth = math.max(5.0, _cellSize * 0.12)
       ..strokeCap = StrokeCap.round;
 

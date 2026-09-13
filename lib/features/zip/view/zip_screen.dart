@@ -135,8 +135,8 @@ class _ZipScreenState extends State<ZipScreen> {
                             Expanded(
                               child: FilledButton.tonalIcon(
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: ZipColors.ink,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: ZipColors.wall,
+                                  foregroundColor: ZipColors.onInk,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 16,
                                   ),

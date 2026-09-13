@@ -59,12 +59,12 @@ class ResultsScreen extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
                   decoration: BoxDecoration(
-                    color: ZipColors.paper,
+                    color: ZipColors.wall,
                     borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: const Color(0xFFD8E0EB)),
+                    border: Border.all(color: ZipColors.outlineQuiet),
                     boxShadow: [
                       BoxShadow(
-                        color: ZipColors.ember.withValues(alpha: 0.12),
+                        color: Colors.black.withValues(alpha: 0.35),
                         blurRadius: 28,
                         offset: const Offset(0, 12),
                       ),
@@ -92,7 +92,7 @@ class ResultsScreen extends StatelessWidget {
                           '$points',
                           style:
                               Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    color: ZipColors.ink,
+                                    color: ZipColors.onInk,
                                     fontWeight: FontWeight.w800,
                                   ),
                         ),

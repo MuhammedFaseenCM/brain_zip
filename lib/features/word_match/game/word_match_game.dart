@@ -5,6 +5,7 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../domain/entities/word_match_deck.dart';
 
 typedef WordMatchWinCallback = void Function(int points, int elapsedSeconds);
@@ -29,7 +30,7 @@ class WordMatchGame extends FlameGame with DragCallbacks {
   final _rand = Random(42);
 
   @override
-  Color backgroundColor() => const Color(0xFFF7F7F5);
+  Color backgroundColor() => ZipColors.ink;
 
   @override
   Future<void> onLoad() async {
@@ -151,7 +152,7 @@ class WordMatchGame extends FlameGame with DragCallbacks {
     super.render(canvas);
     if (_dragSource != null && _dragPos != null && !_dragSource!.isMatched) {
       final paint = Paint()
-        ..color = const Color(0xFFE85D04)
+        ..color = ZipColors.ember
         ..strokeWidth = 4
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round;
@@ -199,15 +200,15 @@ class _WordNode extends PositionComponent {
       rrect,
       Paint()
         ..color = isMatched
-            ? const Color(0xFFD8F3DC)
-            : Colors.white,
+            ? ZipColors.successSoft
+            : ZipColors.wall,
     );
     canvas.drawRRect(
       rrect,
       Paint()
         ..color = isMatched
-            ? const Color(0xFF40916C)
-            : const Color(0xFFE85D04)
+            ? ZipColors.success
+            : ZipColors.ember
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
@@ -215,7 +216,7 @@ class _WordNode extends PositionComponent {
       text: TextSpan(
         text: text,
         style: TextStyle(
-          color: isMatched ? const Color(0xFF1B4332) : const Color(0xFF212529),
+          color: isMatched ? ZipColors.success : ZipColors.onInk,
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
