@@ -11,7 +11,6 @@ class ZipBloc extends Bloc<ZipEvent, ZipState> {
       super(ZipState.initial(now ?? DateTime.now())) {
     on<ZipStarted>(_onStarted);
     on<ZipCompleted>(_onCompleted);
-    on<ZipNavigationHandled>(_onNavigationHandled);
   }
 
   final SubmitScore _submitScore;
@@ -41,6 +40,8 @@ class ZipBloc extends Bloc<ZipEvent, ZipState> {
       timeSeconds: event.timeSeconds,
     );
 
+    if (emit.isDone) return;
+
     emit(
       state.copyWith(
         improved: improved,
@@ -53,13 +54,5 @@ class ZipBloc extends Bloc<ZipEvent, ZipState> {
         },
       ),
     );
-  }
-
-  void _onNavigationHandled(
-    ZipNavigationHandled event,
-    Emitter<ZipState> emit,
-  ) {
-    if (state.status != ZipStatus.navigating) return;
-    emit(state.copyWith(status: ZipStatus.ready, resultsExtra: null));
   }
 }

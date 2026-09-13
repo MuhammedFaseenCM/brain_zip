@@ -55,13 +55,12 @@ extension ZipEventPatterns on ZipEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ZipStarted value)?  started,TResult Function( ZipCompleted value)?  completed,TResult Function( ZipNavigationHandled value)?  navigationHandled,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ZipStarted value)?  started,TResult Function( ZipCompleted value)?  completed,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ZipStarted() when started != null:
 return started(_that);case ZipCompleted() when completed != null:
-return completed(_that);case ZipNavigationHandled() when navigationHandled != null:
-return navigationHandled(_that);case _:
+return completed(_that);case _:
   return orElse();
 
 }
@@ -79,13 +78,12 @@ return navigationHandled(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ZipStarted value)  started,required TResult Function( ZipCompleted value)  completed,required TResult Function( ZipNavigationHandled value)  navigationHandled,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ZipStarted value)  started,required TResult Function( ZipCompleted value)  completed,}){
 final _that = this;
 switch (_that) {
 case ZipStarted():
 return started(_that);case ZipCompleted():
-return completed(_that);case ZipNavigationHandled():
-return navigationHandled(_that);}
+return completed(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -99,13 +97,12 @@ return navigationHandled(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ZipStarted value)?  started,TResult? Function( ZipCompleted value)?  completed,TResult? Function( ZipNavigationHandled value)?  navigationHandled,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ZipStarted value)?  started,TResult? Function( ZipCompleted value)?  completed,}){
 final _that = this;
 switch (_that) {
 case ZipStarted() when started != null:
 return started(_that);case ZipCompleted() when completed != null:
-return completed(_that);case ZipNavigationHandled() when navigationHandled != null:
-return navigationHandled(_that);case _:
+return completed(_that);case _:
   return null;
 
 }
@@ -122,12 +119,11 @@ return navigationHandled(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DateTime? date)?  started,TResult Function( int points,  int timeSeconds)?  completed,TResult Function()?  navigationHandled,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DateTime? date)?  started,TResult Function( int points,  int timeSeconds)?  completed,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ZipStarted() when started != null:
 return started(_that.date);case ZipCompleted() when completed != null:
-return completed(_that.points,_that.timeSeconds);case ZipNavigationHandled() when navigationHandled != null:
-return navigationHandled();case _:
+return completed(_that.points,_that.timeSeconds);case _:
   return orElse();
 
 }
@@ -145,12 +141,11 @@ return navigationHandled();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DateTime? date)  started,required TResult Function( int points,  int timeSeconds)  completed,required TResult Function()  navigationHandled,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DateTime? date)  started,required TResult Function( int points,  int timeSeconds)  completed,}) {final _that = this;
 switch (_that) {
 case ZipStarted():
 return started(_that.date);case ZipCompleted():
-return completed(_that.points,_that.timeSeconds);case ZipNavigationHandled():
-return navigationHandled();}
+return completed(_that.points,_that.timeSeconds);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -164,12 +159,11 @@ return navigationHandled();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DateTime? date)?  started,TResult? Function( int points,  int timeSeconds)?  completed,TResult? Function()?  navigationHandled,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DateTime? date)?  started,TResult? Function( int points,  int timeSeconds)?  completed,}) {final _that = this;
 switch (_that) {
 case ZipStarted() when started != null:
 return started(_that.date);case ZipCompleted() when completed != null:
-return completed(_that.points,_that.timeSeconds);case ZipNavigationHandled() when navigationHandled != null:
-return navigationHandled();case _:
+return completed(_that.points,_that.timeSeconds);case _:
   return null;
 
 }
@@ -310,37 +304,5 @@ as int,
 
 
 }
-
-/// @nodoc
-
-
-class ZipNavigationHandled implements ZipEvent {
-  const ZipNavigationHandled();
-  
-
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZipNavigationHandled);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'ZipEvent.navigationHandled()';
-}
-
-
-}
-
-
-
 
 // dart format on

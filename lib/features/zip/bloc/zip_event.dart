@@ -10,6 +10,4 @@ sealed class ZipEvent with _$ZipEvent {
     required int points,
     required int timeSeconds,
   }) = ZipCompleted;
-
-  const factory ZipEvent.navigationHandled() = ZipNavigationHandled;
 }

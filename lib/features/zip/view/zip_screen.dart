@@ -22,37 +22,65 @@ class ZipScreen extends StatefulWidget {
 }
 
 class _ZipScreenState extends State<ZipScreen> {
+  late final ZipBloc _bloc;
   ZipGame? _game;
 
-  void _ensureGame(ZipState state) {
+  bool _ensureGame(ZipState state) {
     final current = _game;
-    if (current != null && current.level.id == state.level.id) return;
+    if (current != null && current.level.id == state.level.id) return false;
     _game = ZipGame(
       level: state.level,
       onWin: (points, elapsedSeconds) {
-        context.read<ZipBloc>().add(
+        _bloc.add(
           ZipEvent.completed(points: points, timeSeconds: elapsedSeconds),
         );
       },
       onStatsChanged: (_, _) {},
     );
+    return true;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = ZipBloc(submitScore: context.read<SubmitScore>(), now: widget.date);
+    _ensureGame(_bloc.state);
+  }
+
+  @override
+  void dispose() {
+    final game = _game;
+    _game = null;
+    game?.pauseEngine();
+    _bloc.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          ZipBloc(submitScore: context.read<SubmitScore>(), now: widget.date),
-      child: BlocListener<ZipBloc, ZipState>(
-        listenWhen: (prev, curr) =>
-            prev.status != curr.status && curr.status == ZipStatus.navigating,
-        listener: (context, state) {
-          context.pushReplacement('/results', extra: state.resultsExtra);
-        },
+    return BlocProvider.value(
+      value: _bloc,
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<ZipBloc, ZipState>(
+            listenWhen: (prev, curr) =>
+                prev.status != curr.status &&
+                curr.status == ZipStatus.navigating,
+            listener: (context, state) {
+              context.pushReplacement('/results', extra: state.resultsExtra);
+            },
+          ),
+          BlocListener<ZipBloc, ZipState>(
+            listenWhen: (prev, curr) => prev.level.id != curr.level.id,
+            listener: (context, state) {
+              if (_ensureGame(state)) setState(() {});
+            },
+          ),
+        ],
         child: BlocBuilder<ZipBloc, ZipState>(
           builder: (context, state) {
-            _ensureGame(state);
             final finished = state.finished;
+            final game = _game;
 
             return Scaffold(
               body: ZipAtmosphere(
@@ -81,7 +109,9 @@ class _ZipScreenState extends State<ZipScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(24),
-                            child: GameWidget(game: _game!),
+                            child: game == null
+                                ? const SizedBox.shrink()
+                                : GameWidget(game: game),
                           ),
                         ).animate().fadeIn(delay: 80.ms, duration: 400.ms),
                       ),
