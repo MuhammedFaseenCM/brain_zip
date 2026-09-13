@@ -97,9 +97,9 @@ void main() {
       isA<WordMatchPlayState>().having((s) => s.remainingSeconds, 'remainingSeconds', 0),
       isA<WordMatchPlayState>()
           .having((s) => s.status, 'status', WordMatchPlayStatus.navigating)
-          .having((s) => s.resultsExtra?['title'], 'title', 'Time up')
-          .having((s) => s.resultsExtra?['points'], 'points', 25)
-          .having((s) => s.resultsExtra?['improved'], 'improved', false),
+          .having((s) => s.resultsExtra?.title, 'title', 'Time up')
+          .having((s) => s.resultsExtra?.points, 'points', 25)
+          .having((s) => s.resultsExtra?.improved, 'improved', false),
     ],
     verify: (_) {
       verifyNever(
@@ -133,8 +133,8 @@ void main() {
       isA<WordMatchPlayState>().having((s) => s.status, 'status', WordMatchPlayStatus.submitting),
       isA<WordMatchPlayState>()
           .having((s) => s.status, 'status', WordMatchPlayStatus.navigating)
-          .having((s) => s.resultsExtra?['title'], 'title', 'All matched!')
-          .having((s) => s.resultsExtra?['improved'], 'improved', isTrue),
+          .having((s) => s.resultsExtra?.title, 'title', 'All matched!')
+          .having((s) => s.resultsExtra?.improved, 'improved', isTrue),
     ],
     verify: (_) {
       verify(() => submitScore(modeKey: 'match_animals', points: 500, timeSeconds: 7)).called(1);

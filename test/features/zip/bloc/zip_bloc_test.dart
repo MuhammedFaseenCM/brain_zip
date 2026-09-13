@@ -48,9 +48,9 @@ void main() {
       isA<ZipState>()
           .having((s) => s.status, 'status', ZipStatus.navigating)
           .having((s) => s.improved, 'improved', isTrue)
-          .having((s) => s.resultsExtra?['title'], 'title', 'Puzzle cleared!')
-          .having((s) => s.resultsExtra?['timeSeconds'], 'timeSeconds', 12)
-          .having((s) => s.resultsExtra?['replayDaily'], 'replayDaily', isTrue),
+          .having((s) => s.resultsExtra?.title, 'title', 'Puzzle cleared!')
+          .having((s) => s.resultsExtra?.timeSeconds, 'timeSeconds', 12)
+          .having((s) => s.resultsExtra?.replayDaily, 'replayDaily', isTrue),
     ],
     verify: (_) {
       verify(

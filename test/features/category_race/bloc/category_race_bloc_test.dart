@@ -152,9 +152,9 @@ void main() {
       isA<CategoryRaceState>().having((s) => s.status, 'status', CategoryRaceStatus.submitting),
       isA<CategoryRaceState>()
           .having((s) => s.status, 'status', CategoryRaceStatus.navigating)
-          .having((s) => s.resultsExtra?['title'], 'title', 'Round over')
-          .having((s) => s.resultsExtra?['improved'], 'improved', isTrue)
-          .having((s) => s.resultsExtra?['points'], 'points', 50),
+          .having((s) => s.resultsExtra?.title, 'title', 'Round over')
+          .having((s) => s.resultsExtra?.improved, 'improved', isTrue)
+          .having((s) => s.resultsExtra?.points, 'points', 50),
     ],
     verify: (_) {
       verify(() => submitScore(modeKey: 'race_fruits', points: 50, timeSeconds: 2)).called(1);
