@@ -1,0 +1,12 @@
+{
+  "id": "sports",
+  "name": "Sports",
+  "order": 3,
+  "words": [
+    "archery", "badminton", "baseball", "basketball", "boxing", "cricket", "cycling",
+    "diving", "fencing", "football", "golf", "gymnastics", "handball", "hockey",
+    "judo", "karate", "lacrosse", "marathon", "netball", "polo", "rowing", "rugby",
+    "skating", "skiing", "soccer", "softball", "squash", "surfing", "swimming",
+    "tennis", "volleyball", "wrestling", "yoga"
+  ]
+}

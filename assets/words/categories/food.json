@@ -1,0 +1,13 @@
+{
+  "id": "food",
+  "name": "Food",
+  "order": 2,
+  "words": [
+    "apple", "avocado", "banana", "bagel", "bread", "broccoli", "burger", "butter",
+    "cake", "candy", "carrot", "cheese", "cherry", "chicken", "chili", "chocolate",
+    "cookie", "corn", "donut", "egg", "fish", "fries", "garlic", "grape", "honey",
+    "ice", "jam", "juice", "kale", "lemon", "mango", "milk", "noodle", "oat",
+    "onion", "orange", "pasta", "peach", "pepper", "pizza", "potato", "rice",
+    "salad", "salmon", "soup", "steak", "taco", "tomato", "waffle", "yogurt"
+  ]
+}

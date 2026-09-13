@@ -1,0 +1,24 @@
+{
+  "firestore": {
+    "rules": "firestore/firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "brain-zip-app",
+          "appId": "1:43073222004:android:04264a03ef2495c806a821",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "brain-zip-app",
+          "configurations": {
+            "android": "1:43073222004:android:04264a03ef2495c806a821"
+          }
+        }
+      }
+    }
+  }
+}

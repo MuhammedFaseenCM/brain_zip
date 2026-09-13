@@ -1,0 +1,14 @@
+{
+  "id": "opposites",
+  "title": "Opposites",
+  "seconds": 60,
+  "order": 1,
+  "pairs": [
+    { "a": "hot", "b": "cold" },
+    { "a": "up", "b": "down" },
+    { "a": "day", "b": "night" },
+    { "a": "fast", "b": "slow" },
+    { "a": "happy", "b": "sad" },
+    { "a": "big", "b": "small" }
+  ]
+}

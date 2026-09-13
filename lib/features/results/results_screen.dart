@@ -1,0 +1,178 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/theme/app_theme.dart';
+import '../../core/widgets/zip_ui.dart';
+
+class ResultsScreen extends StatelessWidget {
+  const ResultsScreen({super.key, required this.data});
+
+  final Map<String, dynamic> data;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = data['title'] as String? ?? 'Results';
+    final subtitle = data['subtitle'] as String? ?? '';
+    final points = data['points'] as int? ?? 0;
+    final time = data['timeSeconds'] as int?;
+    final improved = data['improved'] as bool? ?? false;
+    final replayDaily = data['replayDaily'] as bool? ?? false;
+    final replayId = data['replayLevelId'] as String?;
+    final nextId = data['nextLevelId'] as String?;
+
+    return Scaffold(
+      body: ZipAtmosphere(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Spacer(),
+                const ZipMark(size: 72)
+                    .animate()
+                    .fadeIn(duration: 400.ms)
+                    .scale(
+                      begin: const Offset(0.7, 0.7),
+                      curve: Curves.easeOutBack,
+                    ),
+                const SizedBox(height: 20),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ).animate().fadeIn(delay: 80.ms).slideY(begin: 0.1),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    subtitle,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: ZipColors.inkSoft,
+                        ),
+                  ).animate().fadeIn(delay: 120.ms),
+                ],
+                const SizedBox(height: 28),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: ZipColors.paper,
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: const Color(0xFFD8E0EB)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ZipColors.ember.withValues(alpha: 0.12),
+                        blurRadius: 28,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '$points',
+                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                              color: ZipColors.ember,
+                              height: 1,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'points',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: ZipColors.inkSoft,
+                            ),
+                      ),
+                      if (time != null) ...[
+                        const SizedBox(height: 14),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.schedule_rounded,
+                              size: 18,
+                              color: ZipColors.inkSoft,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _formatTime(time),
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (improved) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: ZipColors.successSoft,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            'New personal best',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(color: ZipColors.success),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                )
+                    .animate()
+                    .fadeIn(delay: 160.ms, duration: 450.ms)
+                    .slideY(begin: 0.12, curve: Curves.easeOutCubic),
+                const SizedBox(height: 16),
+                Text(
+                  'A new puzzle unlocks tomorrow.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: ZipColors.inkSoft,
+                      ),
+                ),
+                const Spacer(),
+                if (replayDaily || replayId != null)
+                  ZipPrimaryButton(
+                    label: 'Play again',
+                    icon: Icons.refresh_rounded,
+                    onPressed: () {
+                      if (replayDaily) {
+                        context.pushReplacement('/zip');
+                      } else if (replayId != null) {
+                        context.pushReplacement('/zip');
+                      }
+                    },
+                  ).animate().fadeIn(delay: 220.ms),
+                if (nextId != null) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton(
+                    onPressed: () => context.pushReplacement('/zip'),
+                    child: const Text('Next puzzle'),
+                  ),
+                ],
+                const SizedBox(height: 6),
+                TextButton(
+                  onPressed: () => context.go('/'),
+                  child: const Text('Back home'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
+}

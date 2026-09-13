@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /zip_levels/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /word_match_decks/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /categories/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

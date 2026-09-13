@@ -1,0 +1,14 @@
+{
+  "id": "animals",
+  "title": "Animals & Sounds",
+  "seconds": 60,
+  "order": 2,
+  "pairs": [
+    { "a": "cat", "b": "meow" },
+    { "a": "dog", "b": "bark" },
+    { "a": "cow", "b": "moo" },
+    { "a": "duck", "b": "quack" },
+    { "a": "lion", "b": "roar" },
+    { "a": "bee", "b": "buzz" }
+  ]
+}

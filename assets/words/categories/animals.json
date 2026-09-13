@@ -1,0 +1,13 @@
+{
+  "id": "animals",
+  "name": "Animals",
+  "order": 1,
+  "words": [
+    "ant", "ape", "bear", "bird", "buffalo", "cat", "cow", "crab", "deer", "dog",
+    "dolphin", "duck", "eagle", "eel", "elephant", "fox", "frog", "goat", "goose",
+    "hawk", "horse", "iguana", "jaguar", "kangaroo", "koala", "lion", "lizard",
+    "monkey", "mouse", "newt", "octopus", "owl", "panda", "parrot", "penguin",
+    "rabbit", "rat", "seal", "shark", "sheep", "snake", "spider", "tiger", "turtle",
+    "whale", "wolf", "zebra"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "geography",
+  "title": "Cities & Countries",
+  "seconds": 75,
+  "order": 3,
+  "pairs": [
+    { "a": "Paris", "b": "France" },
+    { "a": "Tokyo", "b": "Japan" },
+    { "a": "Cairo", "b": "Egypt" },
+    { "a": "Rome", "b": "Italy" },
+    { "a": "Lima", "b": "Peru" },
+    { "a": "Oslo", "b": "Norway" }
+  ]
+}
