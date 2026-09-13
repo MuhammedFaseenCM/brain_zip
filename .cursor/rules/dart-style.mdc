@@ -1,0 +1,30 @@
+---
+description: Dart/Flutter style conventions
+globs: **/*.dart
+alwaysApply: false
+---
+
+# Dart / Flutter Style
+
+- Use `final` by default; use `const` for compile-time constants and const widgets.
+- Add `const` to widget constructors wherever possible for rebuild performance.
+- Prefer named parameters with `required` for widget constructors.
+- Extract large `build()` trees into smaller widgets, not private helper methods returning `Widget`.
+
+## Async & null safety
+
+```dart
+// ❌ BAD: force-unwrap and unhandled future
+final user = users.firstWhere((u) => u.id == id)!;
+fetchProfile();
+
+// ✅ GOOD: handle absence and await
+final user = users.where((u) => u.id == id).firstOrNull;
+if (user == null) return;
+await fetchProfile();
+```
+
+- Avoid `!` (bang) operator; handle null explicitly.
+- Always `await` futures or intentionally use `unawaited(...)`.
+- Dispose controllers/streams in `dispose()`.
+

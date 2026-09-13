@@ -1,0 +1,26 @@
+---
+description: Shared widgets promotion policy
+globs:
+  - lib/**/*.dart
+alwaysApply: false
+---
+
+# Shared widgets
+
+## Feature-first rule
+- Put widgets **inside the feature** when they are only used by that feature:
+  - `lib/features/<feature>/view/widgets/...`
+
+## Promotion rule (core/widgets)
+- Promote a widget to **`lib/core/widgets/` only when it is used by 2+ features**.
+- If it is only used by one feature, keep it local even if it *feels* reusable.
+
+## What belongs in core/widgets
+- Stateless presentation components with minimal dependencies.
+- Widgets that don't depend on a specific feature's Cubit/Bloc/state shape.
+- Widgets that accept data via parameters (no direct repository/usecase wiring).
+
+## What should NOT be promoted
+- Feature-specific UI, navigation flows, or screens.
+- Widgets that implicitly depend on a feature's domain concepts without clear abstraction.
+

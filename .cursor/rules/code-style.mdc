@@ -1,0 +1,31 @@
+---
+description: Common code style and formatting standards
+alwaysApply: true
+---
+
+# Code Style
+
+## Formatting
+- Run the project formatter (`dart format`) and keep its output; don't hand-tweak layout.
+- Use consistent indentation; never mix tabs and spaces in one file.
+- Remove trailing whitespace and leave a single newline at end of file.
+
+## Naming
+- `lowerCamelCase` for variables/functions, `UpperCamelCase` for classes/widgets/enums, `lowercase_with_underscores` for file names.
+- Use descriptive names; avoid abbreviations like `tmp`, `d`, `val2`.
+- Booleans read as questions: `isLoading`, `hasAccess`, `canEdit`.
+
+## Functions & files
+- Keep functions/widgets small and single-purpose; extract widgets when build methods grow.
+- Prefer early returns over deep nesting.
+- One main concern per file; split when a file gets large.
+
+## Cleanliness
+- No dead code, commented-out blocks, or stray `print` in commits.
+- Remove unused imports and variables.
+- Comments explain *why*, not *what*. Don't narrate obvious code.
+
+## Imports
+- Group imports: Dart/Flutter SDK first, then packages, then local files.
+- Avoid wildcard imports; import only what's used.
+

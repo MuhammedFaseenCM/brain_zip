@@ -1,0 +1,51 @@
+---
+description: BLoC architecture (feature-first + domain/data)
+globs:
+  - lib/**/*.dart
+alwaysApply: false
+---
+
+# BLoC architecture (BrainZip)
+
+## Folder layout (feature-first)
+- **Features live under `lib/features/<feature>/`** and own their UI + state management.
+- **Cross-cutting code lives in `lib/core/`** (router/di/theme/strings/widgets/etc).
+- **Business rules live in `lib/domain/`** (entities, failures, repositories (interfaces), usecases).
+- **Implementations live in `lib/data/`** (clients, repository impls, DTOs/mappers as needed).
+
+## Domain purity
+- **`domain/` must not import Flutter/UI** (`package:flutter/*`, widgets, `BuildContext`).
+- Domain can depend on plain Dart and lightweight value types; keep it deterministic and testable.
+
+## Cubit vs Bloc
+- **Use `Cubit` for simple, linear state** with few events and no complex branching.
+- **Use `Bloc` when you have events + transitions** (multiple user intents, async workflows, cancellation, debounce, analytics hooks, etc).
+- Prefer one responsibility per Cubit/Bloc; split when state grows unrelated.
+
+## Usecases (domain orchestration)
+- Put app actions in **`lib/domain/usecases/`** as small, composable classes/functions.
+- A usecase:
+  - depends on `domain/repositories/*` (interfaces)
+  - returns entities / primitives / failures (no UI)
+  - contains orchestration logic, not storage concerns
+
+## Repositories + DI
+- **Define repository interfaces in `domain/repositories/`**.
+- **Implement them in `data/repositories/*_impl.dart`**.
+- Register repositories in **`RepositoryProvider` / `MultiRepositoryProvider`** (see `lib/core/di/`).
+- UI layers should read dependencies via context (`context.read<Repo>()`) not instantiate them.
+
+## Freezed
+- Use **`freezed` for immutable states/events/entities** where it reduces boilerplate.
+- Keep `*.freezed.dart` and `*.g.dart` generated files untouched.
+
+## Flame: one-shot callbacks only
+- Flame/game layer must **emit one-shot callbacks/events** to the app layer (e.g. `onFinished`, `onScore`).
+- **Do not keep long-lived UI state inside Flame classes**; source of truth stays in Cubit/Bloc.
+- If a callback is “one-shot”, ensure it cannot fire multiple times unintentionally (guard/flag).
+
+## Testing (required)
+- **Use `bloc_test` for Cubit/Bloc tests** (arrange/act/expect).
+- **Use `mocktail` for mocks/fakes** of repository interfaces and collaborators.
+- Prefer testing domain usecases without Flutter bindings.
+

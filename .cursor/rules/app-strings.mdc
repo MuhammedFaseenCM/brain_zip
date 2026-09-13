@@ -1,0 +1,23 @@
+---
+description: User-facing copy via AppStrings
+globs:
+  - lib/**/*.dart
+alwaysApply: false
+---
+
+# App Strings
+
+## Rule
+- **All user-facing copy must come from `AppStrings`** (see `lib/core/strings/app_strings.dart`).
+- Do not inline literal strings in widgets, dialogs, snackbars, buttons, tooltips, or error messages.
+
+## Why
+- Centralizes copy for consistency and easy review.
+- Enables future localization without invasive refactors.
+
+## Guidelines
+- Keep names descriptive and product-oriented (e.g. `AppStrings.wordMatchTitle`).
+- Prefer complete sentences and consistent casing/punctuation.
+- Reuse existing strings before adding new ones; avoid near-duplicates.
+- If string needs formatting, expose a helper (e.g. `scoreLabel(points)`), not string concatenation in UI.
+
