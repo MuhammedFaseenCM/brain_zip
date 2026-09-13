@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
-class BrainZipApp extends ConsumerStatefulWidget {
+class BrainZipApp extends StatefulWidget {
   const BrainZipApp({super.key});
 
   @override
-  ConsumerState<BrainZipApp> createState() => _BrainZipAppState();
+  State<BrainZipApp> createState() => _BrainZipAppState();
 }
 
-class _BrainZipAppState extends ConsumerState<BrainZipApp> {
+class _BrainZipAppState extends State<BrainZipApp> {
   late final _router = buildRouter();
 
   @override
