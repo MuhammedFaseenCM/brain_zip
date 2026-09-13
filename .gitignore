@@ -48,3 +48,7 @@ key.properties
 # Misc
 .env
 .env.*
+
+# Git worktrees
+.worktrees/
+.superpowers/
