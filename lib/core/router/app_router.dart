@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 
-import '../../features/category_race/category_race_screen.dart';
+import '../../features/category_race/view/category_race_screen.dart';
 import '../../features/home/view/home_screen.dart';
 import '../../features/results/results_screen.dart';
 import '../../features/word_match/view/word_match_screen.dart';
