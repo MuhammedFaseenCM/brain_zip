@@ -6,19 +6,18 @@ import 'package:bloc/bloc.dart';
 import '../../../domain/entities/word_category.dart';
 import '../../../domain/usecases/fetch_categories.dart';
 import '../../../domain/usecases/submit_score.dart';
+import '../../results/results_args.dart';
 import 'category_race_event.dart';
 import 'category_race_state.dart';
 
 class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
   CategoryRaceBloc({
-    required FetchCategories fetchCategories,
-    required SubmitScore submitScore,
+    required this.fetchCategories,
+    required this.submitScore,
     Random? random,
     int roundSeconds = 60,
     Stream<int> Function()? ticker,
-  })  : _fetchCategories = fetchCategories,
-        _submitScore = submitScore,
-        _rng = random ?? Random(),
+  })  : _rng = random ?? Random(),
         _roundSeconds = roundSeconds,
         _ticker = ticker ??
             (() => Stream<int>.periodic(const Duration(seconds: 1), (i) => i)),
@@ -35,8 +34,8 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
     on<CategoryRaceFinishRequested>(_onFinishRequested);
   }
 
-  final FetchCategories _fetchCategories;
-  final SubmitScore _submitScore;
+  final FetchCategories fetchCategories;
+  final SubmitScore submitScore;
   final Random _rng;
   final int _roundSeconds;
   final Stream<int> Function() _ticker;
@@ -67,7 +66,7 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
     );
 
     try {
-      final categories = await _fetchCategories();
+      final categories = await fetchCategories();
       if (emit.isDone) return;
 
       if (categories.isEmpty) {
@@ -179,7 +178,7 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
     _tickerSub = null;
 
     final points = state.answers.length * 50;
-    final improved = await _submitScore(
+    final improved = await submitScore(
       modeKey: 'race_${category.id}',
       points: points,
       timeSeconds: state.totalSeconds,
@@ -191,14 +190,14 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
       state.copyWith(
         status: CategoryRaceStatus.navigating,
         improved: improved,
-        resultsExtra: <String, dynamic>{
-          'title': 'Round over',
-          'points': points,
-          'timeSeconds': state.totalSeconds,
-          'improved': improved,
-          'subtitle':
+        resultsExtra: ResultsArgs(
+          title: 'Round over',
+          subtitle:
               '${category.name} · ${state.letter} · ${state.answers.length} words',
-        },
+          timeSeconds: state.totalSeconds,
+          improved: improved,
+          points: points,
+        ),
       ),
     );
   }

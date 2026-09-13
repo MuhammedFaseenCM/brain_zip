@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CategoryRaceState {
 
- CategoryRaceStatus get status; WordCategory? get category; String get letter; int get totalSeconds; int get remainingSeconds; List<String> get answers; String? get feedback; String? get error; bool? get improved; Map<String, dynamic>? get resultsExtra; bool get finished;
+ CategoryRaceStatus get status; WordCategory? get category; String get letter; int get totalSeconds; int get remainingSeconds; List<String> get answers; String? get feedback; String? get error; bool? get improved; ResultsArgs? get resultsExtra; bool get finished;
 /// Create a copy of CategoryRaceState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,12 +25,12 @@ $CategoryRaceStateCopyWith<CategoryRaceState> get copyWith => _$CategoryRaceStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CategoryRaceState&&(identical(other.status, status) || other.status == status)&&(identical(other.category, category) || other.category == category)&&(identical(other.letter, letter) || other.letter == letter)&&(identical(other.totalSeconds, totalSeconds) || other.totalSeconds == totalSeconds)&&(identical(other.remainingSeconds, remainingSeconds) || other.remainingSeconds == remainingSeconds)&&const DeepCollectionEquality().equals(other.answers, answers)&&(identical(other.feedback, feedback) || other.feedback == feedback)&&(identical(other.error, error) || other.error == error)&&(identical(other.improved, improved) || other.improved == improved)&&const DeepCollectionEquality().equals(other.resultsExtra, resultsExtra)&&(identical(other.finished, finished) || other.finished == finished));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CategoryRaceState&&(identical(other.status, status) || other.status == status)&&(identical(other.category, category) || other.category == category)&&(identical(other.letter, letter) || other.letter == letter)&&(identical(other.totalSeconds, totalSeconds) || other.totalSeconds == totalSeconds)&&(identical(other.remainingSeconds, remainingSeconds) || other.remainingSeconds == remainingSeconds)&&const DeepCollectionEquality().equals(other.answers, answers)&&(identical(other.feedback, feedback) || other.feedback == feedback)&&(identical(other.error, error) || other.error == error)&&(identical(other.improved, improved) || other.improved == improved)&&(identical(other.resultsExtra, resultsExtra) || other.resultsExtra == resultsExtra)&&(identical(other.finished, finished) || other.finished == finished));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,category,letter,totalSeconds,remainingSeconds,const DeepCollectionEquality().hash(answers),feedback,error,improved,const DeepCollectionEquality().hash(resultsExtra),finished);
+int get hashCode => Object.hash(runtimeType,status,category,letter,totalSeconds,remainingSeconds,const DeepCollectionEquality().hash(answers),feedback,error,improved,resultsExtra,finished);
 
 @override
 String toString() {
@@ -45,7 +45,7 @@ abstract mixin class $CategoryRaceStateCopyWith<$Res>  {
   factory $CategoryRaceStateCopyWith(CategoryRaceState value, $Res Function(CategoryRaceState) _then) = _$CategoryRaceStateCopyWithImpl;
 @useResult
 $Res call({
- CategoryRaceStatus status, WordCategory? category, String letter, int totalSeconds, int remainingSeconds, List<String> answers, String? feedback, String? error, bool? improved, Map<String, dynamic>? resultsExtra, bool finished
+ CategoryRaceStatus status, WordCategory? category, String letter, int totalSeconds, int remainingSeconds, List<String> answers, String? feedback, String? error, bool? improved, ResultsArgs? resultsExtra, bool finished
 });
 
 
@@ -74,7 +74,7 @@ as List<String>,feedback: freezed == feedback ? _self.feedback : feedback // ign
 as String?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,improved: freezed == improved ? _self.improved : improved // ignore: cast_nullable_to_non_nullable
 as bool?,resultsExtra: freezed == resultsExtra ? _self.resultsExtra : resultsExtra // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,finished: null == finished ? _self.finished : finished // ignore: cast_nullable_to_non_nullable
+as ResultsArgs?,finished: null == finished ? _self.finished : finished // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -157,7 +157,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CategoryRaceStatus status,  WordCategory? category,  String letter,  int totalSeconds,  int remainingSeconds,  List<String> answers,  String? feedback,  String? error,  bool? improved,  Map<String, dynamic>? resultsExtra,  bool finished)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CategoryRaceStatus status,  WordCategory? category,  String letter,  int totalSeconds,  int remainingSeconds,  List<String> answers,  String? feedback,  String? error,  bool? improved,  ResultsArgs? resultsExtra,  bool finished)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CategoryRaceState() when $default != null:
 return $default(_that.status,_that.category,_that.letter,_that.totalSeconds,_that.remainingSeconds,_that.answers,_that.feedback,_that.error,_that.improved,_that.resultsExtra,_that.finished);case _:
@@ -178,7 +178,7 @@ return $default(_that.status,_that.category,_that.letter,_that.totalSeconds,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CategoryRaceStatus status,  WordCategory? category,  String letter,  int totalSeconds,  int remainingSeconds,  List<String> answers,  String? feedback,  String? error,  bool? improved,  Map<String, dynamic>? resultsExtra,  bool finished)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CategoryRaceStatus status,  WordCategory? category,  String letter,  int totalSeconds,  int remainingSeconds,  List<String> answers,  String? feedback,  String? error,  bool? improved,  ResultsArgs? resultsExtra,  bool finished)  $default,) {final _that = this;
 switch (_that) {
 case _CategoryRaceState():
 return $default(_that.status,_that.category,_that.letter,_that.totalSeconds,_that.remainingSeconds,_that.answers,_that.feedback,_that.error,_that.improved,_that.resultsExtra,_that.finished);}
@@ -195,7 +195,7 @@ return $default(_that.status,_that.category,_that.letter,_that.totalSeconds,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CategoryRaceStatus status,  WordCategory? category,  String letter,  int totalSeconds,  int remainingSeconds,  List<String> answers,  String? feedback,  String? error,  bool? improved,  Map<String, dynamic>? resultsExtra,  bool finished)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CategoryRaceStatus status,  WordCategory? category,  String letter,  int totalSeconds,  int remainingSeconds,  List<String> answers,  String? feedback,  String? error,  bool? improved,  ResultsArgs? resultsExtra,  bool finished)?  $default,) {final _that = this;
 switch (_that) {
 case _CategoryRaceState() when $default != null:
 return $default(_that.status,_that.category,_that.letter,_that.totalSeconds,_that.remainingSeconds,_that.answers,_that.feedback,_that.error,_that.improved,_that.resultsExtra,_that.finished);case _:
@@ -210,7 +210,7 @@ return $default(_that.status,_that.category,_that.letter,_that.totalSeconds,_tha
 
 
 class _CategoryRaceState implements CategoryRaceState {
-  const _CategoryRaceState({this.status = CategoryRaceStatus.initial, this.category, this.letter = 'A', this.totalSeconds = 60, this.remainingSeconds = 60, final  List<String> answers = const <String>[], this.feedback, this.error, this.improved, final  Map<String, dynamic>? resultsExtra, this.finished = false}): _answers = answers,_resultsExtra = resultsExtra;
+  const _CategoryRaceState({this.status = CategoryRaceStatus.initial, this.category, this.letter = 'A', this.totalSeconds = 60, this.remainingSeconds = 60, final  List<String> answers = const <String>[], this.feedback, this.error, this.improved, this.resultsExtra, this.finished = false}): _answers = answers;
   
 
 @override@JsonKey() final  CategoryRaceStatus status;
@@ -228,15 +228,7 @@ class _CategoryRaceState implements CategoryRaceState {
 @override final  String? feedback;
 @override final  String? error;
 @override final  bool? improved;
- final  Map<String, dynamic>? _resultsExtra;
-@override Map<String, dynamic>? get resultsExtra {
-  final value = _resultsExtra;
-  if (value == null) return null;
-  if (_resultsExtra is EqualUnmodifiableMapView) return _resultsExtra;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(value);
-}
-
+@override final  ResultsArgs? resultsExtra;
 @override@JsonKey() final  bool finished;
 
 /// Create a copy of CategoryRaceState
@@ -249,12 +241,12 @@ _$CategoryRaceStateCopyWith<_CategoryRaceState> get copyWith => __$CategoryRaceS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CategoryRaceState&&(identical(other.status, status) || other.status == status)&&(identical(other.category, category) || other.category == category)&&(identical(other.letter, letter) || other.letter == letter)&&(identical(other.totalSeconds, totalSeconds) || other.totalSeconds == totalSeconds)&&(identical(other.remainingSeconds, remainingSeconds) || other.remainingSeconds == remainingSeconds)&&const DeepCollectionEquality().equals(other._answers, _answers)&&(identical(other.feedback, feedback) || other.feedback == feedback)&&(identical(other.error, error) || other.error == error)&&(identical(other.improved, improved) || other.improved == improved)&&const DeepCollectionEquality().equals(other._resultsExtra, _resultsExtra)&&(identical(other.finished, finished) || other.finished == finished));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CategoryRaceState&&(identical(other.status, status) || other.status == status)&&(identical(other.category, category) || other.category == category)&&(identical(other.letter, letter) || other.letter == letter)&&(identical(other.totalSeconds, totalSeconds) || other.totalSeconds == totalSeconds)&&(identical(other.remainingSeconds, remainingSeconds) || other.remainingSeconds == remainingSeconds)&&const DeepCollectionEquality().equals(other._answers, _answers)&&(identical(other.feedback, feedback) || other.feedback == feedback)&&(identical(other.error, error) || other.error == error)&&(identical(other.improved, improved) || other.improved == improved)&&(identical(other.resultsExtra, resultsExtra) || other.resultsExtra == resultsExtra)&&(identical(other.finished, finished) || other.finished == finished));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,category,letter,totalSeconds,remainingSeconds,const DeepCollectionEquality().hash(_answers),feedback,error,improved,const DeepCollectionEquality().hash(_resultsExtra),finished);
+int get hashCode => Object.hash(runtimeType,status,category,letter,totalSeconds,remainingSeconds,const DeepCollectionEquality().hash(_answers),feedback,error,improved,resultsExtra,finished);
 
 @override
 String toString() {
@@ -269,7 +261,7 @@ abstract mixin class _$CategoryRaceStateCopyWith<$Res> implements $CategoryRaceS
   factory _$CategoryRaceStateCopyWith(_CategoryRaceState value, $Res Function(_CategoryRaceState) _then) = __$CategoryRaceStateCopyWithImpl;
 @override @useResult
 $Res call({
- CategoryRaceStatus status, WordCategory? category, String letter, int totalSeconds, int remainingSeconds, List<String> answers, String? feedback, String? error, bool? improved, Map<String, dynamic>? resultsExtra, bool finished
+ CategoryRaceStatus status, WordCategory? category, String letter, int totalSeconds, int remainingSeconds, List<String> answers, String? feedback, String? error, bool? improved, ResultsArgs? resultsExtra, bool finished
 });
 
 
@@ -297,8 +289,8 @@ as int,answers: null == answers ? _self._answers : answers // ignore: cast_nulla
 as List<String>,feedback: freezed == feedback ? _self.feedback : feedback // ignore: cast_nullable_to_non_nullable
 as String?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,improved: freezed == improved ? _self.improved : improved // ignore: cast_nullable_to_non_nullable
-as bool?,resultsExtra: freezed == resultsExtra ? _self._resultsExtra : resultsExtra // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,finished: null == finished ? _self.finished : finished // ignore: cast_nullable_to_non_nullable
+as bool?,resultsExtra: freezed == resultsExtra ? _self.resultsExtra : resultsExtra // ignore: cast_nullable_to_non_nullable
+as ResultsArgs?,finished: null == finished ? _self.finished : finished // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

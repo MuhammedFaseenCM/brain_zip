@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/category_race/view/category_race_screen.dart';
 import '../../features/home/view/home_screen.dart';
+import '../../features/results/results_args.dart';
 import '../../features/results/results_screen.dart';
 import '../../features/word_match/view/word_match_screen.dart';
 import '../../features/word_match/view/word_match_select_screen.dart';
@@ -30,10 +31,15 @@ GoRouter buildRouter() {
         path: '/results',
         builder: (context, state) {
           final extra = state.extra;
-          final data = extra is Map<String, dynamic>
+          final args = extra is ResultsArgs
               ? extra
-              : <String, dynamic>{};
-          return ResultsScreen(data: data);
+              : const ResultsArgs(
+                  title: 'Results',
+                  subtitle: '',
+                  timeSeconds: 0,
+                  improved: false,
+                );
+          return ResultsScreen(args: args);
         },
       ),
     ],

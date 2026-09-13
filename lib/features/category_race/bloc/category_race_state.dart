@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../domain/entities/word_category.dart';
+import '../../results/results_args.dart';
 
 part 'category_race_state.freezed.dart';
 
@@ -18,7 +19,7 @@ sealed class CategoryRaceState with _$CategoryRaceState {
     String? feedback,
     String? error,
     bool? improved,
-    Map<String, dynamic>? resultsExtra,
+    ResultsArgs? resultsExtra,
     @Default(false) bool finished,
   }) = _CategoryRaceState;
 }

@@ -1,19 +1,19 @@
 import 'package:bloc/bloc.dart';
 
 import '../../../domain/usecases/submit_score.dart';
+import '../../results/results_args.dart';
 import '../logic/daily_puzzle_generator.dart';
 import 'zip_event.dart';
 import 'zip_state.dart';
 
 class ZipBloc extends Bloc<ZipEvent, ZipState> {
-  ZipBloc({required SubmitScore submitScore, DateTime? now})
-    : _submitScore = submitScore,
-      super(ZipState.initial(now ?? DateTime.now())) {
+  ZipBloc({required this.submitScore, DateTime? now})
+      : super(ZipState.initial(now ?? DateTime.now())) {
     on<ZipStarted>(_onStarted);
     on<ZipCompleted>(_onCompleted);
   }
 
-  final SubmitScore _submitScore;
+  final SubmitScore submitScore;
 
   void _onStarted(ZipStarted event, Emitter<ZipState> emit) {
     final seed = event.date ?? DateTime.now();
@@ -34,7 +34,7 @@ class ZipBloc extends Bloc<ZipEvent, ZipState> {
       ),
     );
 
-    final improved = await _submitScore(
+    final improved = await submitScore(
       modeKey: 'zip_${state.level.id}',
       points: event.points,
       timeSeconds: event.timeSeconds,
@@ -46,12 +46,14 @@ class ZipBloc extends Bloc<ZipEvent, ZipState> {
       state.copyWith(
         improved: improved,
         status: ZipStatus.navigating,
-        resultsExtra: <String, dynamic>{
-          'title': 'Puzzle cleared!',
-          'timeSeconds': event.timeSeconds,
-          'improved': improved,
-          'replayDaily': true,
-        },
+        resultsExtra: ResultsArgs(
+          title: 'Puzzle cleared!',
+          subtitle: '',
+          timeSeconds: event.timeSeconds,
+          improved: improved,
+          points: event.points,
+          replayDaily: true,
+        ),
       ),
     );
   }

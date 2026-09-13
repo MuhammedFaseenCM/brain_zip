@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../domain/entities/word_match_deck.dart';
+import '../../results/results_args.dart';
 
 part 'word_match_play_state.freezed.dart';
 
@@ -16,7 +17,7 @@ sealed class WordMatchPlayState with _$WordMatchPlayState {
     @Default(0) int matched,
     @Default(0) int total,
     @Default(false) bool finished,
-    Map<String, dynamic>? resultsExtra,
+    ResultsArgs? resultsExtra,
     String? error,
   }) = _WordMatchPlayState;
 }

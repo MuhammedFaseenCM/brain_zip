@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ZipState {
 
- DateTime get day; ZipLevel get level; ZipStatus get status; bool get finished; bool? get improved; int? get points; int? get timeSeconds; Map<String, dynamic>? get resultsExtra;
+ DateTime get day; ZipLevel get level; ZipStatus get status; bool get finished; bool? get improved; int? get points; int? get timeSeconds; ResultsArgs? get resultsExtra;
 /// Create a copy of ZipState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,12 +25,12 @@ $ZipStateCopyWith<ZipState> get copyWith => _$ZipStateCopyWithImpl<ZipState>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZipState&&(identical(other.day, day) || other.day == day)&&(identical(other.level, level) || other.level == level)&&(identical(other.status, status) || other.status == status)&&(identical(other.finished, finished) || other.finished == finished)&&(identical(other.improved, improved) || other.improved == improved)&&(identical(other.points, points) || other.points == points)&&(identical(other.timeSeconds, timeSeconds) || other.timeSeconds == timeSeconds)&&const DeepCollectionEquality().equals(other.resultsExtra, resultsExtra));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZipState&&(identical(other.day, day) || other.day == day)&&(identical(other.level, level) || other.level == level)&&(identical(other.status, status) || other.status == status)&&(identical(other.finished, finished) || other.finished == finished)&&(identical(other.improved, improved) || other.improved == improved)&&(identical(other.points, points) || other.points == points)&&(identical(other.timeSeconds, timeSeconds) || other.timeSeconds == timeSeconds)&&(identical(other.resultsExtra, resultsExtra) || other.resultsExtra == resultsExtra));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,day,level,status,finished,improved,points,timeSeconds,const DeepCollectionEquality().hash(resultsExtra));
+int get hashCode => Object.hash(runtimeType,day,level,status,finished,improved,points,timeSeconds,resultsExtra);
 
 @override
 String toString() {
@@ -45,7 +45,7 @@ abstract mixin class $ZipStateCopyWith<$Res>  {
   factory $ZipStateCopyWith(ZipState value, $Res Function(ZipState) _then) = _$ZipStateCopyWithImpl;
 @useResult
 $Res call({
- DateTime day, ZipLevel level, ZipStatus status, bool finished, bool? improved, int? points, int? timeSeconds, Map<String, dynamic>? resultsExtra
+ DateTime day, ZipLevel level, ZipStatus status, bool finished, bool? improved, int? points, int? timeSeconds, ResultsArgs? resultsExtra
 });
 
 
@@ -72,7 +72,7 @@ as bool,improved: freezed == improved ? _self.improved : improved // ignore: cas
 as bool?,points: freezed == points ? _self.points : points // ignore: cast_nullable_to_non_nullable
 as int?,timeSeconds: freezed == timeSeconds ? _self.timeSeconds : timeSeconds // ignore: cast_nullable_to_non_nullable
 as int?,resultsExtra: freezed == resultsExtra ? _self.resultsExtra : resultsExtra // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,
+as ResultsArgs?,
   ));
 }
 
@@ -154,7 +154,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime day,  ZipLevel level,  ZipStatus status,  bool finished,  bool? improved,  int? points,  int? timeSeconds,  Map<String, dynamic>? resultsExtra)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime day,  ZipLevel level,  ZipStatus status,  bool finished,  bool? improved,  int? points,  int? timeSeconds,  ResultsArgs? resultsExtra)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ZipState() when $default != null:
 return $default(_that.day,_that.level,_that.status,_that.finished,_that.improved,_that.points,_that.timeSeconds,_that.resultsExtra);case _:
@@ -175,7 +175,7 @@ return $default(_that.day,_that.level,_that.status,_that.finished,_that.improved
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime day,  ZipLevel level,  ZipStatus status,  bool finished,  bool? improved,  int? points,  int? timeSeconds,  Map<String, dynamic>? resultsExtra)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime day,  ZipLevel level,  ZipStatus status,  bool finished,  bool? improved,  int? points,  int? timeSeconds,  ResultsArgs? resultsExtra)  $default,) {final _that = this;
 switch (_that) {
 case _ZipState():
 return $default(_that.day,_that.level,_that.status,_that.finished,_that.improved,_that.points,_that.timeSeconds,_that.resultsExtra);}
@@ -192,7 +192,7 @@ return $default(_that.day,_that.level,_that.status,_that.finished,_that.improved
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime day,  ZipLevel level,  ZipStatus status,  bool finished,  bool? improved,  int? points,  int? timeSeconds,  Map<String, dynamic>? resultsExtra)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime day,  ZipLevel level,  ZipStatus status,  bool finished,  bool? improved,  int? points,  int? timeSeconds,  ResultsArgs? resultsExtra)?  $default,) {final _that = this;
 switch (_that) {
 case _ZipState() when $default != null:
 return $default(_that.day,_that.level,_that.status,_that.finished,_that.improved,_that.points,_that.timeSeconds,_that.resultsExtra);case _:
@@ -207,7 +207,7 @@ return $default(_that.day,_that.level,_that.status,_that.finished,_that.improved
 
 
 class _ZipState implements ZipState {
-  const _ZipState({required this.day, required this.level, this.status = ZipStatus.ready, this.finished = false, this.improved, this.points, this.timeSeconds, final  Map<String, dynamic>? resultsExtra}): _resultsExtra = resultsExtra;
+  const _ZipState({required this.day, required this.level, this.status = ZipStatus.ready, this.finished = false, this.improved, this.points, this.timeSeconds, this.resultsExtra});
   
 
 @override final  DateTime day;
@@ -217,15 +217,7 @@ class _ZipState implements ZipState {
 @override final  bool? improved;
 @override final  int? points;
 @override final  int? timeSeconds;
- final  Map<String, dynamic>? _resultsExtra;
-@override Map<String, dynamic>? get resultsExtra {
-  final value = _resultsExtra;
-  if (value == null) return null;
-  if (_resultsExtra is EqualUnmodifiableMapView) return _resultsExtra;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(value);
-}
-
+@override final  ResultsArgs? resultsExtra;
 
 /// Create a copy of ZipState
 /// with the given fields replaced by the non-null parameter values.
@@ -237,12 +229,12 @@ _$ZipStateCopyWith<_ZipState> get copyWith => __$ZipStateCopyWithImpl<_ZipState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZipState&&(identical(other.day, day) || other.day == day)&&(identical(other.level, level) || other.level == level)&&(identical(other.status, status) || other.status == status)&&(identical(other.finished, finished) || other.finished == finished)&&(identical(other.improved, improved) || other.improved == improved)&&(identical(other.points, points) || other.points == points)&&(identical(other.timeSeconds, timeSeconds) || other.timeSeconds == timeSeconds)&&const DeepCollectionEquality().equals(other._resultsExtra, _resultsExtra));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZipState&&(identical(other.day, day) || other.day == day)&&(identical(other.level, level) || other.level == level)&&(identical(other.status, status) || other.status == status)&&(identical(other.finished, finished) || other.finished == finished)&&(identical(other.improved, improved) || other.improved == improved)&&(identical(other.points, points) || other.points == points)&&(identical(other.timeSeconds, timeSeconds) || other.timeSeconds == timeSeconds)&&(identical(other.resultsExtra, resultsExtra) || other.resultsExtra == resultsExtra));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,day,level,status,finished,improved,points,timeSeconds,const DeepCollectionEquality().hash(_resultsExtra));
+int get hashCode => Object.hash(runtimeType,day,level,status,finished,improved,points,timeSeconds,resultsExtra);
 
 @override
 String toString() {
@@ -257,7 +249,7 @@ abstract mixin class _$ZipStateCopyWith<$Res> implements $ZipStateCopyWith<$Res>
   factory _$ZipStateCopyWith(_ZipState value, $Res Function(_ZipState) _then) = __$ZipStateCopyWithImpl;
 @override @useResult
 $Res call({
- DateTime day, ZipLevel level, ZipStatus status, bool finished, bool? improved, int? points, int? timeSeconds, Map<String, dynamic>? resultsExtra
+ DateTime day, ZipLevel level, ZipStatus status, bool finished, bool? improved, int? points, int? timeSeconds, ResultsArgs? resultsExtra
 });
 
 
@@ -283,8 +275,8 @@ as ZipStatus,finished: null == finished ? _self.finished : finished // ignore: c
 as bool,improved: freezed == improved ? _self.improved : improved // ignore: cast_nullable_to_non_nullable
 as bool?,points: freezed == points ? _self.points : points // ignore: cast_nullable_to_non_nullable
 as int?,timeSeconds: freezed == timeSeconds ? _self.timeSeconds : timeSeconds // ignore: cast_nullable_to_non_nullable
-as int?,resultsExtra: freezed == resultsExtra ? _self._resultsExtra : resultsExtra // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,
+as int?,resultsExtra: freezed == resultsExtra ? _self.resultsExtra : resultsExtra // ignore: cast_nullable_to_non_nullable
+as ResultsArgs?,
   ));
 }
 

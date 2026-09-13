@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../domain/entities/zip_level.dart';
+import '../../results/results_args.dart';
 import '../logic/daily_puzzle_generator.dart';
 
 part 'zip_state.freezed.dart';
@@ -17,7 +18,7 @@ sealed class ZipState with _$ZipState {
     bool? improved,
     int? points,
     int? timeSeconds,
-    Map<String, dynamic>? resultsExtra,
+    ResultsArgs? resultsExtra,
   }) = _ZipState;
 
   factory ZipState.initial(DateTime now) {

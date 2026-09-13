@@ -4,21 +4,23 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/zip_ui.dart';
+import 'results_args.dart';
 
 class ResultsScreen extends StatelessWidget {
-  const ResultsScreen({super.key, required this.data});
+  const ResultsScreen({super.key, required this.args});
 
-  final Map<String, dynamic> data;
+  final ResultsArgs args;
 
   @override
   Widget build(BuildContext context) {
-    final title = data['title'] as String? ?? 'Results';
-    final subtitle = data['subtitle'] as String? ?? '';
-    final time = data['timeSeconds'] as int?;
-    final improved = data['improved'] as bool? ?? false;
-    final replayDaily = data['replayDaily'] as bool? ?? false;
-    final replayId = data['replayLevelId'] as String?;
-    final nextId = data['nextLevelId'] as String?;
+    final title = args.title;
+    final subtitle = args.subtitle;
+    final time = args.timeSeconds;
+    final improved = args.improved;
+    final replayDaily = args.replayDaily;
+    final replayId = args.replayLevelId;
+    final nextId = args.nextLevelId;
+    final points = args.points;
 
     return Scaffold(
       body: ZipAtmosphere(
@@ -70,28 +72,38 @@ class ResultsScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      if (time != null) ...[
+                      Text(
+                        _formatTime(time),
+                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                              color: ZipColors.ember,
+                              height: 1,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'time',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: ZipColors.inkSoft,
+                            ),
+                      ),
+                      if (points != null) ...[
+                        const SizedBox(height: 18),
                         Text(
-                          _formatTime(time),
-                          style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                color: ZipColors.ember,
-                                height: 1,
-                              ),
+                          '$points',
+                          style:
+                              Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    color: ZipColors.ink,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'time',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          'points',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 color: ZipColors.inkSoft,
                               ),
                         ),
-                      ] else
-                        Text(
-                          'Done',
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                color: ZipColors.ember,
-                              ),
-                        ),
+                      ],
                       if (improved) ...[
                         const SizedBox(height: 16),
                         Container(
@@ -119,13 +131,14 @@ class ResultsScreen extends StatelessWidget {
                     .fadeIn(delay: 160.ms, duration: 450.ms)
                     .slideY(begin: 0.12, curve: Curves.easeOutCubic),
                 const SizedBox(height: 16),
-                Text(
-                  'A new puzzle unlocks tomorrow.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: ZipColors.inkSoft,
-                      ),
-                ),
+                if (replayDaily)
+                  Text(
+                    'A new puzzle unlocks tomorrow.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: ZipColors.inkSoft,
+                        ),
+                  ),
                 const Spacer(),
                 if (replayDaily || replayId != null)
                   ZipPrimaryButton(

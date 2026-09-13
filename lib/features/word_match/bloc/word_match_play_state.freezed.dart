@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WordMatchPlayState {
 
- WordMatchPlayStatus get status; String? get deckId; WordMatchDeck? get deck; int get remainingSeconds; int get matched; int get total; bool get finished; Map<String, dynamic>? get resultsExtra; String? get error;
+ WordMatchPlayStatus get status; String? get deckId; WordMatchDeck? get deck; int get remainingSeconds; int get matched; int get total; bool get finished; ResultsArgs? get resultsExtra; String? get error;
 /// Create a copy of WordMatchPlayState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,12 +25,12 @@ $WordMatchPlayStateCopyWith<WordMatchPlayState> get copyWith => _$WordMatchPlayS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WordMatchPlayState&&(identical(other.status, status) || other.status == status)&&(identical(other.deckId, deckId) || other.deckId == deckId)&&(identical(other.deck, deck) || other.deck == deck)&&(identical(other.remainingSeconds, remainingSeconds) || other.remainingSeconds == remainingSeconds)&&(identical(other.matched, matched) || other.matched == matched)&&(identical(other.total, total) || other.total == total)&&(identical(other.finished, finished) || other.finished == finished)&&const DeepCollectionEquality().equals(other.resultsExtra, resultsExtra)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WordMatchPlayState&&(identical(other.status, status) || other.status == status)&&(identical(other.deckId, deckId) || other.deckId == deckId)&&(identical(other.deck, deck) || other.deck == deck)&&(identical(other.remainingSeconds, remainingSeconds) || other.remainingSeconds == remainingSeconds)&&(identical(other.matched, matched) || other.matched == matched)&&(identical(other.total, total) || other.total == total)&&(identical(other.finished, finished) || other.finished == finished)&&(identical(other.resultsExtra, resultsExtra) || other.resultsExtra == resultsExtra)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,deckId,deck,remainingSeconds,matched,total,finished,const DeepCollectionEquality().hash(resultsExtra),error);
+int get hashCode => Object.hash(runtimeType,status,deckId,deck,remainingSeconds,matched,total,finished,resultsExtra,error);
 
 @override
 String toString() {
@@ -45,7 +45,7 @@ abstract mixin class $WordMatchPlayStateCopyWith<$Res>  {
   factory $WordMatchPlayStateCopyWith(WordMatchPlayState value, $Res Function(WordMatchPlayState) _then) = _$WordMatchPlayStateCopyWithImpl;
 @useResult
 $Res call({
- WordMatchPlayStatus status, String? deckId, WordMatchDeck? deck, int remainingSeconds, int matched, int total, bool finished, Map<String, dynamic>? resultsExtra, String? error
+ WordMatchPlayStatus status, String? deckId, WordMatchDeck? deck, int remainingSeconds, int matched, int total, bool finished, ResultsArgs? resultsExtra, String? error
 });
 
 
@@ -72,7 +72,7 @@ as int,matched: null == matched ? _self.matched : matched // ignore: cast_nullab
 as int,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,finished: null == finished ? _self.finished : finished // ignore: cast_nullable_to_non_nullable
 as bool,resultsExtra: freezed == resultsExtra ? _self.resultsExtra : resultsExtra // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as ResultsArgs?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -155,7 +155,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( WordMatchPlayStatus status,  String? deckId,  WordMatchDeck? deck,  int remainingSeconds,  int matched,  int total,  bool finished,  Map<String, dynamic>? resultsExtra,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( WordMatchPlayStatus status,  String? deckId,  WordMatchDeck? deck,  int remainingSeconds,  int matched,  int total,  bool finished,  ResultsArgs? resultsExtra,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WordMatchPlayState() when $default != null:
 return $default(_that.status,_that.deckId,_that.deck,_that.remainingSeconds,_that.matched,_that.total,_that.finished,_that.resultsExtra,_that.error);case _:
@@ -176,7 +176,7 @@ return $default(_that.status,_that.deckId,_that.deck,_that.remainingSeconds,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( WordMatchPlayStatus status,  String? deckId,  WordMatchDeck? deck,  int remainingSeconds,  int matched,  int total,  bool finished,  Map<String, dynamic>? resultsExtra,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( WordMatchPlayStatus status,  String? deckId,  WordMatchDeck? deck,  int remainingSeconds,  int matched,  int total,  bool finished,  ResultsArgs? resultsExtra,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _WordMatchPlayState():
 return $default(_that.status,_that.deckId,_that.deck,_that.remainingSeconds,_that.matched,_that.total,_that.finished,_that.resultsExtra,_that.error);}
@@ -193,7 +193,7 @@ return $default(_that.status,_that.deckId,_that.deck,_that.remainingSeconds,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( WordMatchPlayStatus status,  String? deckId,  WordMatchDeck? deck,  int remainingSeconds,  int matched,  int total,  bool finished,  Map<String, dynamic>? resultsExtra,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( WordMatchPlayStatus status,  String? deckId,  WordMatchDeck? deck,  int remainingSeconds,  int matched,  int total,  bool finished,  ResultsArgs? resultsExtra,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _WordMatchPlayState() when $default != null:
 return $default(_that.status,_that.deckId,_that.deck,_that.remainingSeconds,_that.matched,_that.total,_that.finished,_that.resultsExtra,_that.error);case _:
@@ -208,7 +208,7 @@ return $default(_that.status,_that.deckId,_that.deck,_that.remainingSeconds,_tha
 
 
 class _WordMatchPlayState implements WordMatchPlayState {
-  const _WordMatchPlayState({this.status = WordMatchPlayStatus.initial, this.deckId, this.deck, this.remainingSeconds = 0, this.matched = 0, this.total = 0, this.finished = false, final  Map<String, dynamic>? resultsExtra, this.error}): _resultsExtra = resultsExtra;
+  const _WordMatchPlayState({this.status = WordMatchPlayStatus.initial, this.deckId, this.deck, this.remainingSeconds = 0, this.matched = 0, this.total = 0, this.finished = false, this.resultsExtra, this.error});
   
 
 @override@JsonKey() final  WordMatchPlayStatus status;
@@ -218,15 +218,7 @@ class _WordMatchPlayState implements WordMatchPlayState {
 @override@JsonKey() final  int matched;
 @override@JsonKey() final  int total;
 @override@JsonKey() final  bool finished;
- final  Map<String, dynamic>? _resultsExtra;
-@override Map<String, dynamic>? get resultsExtra {
-  final value = _resultsExtra;
-  if (value == null) return null;
-  if (_resultsExtra is EqualUnmodifiableMapView) return _resultsExtra;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(value);
-}
-
+@override final  ResultsArgs? resultsExtra;
 @override final  String? error;
 
 /// Create a copy of WordMatchPlayState
@@ -239,12 +231,12 @@ _$WordMatchPlayStateCopyWith<_WordMatchPlayState> get copyWith => __$WordMatchPl
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WordMatchPlayState&&(identical(other.status, status) || other.status == status)&&(identical(other.deckId, deckId) || other.deckId == deckId)&&(identical(other.deck, deck) || other.deck == deck)&&(identical(other.remainingSeconds, remainingSeconds) || other.remainingSeconds == remainingSeconds)&&(identical(other.matched, matched) || other.matched == matched)&&(identical(other.total, total) || other.total == total)&&(identical(other.finished, finished) || other.finished == finished)&&const DeepCollectionEquality().equals(other._resultsExtra, _resultsExtra)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WordMatchPlayState&&(identical(other.status, status) || other.status == status)&&(identical(other.deckId, deckId) || other.deckId == deckId)&&(identical(other.deck, deck) || other.deck == deck)&&(identical(other.remainingSeconds, remainingSeconds) || other.remainingSeconds == remainingSeconds)&&(identical(other.matched, matched) || other.matched == matched)&&(identical(other.total, total) || other.total == total)&&(identical(other.finished, finished) || other.finished == finished)&&(identical(other.resultsExtra, resultsExtra) || other.resultsExtra == resultsExtra)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,deckId,deck,remainingSeconds,matched,total,finished,const DeepCollectionEquality().hash(_resultsExtra),error);
+int get hashCode => Object.hash(runtimeType,status,deckId,deck,remainingSeconds,matched,total,finished,resultsExtra,error);
 
 @override
 String toString() {
@@ -259,7 +251,7 @@ abstract mixin class _$WordMatchPlayStateCopyWith<$Res> implements $WordMatchPla
   factory _$WordMatchPlayStateCopyWith(_WordMatchPlayState value, $Res Function(_WordMatchPlayState) _then) = __$WordMatchPlayStateCopyWithImpl;
 @override @useResult
 $Res call({
- WordMatchPlayStatus status, String? deckId, WordMatchDeck? deck, int remainingSeconds, int matched, int total, bool finished, Map<String, dynamic>? resultsExtra, String? error
+ WordMatchPlayStatus status, String? deckId, WordMatchDeck? deck, int remainingSeconds, int matched, int total, bool finished, ResultsArgs? resultsExtra, String? error
 });
 
 
@@ -285,8 +277,8 @@ as WordMatchDeck?,remainingSeconds: null == remainingSeconds ? _self.remainingSe
 as int,matched: null == matched ? _self.matched : matched // ignore: cast_nullable_to_non_nullable
 as int,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
 as int,finished: null == finished ? _self.finished : finished // ignore: cast_nullable_to_non_nullable
-as bool,resultsExtra: freezed == resultsExtra ? _self._resultsExtra : resultsExtra // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as bool,resultsExtra: freezed == resultsExtra ? _self.resultsExtra : resultsExtra // ignore: cast_nullable_to_non_nullable
+as ResultsArgs?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

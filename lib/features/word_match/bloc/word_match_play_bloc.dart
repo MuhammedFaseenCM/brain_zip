@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 
 import '../../../domain/usecases/fetch_word_match_deck_by_id.dart';
 import '../../../domain/usecases/submit_score.dart';
+import '../../results/results_args.dart';
 import 'word_match_play_event.dart';
 import 'word_match_play_state.dart';
 
@@ -97,13 +98,13 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
         state.copyWith(
           status: WordMatchPlayStatus.navigating,
           finished: true,
-          resultsExtra: <String, dynamic>{
-            'title': 'Time up',
-            'points': state.matched * 25,
-            'timeSeconds': state.deck?.seconds ?? 60,
-            'improved': false,
-            'subtitle': 'Matched ${state.matched} / ${state.total}',
-          },
+          resultsExtra: ResultsArgs(
+            title: 'Time up',
+            subtitle: 'Matched ${state.matched} / ${state.total}',
+            timeSeconds: state.deck?.seconds ?? 60,
+            improved: false,
+            points: state.matched * 25,
+          ),
         ),
       );
     }
@@ -144,13 +145,13 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
     emit(
       state.copyWith(
         status: WordMatchPlayStatus.navigating,
-        resultsExtra: <String, dynamic>{
-          'title': 'All matched!',
-          'points': event.points,
-          'timeSeconds': event.elapsedSeconds,
-          'improved': improved,
-          'subtitle': deck.title,
-        },
+        resultsExtra: ResultsArgs(
+          title: 'All matched!',
+          subtitle: deck.title,
+          timeSeconds: event.elapsedSeconds,
+          improved: improved,
+          points: event.points,
+        ),
       ),
     );
   }
