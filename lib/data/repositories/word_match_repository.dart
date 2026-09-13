@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/firebase/firebase_bootstrap.dart';
-import '../models/word_pair_deck.dart';
+import '../../domain/entities/word_match_deck.dart';
 
 class WordMatchRepository {
   WordMatchRepository({FirebaseFirestore? firestore})

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/providers.dart';
-import '../../../data/models/category.dart';
+import '../../../domain/entities/word_category.dart';
 
 class CategoryRaceScreen extends ConsumerStatefulWidget {
   const CategoryRaceScreen({super.key});

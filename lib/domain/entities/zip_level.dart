@@ -1,48 +1,8 @@
-class Cell {
-  const Cell(this.row, this.col);
+export 'cell.dart';
+export 'wall.dart';
 
-  final int row;
-  final int col;
-
-  @override
-  bool operator ==(Object other) =>
-      other is Cell && other.row == row && other.col == col;
-
-  @override
-  int get hashCode => Object.hash(row, col);
-
-  @override
-  String toString() => '$row,$col';
-
-  static Cell parse(String key) {
-    final parts = key.split(',');
-    return Cell(int.parse(parts[0]), int.parse(parts[1]));
-  }
-
-  List<int> toList() => [row, col];
-}
-
-class Wall {
-  const Wall(this.a, this.b);
-
-  final Cell a;
-  final Cell b;
-
-  bool blocks(Cell from, Cell to) {
-    return (from == a && to == b) || (from == b && to == a);
-  }
-
-  factory Wall.fromJson(Map<String, dynamic> json) {
-    final a = (json['a'] as List).cast<num>();
-    final b = (json['b'] as List).cast<num>();
-    return Wall(Cell(a[0].toInt(), a[1].toInt()), Cell(b[0].toInt(), b[1].toInt()));
-  }
-
-  Map<String, dynamic> toJson() => {
-        'a': a.toList(),
-        'b': b.toList(),
-      };
-}
+import 'cell.dart';
+import 'wall.dart';
 
 class ZipLevel {
   const ZipLevel({

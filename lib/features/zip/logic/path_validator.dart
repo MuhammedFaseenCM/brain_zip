@@ -1,4 +1,4 @@
-import '../../../data/models/zip_level.dart';
+import '../../../domain/entities/zip_level.dart';
 
 class PathValidator {
   PathValidator(this.level);

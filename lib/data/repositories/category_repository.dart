@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/firebase/firebase_bootstrap.dart';
-import '../models/category.dart';
+import '../../domain/entities/word_category.dart';
 
 class CategoryRepository {
   CategoryRepository({FirebaseFirestore? firestore})

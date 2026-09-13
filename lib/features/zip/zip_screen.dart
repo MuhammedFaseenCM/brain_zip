@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/zip_ui.dart';
-import '../../data/models/zip_level.dart';
+import '../../domain/entities/zip_level.dart';
 import 'game/zip_game.dart';
 import 'logic/daily_puzzle_generator.dart';
 

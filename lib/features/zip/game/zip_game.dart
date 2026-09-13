@@ -5,7 +5,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../data/models/zip_level.dart';
+import '../../../domain/entities/zip_level.dart';
 import '../logic/path_validator.dart';
 
 typedef ZipWinCallback = void Function(int points, int elapsedSeconds);

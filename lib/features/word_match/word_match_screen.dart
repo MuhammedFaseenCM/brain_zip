@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/providers.dart';
-import '../../../data/models/word_pair_deck.dart';
+import '../../../domain/entities/word_match_deck.dart';
 import 'game/word_match_game.dart';
 
 class WordMatchScreen extends ConsumerStatefulWidget {

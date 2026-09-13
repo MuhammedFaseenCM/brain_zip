@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/firebase/firebase_bootstrap.dart';
-import '../models/zip_level.dart';
+import '../../domain/entities/zip_level.dart';
 
 class ZipLevelRepository {
   ZipLevelRepository({FirebaseFirestore? firestore})

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers.dart';
-import '../../data/models/zip_level.dart';
+import '../../domain/entities/zip_level.dart';
 
 class ZipLevelSelectScreen extends ConsumerWidget {
   const ZipLevelSelectScreen({super.key});

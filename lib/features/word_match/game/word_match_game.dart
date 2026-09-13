@@ -5,7 +5,7 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
-import '../../../data/models/word_pair_deck.dart';
+import '../../../domain/entities/word_match_deck.dart';
 
 typedef WordMatchWinCallback = void Function(int points, int elapsedSeconds);
 

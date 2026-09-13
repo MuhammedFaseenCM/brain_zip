@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import '../../../data/models/zip_level.dart';
+import '../../../domain/entities/zip_level.dart';
 
 /// Daily Zip puzzles in the style of popular path-fill games:
 /// grids about 6–8, checkpoints from 1 up to at most 15.
