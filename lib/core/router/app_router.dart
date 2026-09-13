@@ -5,29 +5,22 @@ import '../../features/home/view/home_screen.dart';
 import '../../features/results/results_screen.dart';
 import '../../features/word_match/word_match_screen.dart';
 import '../../features/word_match/word_match_select_screen.dart';
-import '../../features/zip/zip_screen.dart';
+import '../../features/zip/view/zip_screen.dart';
 
 GoRouter buildRouter() {
   return GoRouter(
     initialLocation: '/',
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const HomeScreen(),
-      ),
-      GoRoute(
-        path: '/zip',
-        builder: (context, state) => const ZipScreen(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+      GoRoute(path: '/zip', builder: (context, state) => const ZipScreen()),
       GoRoute(
         path: '/word-match',
         builder: (context, state) => const WordMatchSelectScreen(),
       ),
       GoRoute(
         path: '/word-match/:deckId',
-        builder: (context, state) => WordMatchScreen(
-          deckId: state.pathParameters['deckId']!,
-        ),
+        builder: (context, state) =>
+            WordMatchScreen(deckId: state.pathParameters['deckId']!),
       ),
       GoRoute(
         path: '/category-race',
