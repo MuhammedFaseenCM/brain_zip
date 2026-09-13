@@ -85,7 +85,7 @@ class ZipMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(size * 0.22),
+      borderRadius: BorderRadius.circular(size * 0.32),
       child: Image.asset(
         assetPath,
         width: size,
