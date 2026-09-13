@@ -44,6 +44,31 @@ class WordMatchRepositoryImpl implements WordMatchRepository {
     return _loadAssets();
   }
 
+  @override
+  Future<WordMatchDeck?> fetchDeckById(String id) async {
+    final firestore = _firestore;
+    if (firestore != null) {
+      try {
+        final doc =
+            await firestore.collection('word_match_decks').doc(id).get();
+        final data = doc.data();
+        if (doc.exists && data != null) {
+          return WordMatchDeck.fromJson(data, id: doc.id);
+        }
+      } catch (_) {
+        // fall through to assets
+      }
+    }
+
+    for (final path in _assetFiles) {
+      final raw = await _assetBundle.loadString(path);
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      final deck = WordMatchDeck.fromJson(json);
+      if (deck.id == id) return deck;
+    }
+    return null;
+  }
+
   Future<List<WordMatchDeck>> _loadAssets() async {
     final decks = <WordMatchDeck>[];
     for (final path in _assetFiles) {

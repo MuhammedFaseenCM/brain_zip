@@ -11,6 +11,7 @@ import 'package:brain_zip/domain/repositories/score_repository.dart';
 import 'package:brain_zip/domain/repositories/word_match_repository.dart';
 import 'package:brain_zip/domain/repositories/zip_level_repository.dart';
 import 'package:brain_zip/domain/usecases/fetch_categories.dart';
+import 'package:brain_zip/domain/usecases/fetch_word_match_deck_by_id.dart';
 import 'package:brain_zip/domain/usecases/fetch_word_match_decks.dart';
 import 'package:brain_zip/domain/usecases/fetch_zip_levels.dart';
 import 'package:brain_zip/domain/usecases/get_best_points.dart';
@@ -50,6 +51,10 @@ List<SingleChildWidget> buildRepositoryProviders({
     RepositoryProvider<FetchWordMatchDecks>(
       create: (context) =>
           FetchWordMatchDecks(context.read<WordMatchRepository>()),
+    ),
+    RepositoryProvider<FetchWordMatchDeckById>(
+      create: (context) =>
+          FetchWordMatchDeckById(context.read<WordMatchRepository>()),
     ),
     RepositoryProvider<FetchCategories>(
       create: (context) => FetchCategories(context.read<CategoryRepository>()),
