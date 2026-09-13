@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../../features/category_race/category_race_screen.dart';
-import '../../features/home/home_screen.dart';
+import '../../features/home/view/home_screen.dart';
 import '../../features/results/results_screen.dart';
 import '../../features/word_match/word_match_screen.dart';
 import '../../features/word_match/word_match_select_screen.dart';

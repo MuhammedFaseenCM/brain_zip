@@ -1,22 +1,23 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/providers.dart';
 import '../../../domain/entities/word_match_deck.dart';
+import '../../../domain/repositories/score_repository.dart';
+import '../../../domain/usecases/fetch_word_match_decks.dart';
 import 'game/word_match_game.dart';
 
-class WordMatchScreen extends ConsumerStatefulWidget {
+class WordMatchScreen extends StatefulWidget {
   const WordMatchScreen({super.key, required this.deckId});
 
   final String deckId;
 
   @override
-  ConsumerState<WordMatchScreen> createState() => _WordMatchScreenState();
+  State<WordMatchScreen> createState() => _WordMatchScreenState();
 }
 
-class _WordMatchScreenState extends ConsumerState<WordMatchScreen> {
+class _WordMatchScreenState extends State<WordMatchScreen> {
   WordMatchGame? _game;
   WordMatchDeck? _deck;
   int _matched = 0;
@@ -32,8 +33,16 @@ class _WordMatchScreenState extends ConsumerState<WordMatchScreen> {
   }
 
   Future<void> _bootstrap() async {
-    final decks = await ref.read(wordMatchRepositoryProvider).fetchDecks();
-    final deck = decks.where((d) => d.id == widget.deckId).firstOrNull;
+    final decks = await context.read<FetchWordMatchDecks>()();
+
+    WordMatchDeck? deck;
+    for (final d in decks) {
+      if (d.id == widget.deckId) {
+        deck = d;
+        break;
+      }
+    }
+
     if (!mounted) return;
     if (deck == null) {
       setState(() {
@@ -42,9 +51,11 @@ class _WordMatchScreenState extends ConsumerState<WordMatchScreen> {
       });
       return;
     }
-    _remaining = deck.seconds;
+
+    final foundDeck = deck;
+    _remaining = foundDeck.seconds;
     _game = WordMatchGame(
-      deck: deck,
+      deck: foundDeck,
       onWin: _onWin,
       onProgress: (m, t) {
         if (!mounted) return;
@@ -55,8 +66,8 @@ class _WordMatchScreenState extends ConsumerState<WordMatchScreen> {
       },
     );
     setState(() {
-      _deck = deck;
-      _total = deck.pairs.length;
+      _deck = foundDeck;
+      _total = foundDeck.pairs.length;
       _loading = false;
     });
     _tick();
@@ -75,7 +86,7 @@ class _WordMatchScreenState extends ConsumerState<WordMatchScreen> {
   }
 
   Future<void> _onWin(int points, int elapsedSeconds) async {
-    final improved = await ref.read(scoreRepositoryProvider).submitScore(
+    final improved = await context.read<ScoreRepository>().submitScore(
           modeKey: 'match_${widget.deckId}',
           points: points,
           timeSeconds: elapsedSeconds,
@@ -151,3 +162,4 @@ class _WordMatchScreenState extends ConsumerState<WordMatchScreen> {
     );
   }
 }
+

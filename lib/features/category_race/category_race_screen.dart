@@ -1,20 +1,21 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/providers.dart';
 import '../../../domain/entities/word_category.dart';
+import '../../../domain/repositories/score_repository.dart';
+import '../../../domain/usecases/fetch_categories.dart';
 
-class CategoryRaceScreen extends ConsumerStatefulWidget {
+class CategoryRaceScreen extends StatefulWidget {
   const CategoryRaceScreen({super.key});
 
   @override
-  ConsumerState<CategoryRaceScreen> createState() => _CategoryRaceScreenState();
+  State<CategoryRaceScreen> createState() => _CategoryRaceScreenState();
 }
 
-class _CategoryRaceScreenState extends ConsumerState<CategoryRaceScreen> {
+class _CategoryRaceScreenState extends State<CategoryRaceScreen> {
   final _controller = TextEditingController();
   final _focus = FocusNode();
   final _answers = <String>[];
@@ -39,8 +40,7 @@ class _CategoryRaceScreenState extends ConsumerState<CategoryRaceScreen> {
   }
 
   Future<void> _prepare() async {
-    final categories =
-        await ref.read(categoryRepositoryProvider).fetchCategories();
+    final categories = await context.read<FetchCategories>()();
     if (!mounted) return;
     if (categories.isEmpty) {
       setState(() => _loading = false);
@@ -104,7 +104,7 @@ class _CategoryRaceScreenState extends ConsumerState<CategoryRaceScreen> {
   Future<void> _finish() async {
     _started = false;
     final points = _answers.length * 50;
-    final improved = await ref.read(scoreRepositoryProvider).submitScore(
+    final improved = await context.read<ScoreRepository>().submitScore(
           modeKey: 'race_${_category?.id ?? 'unknown'}',
           points: points,
         );
@@ -116,8 +116,7 @@ class _CategoryRaceScreenState extends ConsumerState<CategoryRaceScreen> {
         'points': points,
         'timeSeconds': 60,
         'improved': improved,
-        'subtitle':
-            '${_category?.name} · $_letter · ${_answers.length} words',
+        'subtitle': '${_category?.name} · $_letter · ${_answers.length} words',
       },
     );
   }
@@ -227,3 +226,4 @@ class _CategoryRaceScreenState extends ConsumerState<CategoryRaceScreen> {
     );
   }
 }
+

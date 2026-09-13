@@ -1,26 +1,26 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/zip_ui.dart';
 import '../../domain/entities/zip_level.dart';
+import '../../domain/repositories/score_repository.dart';
 import 'game/zip_game.dart';
 import 'logic/daily_puzzle_generator.dart';
 
-class ZipScreen extends ConsumerStatefulWidget {
+class ZipScreen extends StatefulWidget {
   const ZipScreen({super.key, this.date});
 
   final DateTime? date;
 
   @override
-  ConsumerState<ZipScreen> createState() => _ZipScreenState();
+  State<ZipScreen> createState() => _ZipScreenState();
 }
 
-class _ZipScreenState extends ConsumerState<ZipScreen> {
+class _ZipScreenState extends State<ZipScreen> {
   ZipGame? _game;
   late final DateTime _day;
   late final ZipLevel _level;
@@ -42,7 +42,7 @@ class _ZipScreenState extends ConsumerState<ZipScreen> {
   Future<void> _onWin(int points, int elapsedSeconds) async {
     if (_finished) return;
     _finished = true;
-    final improved = await ref.read(scoreRepositoryProvider).submitScore(
+    final improved = await context.read<ScoreRepository>().submitScore(
           modeKey: 'zip_${_level.id}',
           points: points,
           timeSeconds: elapsedSeconds,
