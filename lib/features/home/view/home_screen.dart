@@ -41,145 +41,137 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                   children: [
                     Row(
-                      children: [
-                        const ZipMark(size: 56)
-                            .animate()
-                            .fadeIn(duration: 400.ms)
-                            .scale(
-                              begin: const Offset(0.85, 0.85),
-                              curve: Curves.easeOutBack,
+                          children: [
+                            const ZipMark(size: 56)
+                                .animate()
+                                .fadeIn(duration: 400.ms)
+                                .scale(
+                                  begin: const Offset(0.85, 0.85),
+                                  curve: Curves.easeOutBack,
+                                ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    AppStrings.appTitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displaySmall
+                                        ?.copyWith(
+                                          color: ZipColors.onInk,
+                                          height: 1,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    AppStrings.homeTagline,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: ZipColors.inkSoft),
+                                  ),
+                                ],
+                              ),
                             ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppStrings.zipBrand,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .displaySmall
-                                    ?.copyWith(
-                                      color: ZipColors.onInk,
-                                      height: 1,
-                                    ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'One fresh puzzle every day.',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: ZipColors.inkSoft,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
+                          ],
+                        )
                         .animate()
                         .fadeIn(duration: 450.ms)
                         .slideY(begin: 0.08, curve: Curves.easeOutCubic),
                     const SizedBox(height: 28),
                     Container(
-                      padding: const EdgeInsets.all(22),
-                      decoration: BoxDecoration(
-                        color: ZipColors.wall,
-                        borderRadius: BorderRadius.circular(28),
-                        border: Border.all(color: ZipColors.outlineQuiet),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            blurRadius: 28,
-                            offset: const Offset(0, 14),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: ZipColors.emberSoft,
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Text(
-                                  AppStrings.today,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
-                                      ?.copyWith(
-                                        color: ZipColors.ember,
-                                      ),
-                                ),
+                          padding: const EdgeInsets.all(22),
+                          decoration: BoxDecoration(
+                            color: ZipColors.wall,
+                            borderRadius: BorderRadius.circular(28),
+                            border: Border.all(color: ZipColors.outlineQuiet),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.35),
+                                blurRadius: 28,
+                                offset: const Offset(0, 14),
                               ),
-                              const Spacer(),
-                              if (cleared)
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.check_circle_rounded,
-                                      size: 18,
-                                      color: ZipColors.success,
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Cleared',
+                                    decoration: BoxDecoration(
+                                      color: ZipColors.emberSoft,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      AppStrings.today,
                                       style: Theme.of(context)
                                           .textTheme
                                           .labelLarge
-                                          ?.copyWith(color: ZipColors.success),
+                                          ?.copyWith(color: ZipColors.ember),
                                     ),
-                                  ],
+                                  ),
+                                  const Spacer(),
+                                  if (cleared)
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.check_circle_rounded,
+                                          size: 18,
+                                          color: ZipColors.success,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Cleared',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge
+                                              ?.copyWith(
+                                                color: ZipColors.success,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                cleared ? 'Nice work' : 'Ready when you are',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.headlineMedium,
+                              ),
+                              if (cleared && bestTime != null) ...[
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Best time ${_formatBestTime(bestTime)}',
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(color: ZipColors.inkSoft),
                                 ),
+                              ],
+                              const SizedBox(height: 22),
+                              ZipPrimaryButton(
+                                label: cleared
+                                    ? 'Play again'
+                                    : AppStrings.playTodaysZip,
+                                icon: Icons.play_arrow_rounded,
+                                onPressed: () => context.push('/zip'),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Start at 1 · fill every cell · finish on the last number.',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: ZipColors.inkSoft),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            cleared ? 'Nice work' : 'Ready when you are',
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          if (cleared && bestTime != null) ...[
-                            const SizedBox(height: 12),
-                            Text(
-                              'Best time ${_formatBestTime(bestTime)}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    color: ZipColors.inkSoft,
-                                  ),
-                            ),
-                          ],
-                          const SizedBox(height: 22),
-                          ZipPrimaryButton(
-                            label: cleared
-                                ? 'Play again'
-                                : AppStrings.playTodaysZip,
-                            icon: Icons.play_arrow_rounded,
-                            onPressed: () => context.push('/zip'),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Start at 1 · fill every cell · finish on the last number.',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: ZipColors.inkSoft,
-                                ),
-                          ),
-                        ],
-                      ),
-                    )
+                        )
                         .animate()
                         .fadeIn(delay: 100.ms, duration: 450.ms)
                         .slideY(begin: 0.1, curve: Curves.easeOutCubic),
@@ -187,8 +179,8 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       'Parked for later',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: ZipColors.inkSoft,
-                          ),
+                        color: ZipColors.inkSoft,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     const _ParkedRow(
@@ -235,16 +227,16 @@ class _ParkedRow extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: ZipColors.inkSoft,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: ZipColors.inkSoft),
               ),
             ),
             Text(
               'Soon',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: ZipColors.inkSoft,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: ZipColors.inkSoft),
             ),
           ],
         ),
@@ -252,4 +244,3 @@ class _ParkedRow extends StatelessWidget {
     );
   }
 }
-

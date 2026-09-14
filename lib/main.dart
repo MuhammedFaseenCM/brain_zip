@@ -16,7 +16,7 @@ Future<void> main() async {
   runApp(
     MultiRepositoryProvider(
       providers: buildRepositoryProviders(prefs: prefs),
-      child: const BrainZipApp(),
+      child: const WinkloApp(),
     ),
   );
 }

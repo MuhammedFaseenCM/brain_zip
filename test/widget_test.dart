@@ -11,20 +11,21 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
 
-  testWidgets('Home shows daily Zip CTA without puzzle picker', (tester) async {
+  testWidgets('Home shows Winklo brand and daily Zip CTA', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
 
     await tester.pumpWidget(
       MultiRepositoryProvider(
         providers: buildRepositoryProviders(prefs: prefs),
-        child: const BrainZipApp(),
+        child: const WinkloApp(),
       ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 800));
 
-    expect(find.text(AppStrings.zipBrand), findsOneWidget);
+    expect(find.text(AppStrings.appTitle), findsOneWidget);
+    expect(find.text(AppStrings.homeTagline), findsOneWidget);
     expect(find.text(AppStrings.playTodaysZip), findsOneWidget);
     expect(find.text(AppStrings.today), findsOneWidget);
     expect(find.text('Choose a puzzle'), findsNothing);

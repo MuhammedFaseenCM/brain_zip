@@ -1,4 +1,4 @@
-# Brain Zip
+# Winklo
 
 Solo Android mini-games built with Flutter + Flame:
 
