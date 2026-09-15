@@ -1,5 +1,8 @@
 import 'package:bloc/bloc.dart';
 
+import '../../../domain/game_ids.dart';
+import '../../../domain/streak_calculator.dart';
+import '../../../domain/usecases/record_daily_clear.dart';
 import '../../../domain/usecases/submit_score.dart';
 import '../../results/results_args.dart';
 import '../logic/daily_puzzle_generator.dart';
@@ -7,13 +10,17 @@ import 'zip_event.dart';
 import 'zip_state.dart';
 
 class ZipBloc extends Bloc<ZipEvent, ZipState> {
-  ZipBloc({required this.submitScore, DateTime? now})
-      : super(ZipState.initial(now ?? DateTime.now())) {
+  ZipBloc({
+    required this.submitScore,
+    required this.recordDailyClear,
+    DateTime? now,
+  }) : super(ZipState.initial(now ?? DateTime.now())) {
     on<ZipStarted>(_onStarted);
     on<ZipCompleted>(_onCompleted);
   }
 
   final SubmitScore submitScore;
+  final RecordDailyClear recordDailyClear;
 
   void _onStarted(ZipStarted event, Emitter<ZipState> emit) {
     final seed = event.date ?? DateTime.now();
@@ -40,6 +47,11 @@ class ZipBloc extends Bloc<ZipEvent, ZipState> {
       timeSeconds: event.timeSeconds,
     );
 
+    final streak = await recordDailyClear(
+      gameId: GameIds.zip,
+      dateId: StreakCalculator.dateId(state.day),
+    );
+
     if (emit.isDone) return;
 
     emit(
@@ -53,6 +65,8 @@ class ZipBloc extends Bloc<ZipEvent, ZipState> {
           improved: improved,
           points: event.points,
           replayDaily: true,
+          currentStreak: streak.current,
+          longestStreak: streak.longest,
         ),
       ),
     );

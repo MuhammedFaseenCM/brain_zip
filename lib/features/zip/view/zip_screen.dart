@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/zip_ui.dart';
+import '../../../domain/usecases/record_daily_clear.dart';
 import '../../../domain/usecases/submit_score.dart';
 import '../bloc/zip_bloc.dart';
 import '../bloc/zip_event.dart';
@@ -43,7 +44,11 @@ class _ZipScreenState extends State<ZipScreen> {
   @override
   void initState() {
     super.initState();
-    _bloc = ZipBloc(submitScore: context.read<SubmitScore>(), now: widget.date);
+    _bloc = ZipBloc(
+      submitScore: context.read<SubmitScore>(),
+      recordDailyClear: context.read<RecordDailyClear>(),
+      now: widget.date,
+    );
     _ensureGame(_bloc.state);
   }
 

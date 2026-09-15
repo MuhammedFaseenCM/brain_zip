@@ -4,10 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:brain_zip/data/repositories/category_repository_impl.dart';
 import 'package:brain_zip/data/repositories/score_repository_impl.dart';
+import 'package:brain_zip/data/repositories/streak_repository_impl.dart';
 import 'package:brain_zip/data/repositories/word_match_repository_impl.dart';
 import 'package:brain_zip/data/repositories/zip_level_repository_impl.dart';
 import 'package:brain_zip/domain/repositories/category_repository.dart';
 import 'package:brain_zip/domain/repositories/score_repository.dart';
+import 'package:brain_zip/domain/repositories/streak_repository.dart';
 import 'package:brain_zip/domain/repositories/word_match_repository.dart';
 import 'package:brain_zip/domain/repositories/zip_level_repository.dart';
 import 'package:brain_zip/domain/usecases/fetch_categories.dart';
@@ -16,6 +18,8 @@ import 'package:brain_zip/domain/usecases/fetch_word_match_decks.dart';
 import 'package:brain_zip/domain/usecases/fetch_zip_levels.dart';
 import 'package:brain_zip/domain/usecases/get_best_points.dart';
 import 'package:brain_zip/domain/usecases/get_best_time_seconds.dart';
+import 'package:brain_zip/domain/usecases/get_streak.dart';
+import 'package:brain_zip/domain/usecases/record_daily_clear.dart';
 import 'package:brain_zip/domain/usecases/submit_score.dart';
 
 List<SingleChildWidget> buildRepositoryProviders({
@@ -26,6 +30,10 @@ List<SingleChildWidget> buildRepositoryProviders({
     RepositoryProvider<ScoreRepository>(
       create: (context) =>
           ScoreRepositoryImpl(context.read<SharedPreferences>()),
+    ),
+    RepositoryProvider<StreakRepository>(
+      create: (context) =>
+          StreakRepositoryImpl(context.read<SharedPreferences>()),
     ),
     RepositoryProvider<ZipLevelRepository>(
       create: (_) => ZipLevelRepositoryImpl(),
@@ -44,6 +52,12 @@ List<SingleChildWidget> buildRepositoryProviders({
     ),
     RepositoryProvider<GetBestTimeSeconds>(
       create: (context) => GetBestTimeSeconds(context.read<ScoreRepository>()),
+    ),
+    RepositoryProvider<GetStreak>(
+      create: (context) => GetStreak(context.read<StreakRepository>()),
+    ),
+    RepositoryProvider<RecordDailyClear>(
+      create: (context) => RecordDailyClear(context.read<StreakRepository>()),
     ),
     RepositoryProvider<FetchZipLevels>(
       create: (context) => FetchZipLevels(context.read<ZipLevelRepository>()),

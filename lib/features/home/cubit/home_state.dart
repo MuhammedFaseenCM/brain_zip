@@ -12,6 +12,10 @@ sealed class HomeState with _$HomeState {
     required String dateId,
     @Default(0) int bestPoints,
     int? bestTimeSeconds,
+    @Default(0) int currentStreak,
+    @Default(0) int longestStreak,
+    @Default(false) bool isOnFreeze,
+    @Default(true) bool freezeAvailable,
   }) = _HomeState;
 
   factory HomeState.initial(DateTime now) {
@@ -23,4 +27,3 @@ sealed class HomeState with _$HomeState {
     );
   }
 }
-

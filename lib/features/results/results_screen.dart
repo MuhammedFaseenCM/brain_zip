@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/strings/app_strings.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/zip_ui.dart';
 import 'results_args.dart';
@@ -49,84 +50,102 @@ class ResultsScreen extends StatelessWidget {
                   Text(
                     subtitle,
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: ZipColors.inkSoft,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: ZipColors.inkSoft),
                   ).animate().fadeIn(delay: 120.ms),
                 ],
                 const SizedBox(height: 28),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: ZipColors.wall,
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: ZipColors.outlineQuiet),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.35),
-                        blurRadius: 28,
-                        offset: const Offset(0, 12),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 28,
+                        horizontal: 20,
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        _formatTime(time),
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                              color: ZipColors.ember,
-                              height: 1,
-                            ),
+                      decoration: BoxDecoration(
+                        color: ZipColors.wall,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(color: ZipColors.outlineQuiet),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 28,
+                            offset: const Offset(0, 12),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'time',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: ZipColors.inkSoft,
-                            ),
-                      ),
-                      if (points != null) ...[
-                        const SizedBox(height: 18),
-                        Text(
-                          '$points',
-                          style:
-                              Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      child: Column(
+                        children: [
+                          Text(
+                            _formatTime(time),
+                            style: Theme.of(context).textTheme.displayLarge
+                                ?.copyWith(color: ZipColors.ember, height: 1),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'time',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(color: ZipColors.inkSoft),
+                          ),
+                          if (points != null) ...[
+                            const SizedBox(height: 18),
+                            Text(
+                              '$points',
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
                                     color: ZipColors.onInk,
                                     fontWeight: FontWeight.w800,
                                   ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'points',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: ZipColors.inkSoft,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'points',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(color: ZipColors.inkSoft),
+                            ),
+                          ],
+                          if (improved) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                        ),
-                      ],
-                      if (improved) ...[
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ZipColors.successSoft,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            'New personal best',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
-                                ?.copyWith(color: ZipColors.success),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                )
+                              decoration: BoxDecoration(
+                                color: ZipColors.successSoft,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                AppStrings.newPersonalBest,
+                                style: Theme.of(context).textTheme.labelLarge
+                                    ?.copyWith(color: ZipColors.success),
+                              ),
+                            ),
+                          ],
+                          if (args.currentStreak != null &&
+                              args.currentStreak! > 0) ...[
+                            const SizedBox(height: 16),
+                            ZipHudPill(
+                              icon: Icons.local_fire_department_rounded,
+                              label: AppStrings.streakLabel(
+                                args.currentStreak!,
+                              ),
+                              emphasize: true,
+                            ),
+                            if (args.longestStreak != null &&
+                                args.longestStreak! > 0) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                AppStrings.longestStreakLabel(
+                                  args.longestStreak!,
+                                ),
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(color: ZipColors.inkSoft),
+                              ),
+                            ],
+                          ],
+                        ],
+                      ),
+                    )
                     .animate()
                     .fadeIn(delay: 160.ms, duration: 450.ms)
                     .slideY(begin: 0.12, curve: Curves.easeOutCubic),
@@ -135,9 +154,9 @@ class ResultsScreen extends StatelessWidget {
                   Text(
                     'A new puzzle unlocks tomorrow.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: ZipColors.inkSoft,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: ZipColors.inkSoft),
                   ),
                 const Spacer(),
                 if (replayDaily || replayId != null)

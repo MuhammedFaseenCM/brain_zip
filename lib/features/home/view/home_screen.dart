@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/zip_ui.dart';
 import '../../../domain/usecases/get_best_points.dart';
 import '../../../domain/usecases/get_best_time_seconds.dart';
+import '../../../domain/usecases/get_streak.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 
@@ -26,6 +27,7 @@ class HomeScreen extends StatelessWidget {
       create: (context) => HomeCubit(
         getBestPoints: context.read<GetBestPoints>(),
         getBestTimeSeconds: context.read<GetBestTimeSeconds>(),
+        getStreak: context.read<GetStreak>(),
       )..load(),
       child: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) {
@@ -118,6 +120,16 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const Spacer(),
+                                  if (state.currentStreak > 0) ...[
+                                    ZipHudPill(
+                                      icon: Icons.local_fire_department_rounded,
+                                      label: AppStrings.streakLabel(
+                                        state.currentStreak,
+                                      ),
+                                      emphasize: true,
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
                                   if (cleared)
                                     Row(
                                       children: [
@@ -128,7 +140,7 @@ class HomeScreen extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
-                                          'Cleared',
+                                          AppStrings.cleared,
                                           style: Theme.of(context)
                                               .textTheme
                                               .labelLarge
@@ -140,6 +152,24 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                 ],
                               ),
+                              if (state.isOnFreeze) ...[
+                                const SizedBox(height: 10),
+                                Text(
+                                  AppStrings.streakProtectedLabel,
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(color: ZipColors.ember),
+                                ),
+                              ],
+                              if (state.longestStreak > 0) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  AppStrings.longestStreakLabel(
+                                    state.longestStreak,
+                                  ),
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(color: ZipColors.inkSoft),
+                                ),
+                              ],
                               const SizedBox(height: 16),
                               Text(
                                 cleared ? 'Nice work' : 'Ready when you are',

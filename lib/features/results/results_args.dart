@@ -8,6 +8,8 @@ class ResultsArgs {
     this.replayDaily = false,
     this.replayLevelId,
     this.nextLevelId,
+    this.currentStreak,
+    this.longestStreak,
   });
 
   final String title;
@@ -18,4 +20,6 @@ class ResultsArgs {
   final bool replayDaily;
   final String? replayLevelId;
   final String? nextLevelId;
+  final int? currentStreak;
+  final int? longestStreak;
 }

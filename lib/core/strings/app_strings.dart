@@ -7,9 +7,21 @@ abstract final class AppStrings {
   static const today = 'TODAY';
   static const wordMatch = 'Word Match';
   static const categoryRace = 'Category Race';
+  static const streakProtectedLabel = 'Streak protected';
+  static const cleared = 'Cleared';
+
+  // Results
+  static const newPersonalBest = 'New personal best';
 
   // Zip game branding (feature, not app title)
   static const zipBrand = 'ZIP';
 
-  // Add more as screens migrate
+  static String streakLabel(int days) {
+    if (days == 1) return '1-day streak';
+    return '$days-day streak';
+  }
+
+  static String longestStreakLabel(int days) {
+    return 'Best: $days';
+  }
 }

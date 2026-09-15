@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HomeState {
 
- ZipLevel get dailyLevel; String get dateId; int get bestPoints; int? get bestTimeSeconds;
+ ZipLevel get dailyLevel; String get dateId; int get bestPoints; int? get bestTimeSeconds; int get currentStreak; int get longestStreak; bool get isOnFreeze; bool get freezeAvailable;
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $HomeStateCopyWith<HomeState> get copyWith => _$HomeStateCopyWithImpl<HomeState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeState&&(identical(other.dailyLevel, dailyLevel) || other.dailyLevel == dailyLevel)&&(identical(other.dateId, dateId) || other.dateId == dateId)&&(identical(other.bestPoints, bestPoints) || other.bestPoints == bestPoints)&&(identical(other.bestTimeSeconds, bestTimeSeconds) || other.bestTimeSeconds == bestTimeSeconds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HomeState&&(identical(other.dailyLevel, dailyLevel) || other.dailyLevel == dailyLevel)&&(identical(other.dateId, dateId) || other.dateId == dateId)&&(identical(other.bestPoints, bestPoints) || other.bestPoints == bestPoints)&&(identical(other.bestTimeSeconds, bestTimeSeconds) || other.bestTimeSeconds == bestTimeSeconds)&&(identical(other.currentStreak, currentStreak) || other.currentStreak == currentStreak)&&(identical(other.longestStreak, longestStreak) || other.longestStreak == longestStreak)&&(identical(other.isOnFreeze, isOnFreeze) || other.isOnFreeze == isOnFreeze)&&(identical(other.freezeAvailable, freezeAvailable) || other.freezeAvailable == freezeAvailable));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,dailyLevel,dateId,bestPoints,bestTimeSeconds);
+int get hashCode => Object.hash(runtimeType,dailyLevel,dateId,bestPoints,bestTimeSeconds,currentStreak,longestStreak,isOnFreeze,freezeAvailable);
 
 @override
 String toString() {
-  return 'HomeState(dailyLevel: $dailyLevel, dateId: $dateId, bestPoints: $bestPoints, bestTimeSeconds: $bestTimeSeconds)';
+  return 'HomeState(dailyLevel: $dailyLevel, dateId: $dateId, bestPoints: $bestPoints, bestTimeSeconds: $bestTimeSeconds, currentStreak: $currentStreak, longestStreak: $longestStreak, isOnFreeze: $isOnFreeze, freezeAvailable: $freezeAvailable)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $HomeStateCopyWith<$Res>  {
   factory $HomeStateCopyWith(HomeState value, $Res Function(HomeState) _then) = _$HomeStateCopyWithImpl;
 @useResult
 $Res call({
- ZipLevel dailyLevel, String dateId, int bestPoints, int? bestTimeSeconds
+ ZipLevel dailyLevel, String dateId, int bestPoints, int? bestTimeSeconds, int currentStreak, int longestStreak, bool isOnFreeze, bool freezeAvailable
 });
 
 
@@ -62,13 +62,17 @@ class _$HomeStateCopyWithImpl<$Res>
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? dailyLevel = null,Object? dateId = null,Object? bestPoints = null,Object? bestTimeSeconds = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? dailyLevel = null,Object? dateId = null,Object? bestPoints = null,Object? bestTimeSeconds = freezed,Object? currentStreak = null,Object? longestStreak = null,Object? isOnFreeze = null,Object? freezeAvailable = null,}) {
   return _then(_self.copyWith(
 dailyLevel: null == dailyLevel ? _self.dailyLevel : dailyLevel // ignore: cast_nullable_to_non_nullable
 as ZipLevel,dateId: null == dateId ? _self.dateId : dateId // ignore: cast_nullable_to_non_nullable
 as String,bestPoints: null == bestPoints ? _self.bestPoints : bestPoints // ignore: cast_nullable_to_non_nullable
 as int,bestTimeSeconds: freezed == bestTimeSeconds ? _self.bestTimeSeconds : bestTimeSeconds // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,currentStreak: null == currentStreak ? _self.currentStreak : currentStreak // ignore: cast_nullable_to_non_nullable
+as int,longestStreak: null == longestStreak ? _self.longestStreak : longestStreak // ignore: cast_nullable_to_non_nullable
+as int,isOnFreeze: null == isOnFreeze ? _self.isOnFreeze : isOnFreeze // ignore: cast_nullable_to_non_nullable
+as bool,freezeAvailable: null == freezeAvailable ? _self.freezeAvailable : freezeAvailable // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -150,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ZipLevel dailyLevel,  String dateId,  int bestPoints,  int? bestTimeSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ZipLevel dailyLevel,  String dateId,  int bestPoints,  int? bestTimeSeconds,  int currentStreak,  int longestStreak,  bool isOnFreeze,  bool freezeAvailable)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HomeState() when $default != null:
-return $default(_that.dailyLevel,_that.dateId,_that.bestPoints,_that.bestTimeSeconds);case _:
+return $default(_that.dailyLevel,_that.dateId,_that.bestPoints,_that.bestTimeSeconds,_that.currentStreak,_that.longestStreak,_that.isOnFreeze,_that.freezeAvailable);case _:
   return orElse();
 
 }
@@ -171,10 +175,10 @@ return $default(_that.dailyLevel,_that.dateId,_that.bestPoints,_that.bestTimeSec
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ZipLevel dailyLevel,  String dateId,  int bestPoints,  int? bestTimeSeconds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ZipLevel dailyLevel,  String dateId,  int bestPoints,  int? bestTimeSeconds,  int currentStreak,  int longestStreak,  bool isOnFreeze,  bool freezeAvailable)  $default,) {final _that = this;
 switch (_that) {
 case _HomeState():
-return $default(_that.dailyLevel,_that.dateId,_that.bestPoints,_that.bestTimeSeconds);}
+return $default(_that.dailyLevel,_that.dateId,_that.bestPoints,_that.bestTimeSeconds,_that.currentStreak,_that.longestStreak,_that.isOnFreeze,_that.freezeAvailable);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -188,10 +192,10 @@ return $default(_that.dailyLevel,_that.dateId,_that.bestPoints,_that.bestTimeSec
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ZipLevel dailyLevel,  String dateId,  int bestPoints,  int? bestTimeSeconds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ZipLevel dailyLevel,  String dateId,  int bestPoints,  int? bestTimeSeconds,  int currentStreak,  int longestStreak,  bool isOnFreeze,  bool freezeAvailable)?  $default,) {final _that = this;
 switch (_that) {
 case _HomeState() when $default != null:
-return $default(_that.dailyLevel,_that.dateId,_that.bestPoints,_that.bestTimeSeconds);case _:
+return $default(_that.dailyLevel,_that.dateId,_that.bestPoints,_that.bestTimeSeconds,_that.currentStreak,_that.longestStreak,_that.isOnFreeze,_that.freezeAvailable);case _:
   return null;
 
 }
@@ -203,13 +207,17 @@ return $default(_that.dailyLevel,_that.dateId,_that.bestPoints,_that.bestTimeSec
 
 
 class _HomeState implements HomeState {
-  const _HomeState({required this.dailyLevel, required this.dateId, this.bestPoints = 0, this.bestTimeSeconds});
+  const _HomeState({required this.dailyLevel, required this.dateId, this.bestPoints = 0, this.bestTimeSeconds, this.currentStreak = 0, this.longestStreak = 0, this.isOnFreeze = false, this.freezeAvailable = true});
   
 
 @override final  ZipLevel dailyLevel;
 @override final  String dateId;
 @override@JsonKey() final  int bestPoints;
 @override final  int? bestTimeSeconds;
+@override@JsonKey() final  int currentStreak;
+@override@JsonKey() final  int longestStreak;
+@override@JsonKey() final  bool isOnFreeze;
+@override@JsonKey() final  bool freezeAvailable;
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
@@ -221,16 +229,16 @@ _$HomeStateCopyWith<_HomeState> get copyWith => __$HomeStateCopyWithImpl<_HomeSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeState&&(identical(other.dailyLevel, dailyLevel) || other.dailyLevel == dailyLevel)&&(identical(other.dateId, dateId) || other.dateId == dateId)&&(identical(other.bestPoints, bestPoints) || other.bestPoints == bestPoints)&&(identical(other.bestTimeSeconds, bestTimeSeconds) || other.bestTimeSeconds == bestTimeSeconds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HomeState&&(identical(other.dailyLevel, dailyLevel) || other.dailyLevel == dailyLevel)&&(identical(other.dateId, dateId) || other.dateId == dateId)&&(identical(other.bestPoints, bestPoints) || other.bestPoints == bestPoints)&&(identical(other.bestTimeSeconds, bestTimeSeconds) || other.bestTimeSeconds == bestTimeSeconds)&&(identical(other.currentStreak, currentStreak) || other.currentStreak == currentStreak)&&(identical(other.longestStreak, longestStreak) || other.longestStreak == longestStreak)&&(identical(other.isOnFreeze, isOnFreeze) || other.isOnFreeze == isOnFreeze)&&(identical(other.freezeAvailable, freezeAvailable) || other.freezeAvailable == freezeAvailable));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,dailyLevel,dateId,bestPoints,bestTimeSeconds);
+int get hashCode => Object.hash(runtimeType,dailyLevel,dateId,bestPoints,bestTimeSeconds,currentStreak,longestStreak,isOnFreeze,freezeAvailable);
 
 @override
 String toString() {
-  return 'HomeState(dailyLevel: $dailyLevel, dateId: $dateId, bestPoints: $bestPoints, bestTimeSeconds: $bestTimeSeconds)';
+  return 'HomeState(dailyLevel: $dailyLevel, dateId: $dateId, bestPoints: $bestPoints, bestTimeSeconds: $bestTimeSeconds, currentStreak: $currentStreak, longestStreak: $longestStreak, isOnFreeze: $isOnFreeze, freezeAvailable: $freezeAvailable)';
 }
 
 
@@ -241,7 +249,7 @@ abstract mixin class _$HomeStateCopyWith<$Res> implements $HomeStateCopyWith<$Re
   factory _$HomeStateCopyWith(_HomeState value, $Res Function(_HomeState) _then) = __$HomeStateCopyWithImpl;
 @override @useResult
 $Res call({
- ZipLevel dailyLevel, String dateId, int bestPoints, int? bestTimeSeconds
+ ZipLevel dailyLevel, String dateId, int bestPoints, int? bestTimeSeconds, int currentStreak, int longestStreak, bool isOnFreeze, bool freezeAvailable
 });
 
 
@@ -258,13 +266,17 @@ class __$HomeStateCopyWithImpl<$Res>
 
 /// Create a copy of HomeState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? dailyLevel = null,Object? dateId = null,Object? bestPoints = null,Object? bestTimeSeconds = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? dailyLevel = null,Object? dateId = null,Object? bestPoints = null,Object? bestTimeSeconds = freezed,Object? currentStreak = null,Object? longestStreak = null,Object? isOnFreeze = null,Object? freezeAvailable = null,}) {
   return _then(_HomeState(
 dailyLevel: null == dailyLevel ? _self.dailyLevel : dailyLevel // ignore: cast_nullable_to_non_nullable
 as ZipLevel,dateId: null == dateId ? _self.dateId : dateId // ignore: cast_nullable_to_non_nullable
 as String,bestPoints: null == bestPoints ? _self.bestPoints : bestPoints // ignore: cast_nullable_to_non_nullable
 as int,bestTimeSeconds: freezed == bestTimeSeconds ? _self.bestTimeSeconds : bestTimeSeconds // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,currentStreak: null == currentStreak ? _self.currentStreak : currentStreak // ignore: cast_nullable_to_non_nullable
+as int,longestStreak: null == longestStreak ? _self.longestStreak : longestStreak // ignore: cast_nullable_to_non_nullable
+as int,isOnFreeze: null == isOnFreeze ? _self.isOnFreeze : isOnFreeze // ignore: cast_nullable_to_non_nullable
+as bool,freezeAvailable: null == freezeAvailable ? _self.freezeAvailable : freezeAvailable // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
