@@ -23,6 +23,7 @@ abstract final class AppStrings {
   static const pathWordsClearedTitle = 'Puzzle cleared!';
   static const pathWordsLoading = 'Building today’s puzzle…';
   static const pathWordsFailed = 'Could not load today’s puzzle.';
+  static const retry = 'Retry';
 
   // Results
   static const newPersonalBest = 'New personal best';
