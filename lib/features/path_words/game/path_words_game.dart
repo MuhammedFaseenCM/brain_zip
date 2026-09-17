@@ -9,7 +9,7 @@ import '../../../domain/entities/cell.dart';
 import '../../../domain/entities/path_words_puzzle.dart';
 import 'path_words_board_view.dart';
 
-class PathWordsGame extends FlameGame with DragCallbacks {
+class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
   PathWordsGame({
     required this.view,
     required this.onPointerDown,
@@ -29,6 +29,7 @@ class PathWordsGame extends FlameGame with DragCallbacks {
   Vector2? _lastPointer;
   Cell? _lastEnteredCell;
   bool _drawing = false;
+  bool _tapGesture = false;
 
   DateTime? _hintFlashStartedAt;
 
@@ -129,7 +130,9 @@ class PathWordsGame extends FlameGame with DragCallbacks {
     super.onDragStart(event);
     final pos = event.localPosition;
     _lastPointer = pos.clone();
-    _lastEnteredCell = null;
+    if (!_tapGesture) {
+      _lastEnteredCell = null;
+    }
 
     final cell = _cellAt(pos);
     if (cell == null || !view.inputEnabled) {
@@ -138,8 +141,40 @@ class PathWordsGame extends FlameGame with DragCallbacks {
     }
 
     _drawing = true;
+    if (_tapGesture) {
+      return;
+    }
     _lastEnteredCell = cell;
     onPointerDown(cell);
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    final pos = event.localPosition;
+    final cell = _cellAt(pos);
+    if (cell == null || !view.inputEnabled) return;
+
+    _tapGesture = true;
+    _lastEnteredCell = cell;
+    onPointerDown(cell);
+  }
+
+  @override
+  void onTapUp(TapUpEvent event) {
+    if (!_tapGesture) return;
+    _tapGesture = false;
+    if (!_drawing && view.inputEnabled) {
+      onPointerUp();
+    }
+  }
+
+  @override
+  void onTapCancel(TapCancelEvent event) {
+    if (!_tapGesture) return;
+    _tapGesture = false;
+    if (!_drawing && view.inputEnabled) {
+      onPointerUp();
+    }
   }
 
   @override
@@ -159,6 +194,7 @@ class PathWordsGame extends FlameGame with DragCallbacks {
       onPointerUp();
     }
     _drawing = false;
+    _tapGesture = false;
     _lastPointer = null;
     _lastEnteredCell = null;
   }
@@ -170,6 +206,7 @@ class PathWordsGame extends FlameGame with DragCallbacks {
       onPointerUp();
     }
     _drawing = false;
+    _tapGesture = false;
     _lastPointer = null;
     _lastEnteredCell = null;
   }
@@ -181,9 +218,9 @@ class PathWordsGame extends FlameGame with DragCallbacks {
     _drawBoard(canvas);
     _drawCompletedPaths(canvas);
     _drawActivePath(canvas);
-    _drawStartChecks(canvas);
     _drawHintFlash(canvas);
     _drawLetters(canvas);
+    _drawStartChecks(canvas);
   }
 
   void _drawBoardShadow(Canvas canvas) {
@@ -389,12 +426,16 @@ class PathWordsGame extends FlameGame with DragCallbacks {
 
     for (final target in view.puzzle.targets) {
       if (completed.contains(target.id)) continue;
-      final center = _centerOf(target.start);
-      final s = _cellSize * 0.18;
+      final rect = _cellRect(target.start, inset: _cellSize * 0.1);
+      final anchor = Offset(
+        rect.right - _cellSize * 0.06,
+        rect.top + _cellSize * 0.14,
+      );
+      final s = _cellSize * 0.11;
       final p = Path()
-        ..moveTo(center.dx - s * 0.9, center.dy + s * 0.05)
-        ..lineTo(center.dx - s * 0.25, center.dy + s * 0.7)
-        ..lineTo(center.dx + s * 0.95, center.dy - s * 0.8);
+        ..moveTo(anchor.dx - s * 0.95, anchor.dy + s * 0.05)
+        ..lineTo(anchor.dx - s * 0.3, anchor.dy + s * 0.75)
+        ..lineTo(anchor.dx + s, anchor.dy - s * 0.85);
       canvas.drawPath(p, paint);
     }
   }
