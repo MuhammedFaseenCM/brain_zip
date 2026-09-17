@@ -19,9 +19,16 @@ import 'widgets/path_words_how_to_play.dart';
 import 'widgets/path_words_word_list.dart';
 
 class PathWordsScreen extends StatefulWidget {
-  const PathWordsScreen({super.key, this.date});
+  const PathWordsScreen({
+    super.key,
+    this.date,
+    this.bloc,
+    this.autoStart = true,
+  });
 
   final DateTime? date;
+  final PathWordsBloc? bloc;
+  final bool autoStart;
 
   @override
   State<PathWordsScreen> createState() => _PathWordsScreenState();
@@ -29,7 +36,21 @@ class PathWordsScreen extends StatefulWidget {
 
 class _PathWordsScreenState extends State<PathWordsScreen> {
   late final PathWordsBloc _bloc;
+  late final bool _ownsBloc;
   PathWordsGame? _game;
+
+  void _applyViewToGame(PathWordsBoardView view) {
+    final game = _game;
+    if (game == null) return;
+
+    if (game.hasLayout) {
+      game.applyView(view);
+      return;
+    }
+
+    // Game isn't attached to a GameWidget yet; avoid touching layout.
+    game.view = view;
+  }
 
   PathWordsBoardView? _viewFor(PathWordsState state) {
     final puzzle = state.puzzle;
@@ -60,7 +81,7 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
 
     final current = _game;
     if (current != null && current.view.puzzle.id == view.puzzle.id) {
-      current.applyView(view);
+      _applyViewToGame(view);
       return false;
     }
 
@@ -73,14 +94,40 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
     return true;
   }
 
+  void _selfHealGame(PathWordsState state) {
+    final puzzle = state.puzzle;
+    if (puzzle == null) return;
+
+    final current = _game;
+    final isSamePuzzle = current != null && current.view.puzzle.id == puzzle.id;
+
+    if (isSamePuzzle) {
+      _ensureGame(state); // applyView even if listener missed
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_ensureGame(state)) setState(() {});
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    _bloc = PathWordsBloc(
-      generateDailyPathWords: context.read<GenerateDailyPathWords>(),
-      submitScore: context.read<SubmitScore>(),
-      recordDailyClear: context.read<RecordDailyClear>(),
-    )..add(PathWordsEvent.started(date: widget.date));
+    final injected = widget.bloc;
+    _ownsBloc = injected == null;
+    _bloc =
+        injected ??
+        PathWordsBloc(
+          generateDailyPathWords: context.read<GenerateDailyPathWords>(),
+          submitScore: context.read<SubmitScore>(),
+          recordDailyClear: context.read<RecordDailyClear>(),
+        );
+
+    if (widget.autoStart) {
+      _bloc.add(PathWordsEvent.started(date: widget.date));
+    }
   }
 
   @override
@@ -88,7 +135,9 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
     final game = _game;
     _game = null;
     game?.pauseEngine();
-    _bloc.close();
+    if (_ownsBloc) {
+      _bloc.close();
+    }
     super.dispose();
   }
 
@@ -119,12 +168,13 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
             listener: (context, state) {
               final view = _viewFor(state);
               if (view == null) return;
-              _game?.applyView(view);
+              _applyViewToGame(view);
             },
           ),
         ],
         child: BlocBuilder<PathWordsBloc, PathWordsState>(
           builder: (context, state) {
+            _selfHealGame(state);
             final puzzle = state.puzzle;
             final finished = state.finished;
             final game = _game;
