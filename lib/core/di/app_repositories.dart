@@ -5,11 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brain_zip/data/repositories/category_repository_impl.dart';
 import 'package:brain_zip/data/repositories/score_repository_impl.dart';
 import 'package:brain_zip/data/repositories/streak_repository_impl.dart';
+import 'package:brain_zip/data/repositories/word_list_repository_impl.dart';
 import 'package:brain_zip/data/repositories/word_match_repository_impl.dart';
 import 'package:brain_zip/data/repositories/zip_level_repository_impl.dart';
 import 'package:brain_zip/domain/repositories/category_repository.dart';
 import 'package:brain_zip/domain/repositories/score_repository.dart';
 import 'package:brain_zip/domain/repositories/streak_repository.dart';
+import 'package:brain_zip/domain/repositories/word_list_repository.dart';
 import 'package:brain_zip/domain/repositories/word_match_repository.dart';
 import 'package:brain_zip/domain/repositories/zip_level_repository.dart';
 import 'package:brain_zip/domain/usecases/fetch_categories.dart';
@@ -43,6 +45,9 @@ List<SingleChildWidget> buildRepositoryProviders({
     ),
     RepositoryProvider<CategoryRepository>(
       create: (_) => CategoryRepositoryImpl(),
+    ),
+    RepositoryProvider<WordListRepository>(
+      create: (_) => WordListRepositoryImpl(),
     ),
     RepositoryProvider<SubmitScore>(
       create: (context) => SubmitScore(context.read<ScoreRepository>()),

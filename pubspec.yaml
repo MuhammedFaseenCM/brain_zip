@@ -96,6 +96,7 @@ flutter:
     - assets/zip/levels/
     - assets/word_match/decks/
     - assets/words/categories/
+    - assets/words/en_words.txt
     - assets/branding/
 
   # An image asset can refer to one or more resolution-specific "variants", see
