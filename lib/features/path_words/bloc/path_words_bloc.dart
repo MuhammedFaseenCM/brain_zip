@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 
-import '../../../domain/entities/cell.dart';
+import '../../../core/strings/app_strings.dart';
 import '../../../domain/game_ids.dart';
 import '../../../domain/path_words/path_words_rules.dart';
 import '../../../domain/path_words/path_words_scoring.dart';
@@ -93,8 +93,9 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
   ) {
     if (state.finished) return;
     if (state.status != PathWordsStatus.ready &&
-        state.status != PathWordsStatus.playing)
+        state.status != PathWordsStatus.playing) {
       return;
+    }
     final puzzle = state.puzzle;
     if (puzzle == null) return;
 
@@ -127,8 +128,9 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
   ) async {
     if (state.finished) return;
     if (state.status != PathWordsStatus.ready &&
-        state.status != PathWordsStatus.playing)
+        state.status != PathWordsStatus.playing) {
       return;
+    }
     final puzzle = state.puzzle;
     if (puzzle == null) return;
     if (state.activePath.isEmpty) return;
@@ -180,8 +182,9 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
   ) async {
     if (state.finished) return;
     if (state.status != PathWordsStatus.ready &&
-        state.status != PathWordsStatus.playing)
+        state.status != PathWordsStatus.playing) {
       return;
+    }
     final puzzle = state.puzzle;
     if (puzzle == null) return;
     if (state.activePath.isEmpty) return;
@@ -215,8 +218,9 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
   void _onUndo(PathWordsUndo event, Emitter<PathWordsState> emit) {
     if (state.finished) return;
     if (state.status != PathWordsStatus.ready &&
-        state.status != PathWordsStatus.playing)
+        state.status != PathWordsStatus.playing) {
       return;
+    }
     if (state.activePath.isEmpty) return;
 
     final undone = PathWordsRules.undoActive(state.activePath);
@@ -311,7 +315,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         improved: improved,
         status: PathWordsStatus.navigating,
         resultsExtra: ResultsArgs(
-          title: 'Puzzle cleared!',
+          title: AppStrings.pathWordsClearedTitle,
           subtitle: '',
           timeSeconds: elapsed,
           improved: improved,
