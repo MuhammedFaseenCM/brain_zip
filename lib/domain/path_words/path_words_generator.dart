@@ -13,7 +13,8 @@ abstract final class PathWordsGenerator {
     required DateTime day,
     required List<String> words,
   }) {
-    final localDay = DateTime(day.year, day.month, day.day);
+    final local = day.toLocal();
+    final localDay = DateTime(local.year, local.month, local.day);
     final dateId = StreakCalculator.dateId(localDay);
     final seed = Object.hash(dateId, generatorVersion);
     final rng = Random(seed);

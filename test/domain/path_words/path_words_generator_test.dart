@@ -12,6 +12,19 @@ void main() {
     expect(words.length, greaterThan(200));
   });
 
+  test('UTC instant uses local calendar date for seed', () {
+    final utcLate = DateTime.utc(2026, 9, 17, 23, 0);
+    final local = utcLate.toLocal();
+    final localCalendarDay = DateTime(local.year, local.month, local.day);
+    final fromUtc = PathWordsGenerator.generate(day: utcLate, words: words);
+    final fromLocal = PathWordsGenerator.generate(
+      day: localCalendarDay,
+      words: words,
+    );
+    expect(fromUtc.id, fromLocal.id);
+    expect(fromUtc.letters, fromLocal.letters);
+  });
+
   test('same day is deterministic', () {
     final a = PathWordsGenerator.generate(
       day: DateTime(2026, 9, 17),
