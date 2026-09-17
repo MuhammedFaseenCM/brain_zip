@@ -142,8 +142,9 @@ void main() {
       );
 
       final clock = _FakeClock([
-        DateTime(2026, 9, 17, 0, 0, 0),
-        DateTime(2026, 9, 17, 0, 0, 12),
+        DateTime(2026, 9, 17, 0, 0, 0), // bloc initial day
+        DateTime(2026, 9, 17, 0, 0, 0), // startedAt
+        DateTime(2026, 9, 17, 0, 0, 12), // finish elapsed
       ]);
 
       return PathWordsBloc(
@@ -364,5 +365,105 @@ void main() {
             DateTime(2026, 9, 17, 0, 0, 0),
           ),
     ],
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
+    'reset after win is a no-op',
+    build: () {
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _tinyPuzzle(day: inv.namedArguments[#day] as DateTime),
+      );
+      when(
+        () => submitScore(
+          modeKey: 'path_words_20260917',
+          points: 940,
+          timeSeconds: 12,
+        ),
+      ).thenAnswer((_) async => true);
+      when(
+        () => recordDailyClear(gameId: GameIds.pathWords, dateId: '20260917'),
+      ).thenAnswer(
+        (_) async => const GameStreak(
+          gameId: GameIds.pathWords,
+          current: 3,
+          longest: 5,
+          lastClearedDateId: '20260917',
+        ),
+      );
+
+      final clock = _FakeClock([
+        DateTime(2026, 9, 17, 0, 0, 0), // bloc initial day
+        DateTime(2026, 9, 17, 0, 0, 0), // startedAt
+        DateTime(2026, 9, 17, 0, 0, 12), // finish elapsed
+      ]);
+
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        now: clock.call,
+      );
+    },
+    act: (b) async {
+      b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17)));
+      await pumpEventQueue();
+
+      b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
+      b.add(const PathWordsEvent.pointerEnter(Cell(0, 1)));
+      await pumpEventQueue();
+
+      b.add(const PathWordsEvent.pointerDown(Cell(1, 0)));
+      b.add(const PathWordsEvent.pointerEnter(Cell(1, 1)));
+      await pumpEventQueue();
+
+      b.add(const PathWordsEvent.reset());
+    },
+    expect: () => [
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.loading,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.ready,
+      ),
+      isA<PathWordsState>()
+          .having((s) => s.status, 'status', PathWordsStatus.playing)
+          .having((s) => s.activePath, 'activePath', [const Cell(0, 0)]),
+      isA<PathWordsState>()
+          .having(
+            (s) => s.completedTargetIds,
+            'completedTargetIds',
+            contains('t0'),
+          )
+          .having((s) => s.activePath, 'activePath', isEmpty),
+      isA<PathWordsState>()
+          .having((s) => s.status, 'status', PathWordsStatus.playing)
+          .having((s) => s.activePath, 'activePath', [const Cell(1, 0)]),
+      isA<PathWordsState>()
+          .having(
+            (s) => s.completedTargetIds,
+            'completedTargetIds',
+            containsAll(['t0', 't1']),
+          )
+          .having((s) => s.activePath, 'activePath', isEmpty),
+      isA<PathWordsState>()
+          .having((s) => s.status, 'status', PathWordsStatus.submitting)
+          .having((s) => s.finished, 'finished', isTrue),
+      isA<PathWordsState>()
+          .having((s) => s.status, 'status', PathWordsStatus.navigating)
+          .having((s) => s.finished, 'finished', isTrue)
+          .having(
+            (s) => s.completedTargetIds,
+            'completedTargetIds',
+            containsAll(['t0', 't1']),
+          ),
+    ],
+    verify: (bloc) {
+      expect(bloc.state.status, PathWordsStatus.navigating);
+      expect(bloc.state.finished, isTrue);
+    },
   );
 }

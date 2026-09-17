@@ -19,7 +19,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     required this.recordDailyClear,
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now,
-       super(PathWordsState.initial(DateTime.now())) {
+       super(PathWordsState.initial((now ?? DateTime.now)())) {
     on<PathWordsStarted>(_onStarted);
     on<PathWordsPointerDown>(_onPointerDown);
     on<PathWordsPointerEnter>(_onPointerEnter);
@@ -251,7 +251,11 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
   }
 
   void _onReset(PathWordsReset event, Emitter<PathWordsState> emit) {
-    if (state.status == PathWordsStatus.loading) return;
+    if (state.finished) return;
+    if (state.status != PathWordsStatus.ready &&
+        state.status != PathWordsStatus.playing) {
+      return;
+    }
     if (state.puzzle == null) return;
 
     emit(
