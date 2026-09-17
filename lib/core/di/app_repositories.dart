@@ -15,6 +15,7 @@ import 'package:brain_zip/domain/repositories/word_list_repository.dart';
 import 'package:brain_zip/domain/repositories/word_match_repository.dart';
 import 'package:brain_zip/domain/repositories/zip_level_repository.dart';
 import 'package:brain_zip/domain/usecases/fetch_categories.dart';
+import 'package:brain_zip/domain/usecases/generate_daily_path_words.dart';
 import 'package:brain_zip/domain/usecases/fetch_word_match_deck_by_id.dart';
 import 'package:brain_zip/domain/usecases/fetch_word_match_decks.dart';
 import 'package:brain_zip/domain/usecases/fetch_zip_levels.dart';
@@ -77,6 +78,10 @@ List<SingleChildWidget> buildRepositoryProviders({
     ),
     RepositoryProvider<FetchCategories>(
       create: (context) => FetchCategories(context.read<CategoryRepository>()),
+    ),
+    RepositoryProvider<GenerateDailyPathWords>(
+      create: (context) =>
+          GenerateDailyPathWords(context.read<WordListRepository>()),
     ),
   ];
 }
