@@ -194,6 +194,12 @@ class HomeScreen extends StatelessWidget {
                                 onPressed: () => context.push('/zip'),
                               ),
                               const SizedBox(height: 12),
+                              ZipPrimaryButton(
+                                label: AppStrings.playTodaysPathWords,
+                                icon: Icons.grid_on_rounded,
+                                onPressed: () => context.push('/path-words'),
+                              ),
+                              const SizedBox(height: 12),
                               Text(
                                 'Start at 1 · fill every cell · finish on the last number.',
                                 style: Theme.of(context).textTheme.bodySmall
