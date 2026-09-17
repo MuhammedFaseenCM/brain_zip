@@ -129,8 +129,13 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
             final finished = state.finished;
             final game = _game;
 
-            final canUndo = state.activePath.isNotEmpty && !finished;
-            final canHint = state.hintsRemaining > 0 && !finished;
+            final isReadyToPlay =
+                !finished &&
+                (state.status == PathWordsStatus.ready ||
+                    state.status == PathWordsStatus.playing) &&
+                puzzle != null;
+            final canUndo = isReadyToPlay && state.activePath.isNotEmpty;
+            final canHint = isReadyToPlay && state.hintsRemaining > 0;
 
             return Scaffold(
               body: ZipAtmosphere(
@@ -152,7 +157,7 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                               ),
                             ),
                             IconButton(
-                              onPressed: finished
+                              onPressed: !isReadyToPlay
                                   ? null
                                   : () =>
                                         _bloc.add(const PathWordsEvent.reset()),

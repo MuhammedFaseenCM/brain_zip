@@ -108,7 +108,11 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     );
 
     if (begun == null) {
-      if (state.activePath.isEmpty) return;
+      if (state.activePath.isEmpty) {
+        if (state.hintFlashCell == null) return;
+        emit(state.copyWith(hintFlashCell: null));
+        return;
+      }
       emit(state.copyWith(activePath: const [], hintFlashCell: null));
       return;
     }

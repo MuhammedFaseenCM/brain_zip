@@ -11,7 +11,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
 
-  testWidgets('Home shows Winklo brand and daily Zip CTA', (tester) async {
+  testWidgets('Home shows Winklo brand and daily CTAs', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
 
@@ -27,6 +27,7 @@ void main() {
     expect(find.text(AppStrings.appTitle), findsOneWidget);
     expect(find.text(AppStrings.homeTagline), findsOneWidget);
     expect(find.text(AppStrings.playTodaysZip), findsOneWidget);
+    expect(find.text(AppStrings.playTodaysPathWords), findsOneWidget);
     expect(find.text(AppStrings.today), findsOneWidget);
     expect(find.text('Choose a puzzle'), findsNothing);
     expect(find.text(AppStrings.wordMatch), findsOneWidget);
