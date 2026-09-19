@@ -26,15 +26,10 @@ class PathWordsRules {
     if (locked.contains(cell)) {
       return null;
     }
-    for (final target in puzzle.targets) {
-      if (completedTargetIds.contains(target.id)) {
-        continue;
-      }
-      if (target.start == cell) {
-        return [cell];
-      }
+    if (!puzzle.hasLetter(cell)) {
+      return null;
     }
-    return null;
+    return [cell];
   }
 
   static List<Cell>? tryExtend({
@@ -56,10 +51,39 @@ class PathWordsRules {
     if (locked.contains(candidate)) {
       return null;
     }
+    if (!puzzle.hasLetter(candidate)) {
+      return null;
+    }
     if (path.contains(candidate)) {
       return null;
     }
     return [...path, candidate];
+  }
+
+  static PathWordsTarget? activeTarget({
+    required PathWordsPuzzle puzzle,
+    required List<Cell> activePath,
+    required Set<String> completedTargetIds,
+  }) {
+    if (activePath.isEmpty) {
+      return null;
+    }
+    final start = activePath.first;
+    PathWordsTarget? fallback;
+    for (final target in puzzle.targets) {
+      if (completedTargetIds.contains(target.id)) {
+        continue;
+      }
+      fallback ??= target;
+      final reversed = target.path.reversed.toList();
+      if (start == target.start ||
+          start == reversed.first ||
+          _isPrefix(activePath, target.path) ||
+          _isPrefix(activePath, reversed)) {
+        return target;
+      }
+    }
+    return fallback;
   }
 
   static PathWordsTarget? completedTarget({
@@ -78,28 +102,24 @@ class PathWordsRules {
     return null;
   }
 
-  static Cell? nextHintCell({
+  static List<Cell> hintedPath({
     required PathWordsPuzzle puzzle,
-    required List<Cell> activePath,
     required Set<String> completedTargetIds,
+    required int revealedLength,
   }) {
-    PathWordsTarget? firstUnfinished;
+    if (revealedLength <= 0) {
+      return const [];
+    }
     for (final target in puzzle.targets) {
-      if (!completedTargetIds.contains(target.id)) {
-        firstUnfinished = target;
-        break;
+      if (completedTargetIds.contains(target.id)) {
+        continue;
       }
+      final end = revealedLength < target.path.length
+          ? revealedLength
+          : target.path.length;
+      return target.path.sublist(0, end);
     }
-    if (firstUnfinished == null) {
-      return null;
-    }
-    if (_isPrefix(activePath, firstUnfinished.path)) {
-      if (activePath.length >= firstUnfinished.path.length) {
-        return null;
-      }
-      return firstUnfinished.path[activePath.length];
-    }
-    return firstUnfinished.start;
+    return const [];
   }
 
   static List<Cell> undoActive(List<Cell> path) {

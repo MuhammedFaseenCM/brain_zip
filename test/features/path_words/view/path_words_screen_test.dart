@@ -1,4 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:brain_zip/core/strings/app_strings.dart';
 import 'package:brain_zip/domain/entities/cell.dart';
 import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
 import 'package:brain_zip/features/path_words/bloc/path_words_bloc.dart';
@@ -66,5 +67,15 @@ void main() {
     await tester.pump();
 
     expect(find.byWidgetPredicate((w) => w is GameWidget), findsOneWidget);
+    expect(find.byType(ListView), findsNothing);
+    expect(find.byType(ExpansionTile), findsNothing);
+
+    await tester.tap(find.byTooltip(AppStrings.pathWordsHowToPlayTitle));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.text(AppStrings.pathWordsHowToPlayBody), findsOneWidget);
+    expect(find.byType(ListView), findsNothing);
   });
 }

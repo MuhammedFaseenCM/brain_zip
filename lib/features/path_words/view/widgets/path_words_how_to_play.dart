@@ -3,40 +3,46 @@ import 'package:flutter/material.dart';
 import '../../../../core/strings/app_strings.dart';
 import '../../../../core/theme/app_theme.dart';
 
-class PathWordsHowToPlay extends StatelessWidget {
-  const PathWordsHowToPlay({super.key});
+class PathWordsHowToPlayButton extends StatelessWidget {
+  const PathWordsHowToPlayButton({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ZipColors.wall,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: ZipColors.outlineQuiet),
-      ),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          collapsedIconColor: ZipColors.inkSoft,
-          iconColor: ZipColors.inkSoft,
+  static Future<void> show(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: ZipColors.wall,
+          surfaceTintColor: Colors.transparent,
           title: Text(
             AppStrings.pathWordsHowToPlayTitle,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
               color: ZipColors.onInk,
               fontWeight: FontWeight.w800,
             ),
           ),
-          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          children: [
-            Text(
-              AppStrings.pathWordsHowToPlayBody,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: ZipColors.inkSoft),
+          content: Text(
+            AppStrings.pathWordsHowToPlayBody,
+            style: Theme.of(
+              dialogContext,
+            ).textTheme.bodyMedium?.copyWith(color: ZipColors.inkSoft),
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text(AppStrings.pathWordsHowToPlayGotIt),
             ),
           ],
-        ),
-      ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: AppStrings.pathWordsHowToPlayTitle,
+      onPressed: () => show(context),
+      icon: const Icon(Icons.help_outline_rounded),
     );
   }
 }

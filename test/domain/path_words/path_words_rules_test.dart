@@ -32,7 +32,7 @@ PathWordsPuzzle tinyPuzzle() {
 void main() {
   final puzzle = tinyPuzzle();
 
-  test('tryBegin only on unfinished starts', () {
+  test('tryBegin allows any letter cell that is not locked', () {
     expect(
       PathWordsRules.tryBegin(
         puzzle: puzzle,
@@ -48,6 +48,51 @@ void main() {
         cell: const Cell(0, 1),
         locked: {},
         completedTargetIds: {},
+      ),
+      [const Cell(0, 1)],
+    );
+    expect(
+      PathWordsRules.tryBegin(
+        puzzle: puzzle,
+        cell: const Cell(0, 1),
+        locked: {const Cell(0, 1)},
+        completedTargetIds: {'t0'},
+      ),
+      isNull,
+    );
+  });
+
+  test('tryExtend rejects blank unused cells', () {
+    final sparse = PathWordsPuzzle(
+      id: 'sparse',
+      day: DateTime(2026, 9, 17),
+      size: 2,
+      letters: const ['a', 'b', '', ''],
+      targets: const [
+        PathWordsTarget(
+          id: 't0',
+          word: 'ab',
+          start: Cell(0, 0),
+          path: [Cell(0, 0), Cell(0, 1)],
+          colorIndex: 0,
+        ),
+      ],
+    );
+    expect(
+      PathWordsRules.tryBegin(
+        puzzle: sparse,
+        cell: const Cell(1, 0),
+        locked: {},
+        completedTargetIds: {},
+      ),
+      isNull,
+    );
+    expect(
+      PathWordsRules.tryExtend(
+        puzzle: sparse,
+        path: const [Cell(0, 0)],
+        candidate: const Cell(1, 0),
+        locked: {},
       ),
       isNull,
     );
@@ -75,40 +120,104 @@ void main() {
     );
   });
 
-  test('completedTarget matches full solution path', () {
-    final path = [const Cell(0, 0), const Cell(0, 1)];
+  test('completedTarget matches the official path only, not reverse', () {
     expect(
       PathWordsRules.completedTarget(
         puzzle: puzzle,
-        path: path,
+        path: const [Cell(0, 0), Cell(0, 1)],
         completedTargetIds: {},
       )?.id,
       't0',
     );
+    expect(
+      PathWordsRules.completedTarget(
+        puzzle: puzzle,
+        path: const [Cell(0, 1), Cell(0, 0)],
+        completedTargetIds: {},
+      ),
+      isNull,
+    );
   });
 
-  test('nextHintCell returns start then next along first unfinished', () {
+  test('hintedPath grows connected cells on the unsolved word', () {
     expect(
-      PathWordsRules.nextHintCell(
+      PathWordsRules.hintedPath(
         puzzle: puzzle,
-        activePath: const [],
         completedTargetIds: {},
+        revealedLength: 1,
       ),
-      const Cell(0, 0),
+      [const Cell(0, 0)],
     );
     expect(
-      PathWordsRules.nextHintCell(
+      PathWordsRules.hintedPath(
         puzzle: puzzle,
-        activePath: const [Cell(0, 0)],
         completedTargetIds: {},
+        revealedLength: 2,
       ),
-      const Cell(0, 1),
+      [const Cell(0, 0), const Cell(0, 1)],
+    );
+    expect(
+      PathWordsRules.hintedPath(
+        puzzle: puzzle,
+        completedTargetIds: {},
+        revealedLength: 3,
+      ),
+      [const Cell(0, 0), const Cell(0, 1)],
     );
   });
+
+  test(
+    'hintedPath moves to the next word only after the current one is solved',
+    () {
+      expect(
+        PathWordsRules.hintedPath(
+          puzzle: puzzle,
+          completedTargetIds: {'t0'},
+          revealedLength: 1,
+        ),
+        [const Cell(1, 0)],
+      );
+      expect(
+        PathWordsRules.hintedPath(
+          puzzle: puzzle,
+          completedTargetIds: {'t0'},
+          revealedLength: 2,
+        ),
+        [const Cell(1, 0), const Cell(1, 1)],
+      );
+    },
+  );
 
   test('undoActive pops last', () {
     expect(PathWordsRules.undoActive(const [Cell(0, 0), Cell(0, 1)]), [
       const Cell(0, 0),
     ]);
+  });
+
+  test('activeTarget matches a word from either end, else the live drag', () {
+    expect(
+      PathWordsRules.activeTarget(
+        puzzle: puzzle,
+        activePath: const [Cell(1, 0), Cell(1, 1)],
+        completedTargetIds: {},
+      )?.id,
+      't1',
+    );
+    expect(
+      PathWordsRules.activeTarget(
+        puzzle: puzzle,
+        activePath: const [Cell(0, 1)],
+        completedTargetIds: {},
+      )?.id,
+      't0',
+    );
+    expect(
+      PathWordsRules.activeTarget(
+        puzzle: puzzle,
+        activePath: const [Cell(0, 0)],
+        completedTargetIds: {'t0'},
+      )?.id,
+      't1',
+    );
   });
 }

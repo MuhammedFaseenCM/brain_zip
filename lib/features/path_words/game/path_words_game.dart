@@ -32,6 +32,7 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
   bool _tapGesture = false;
 
   DateTime? _hintFlashStartedAt;
+  double _celebrateT = 0;
 
   @override
   Color backgroundColor() => const Color(0x00000000);
@@ -49,13 +50,24 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
   }
 
   void applyView(PathWordsBoardView view) {
-    final oldHint = this.view.hintFlashCell;
+    final oldPath = this.view.hintPath;
+    final oldReveal = this.view.hintRevealLength;
+    final wasCelebrating = this.view.celebrate;
     this.view = view;
-    if (view.hintFlashCell != null && view.hintFlashCell != oldHint) {
+    if (view.hintPath.isNotEmpty &&
+        (view.hintRevealLength != oldReveal ||
+            view.hintPath.length != oldPath.length ||
+            view.hintPath.last != (oldPath.isEmpty ? null : oldPath.last))) {
       _hintFlashStartedAt = DateTime.now();
     }
-    if (view.hintFlashCell == null) {
+    if (view.hintPath.isEmpty) {
       _hintFlashStartedAt = null;
+    }
+    if (view.celebrate && !wasCelebrating) {
+      _celebrateT = 0;
+    }
+    if (!view.celebrate) {
+      _celebrateT = 0;
     }
     _layout();
   }
@@ -212,15 +224,24 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
   }
 
   @override
+  void update(double dt) {
+    super.update(dt);
+    if (view.celebrate) {
+      _celebrateT += dt;
+    }
+  }
+
+  @override
   void render(Canvas canvas) {
     super.render(canvas);
     _drawBoardShadow(canvas);
     _drawBoard(canvas);
+    _drawUnusedCells(canvas);
     _drawCompletedPaths(canvas);
+    _drawCelebrateGlow(canvas);
     _drawActivePath(canvas);
     _drawHintFlash(canvas);
     _drawLetters(canvas);
-    _drawStartChecks(canvas);
   }
 
   void _drawBoardShadow(Canvas canvas) {
@@ -268,6 +289,25 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
     }
   }
 
+  void _drawUnusedCells(Canvas canvas) {
+    final board = _cellSize * view.puzzle.size;
+    final rect = Rect.fromLTWH(_origin.dx, _origin.dy, board, board);
+    canvas.save();
+    canvas.clipRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(_boardRadius)),
+    );
+
+    final fill = Paint()..color = ZipColors.ink.withValues(alpha: 0.72);
+    for (var row = 0; row < view.puzzle.size; row++) {
+      for (var col = 0; col < view.puzzle.size; col++) {
+        final cell = Cell(row, col);
+        if (view.puzzle.hasLetter(cell)) continue;
+        canvas.drawRect(_cellRect(cell), fill);
+      }
+    }
+    canvas.restore();
+  }
+
   static const List<Color> pathColors = [
     Color(0xFFFB7185), // rose
     Color(0xFF38BDF8), // sky
@@ -298,7 +338,17 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
       final colorIndex = target?.colorIndex ?? 0;
       final color = pathColors[colorIndex % pathColors.length];
 
-      final fill = Paint()..color = color.withValues(alpha: 0.28);
+      final pulse = view.celebrate
+          ? (0.55 +
+                0.45 *
+                    (0.5 +
+                        0.5 *
+                            math.sin(
+                              (_celebrateT * math.pi * 2.4) + colorIndex,
+                            )))
+          : 1.0;
+      final fill = Paint()
+        ..color = color.withValues(alpha: (0.28 * pulse).clamp(0.18, 0.7));
       for (final cell in path) {
         canvas.drawRRect(
           RRect.fromRectAndRadius(
@@ -308,9 +358,32 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
           fill,
         );
       }
-
-      _drawArrows(canvas, path: path, color: color.withValues(alpha: 0.75));
     }
+  }
+
+  void _drawCelebrateGlow(Canvas canvas) {
+    if (!view.celebrate) return;
+
+    final board = _cellSize * view.puzzle.size;
+    final rect = Rect.fromLTWH(_origin.dx, _origin.dy, board, board);
+    final pulse = 0.5 + 0.5 * math.sin(_celebrateT * math.pi * 2.1);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect.deflate(2.5), Radius.circular(_boardRadius)),
+      Paint()
+        ..color = ZipColors.success.withValues(alpha: 0.18 + pulse * 0.38)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.0 + pulse * 3.5,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        rect.deflate(5.5),
+        Radius.circular(_boardRadius * 0.9),
+      ),
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.12 + pulse * 0.22)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6,
+    );
   }
 
   void _drawActivePath(Canvas canvas) {
@@ -325,147 +398,38 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
         fill,
       );
     }
-
-    final strokeWidth = _cellSize * 0.14;
-    final stroke = Paint()
-      ..color = ZipColors.ember.withValues(alpha: 0.95)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    if (view.activePath.length == 1) {
-      canvas.drawCircle(
-        _centerOf(view.activePath.first),
-        strokeWidth * 0.55,
-        Paint()..color = ZipColors.ember,
-      );
-    } else {
-      final p = Path();
-      final first = _centerOf(view.activePath.first);
-      p.moveTo(first.dx, first.dy);
-      for (var i = 1; i < view.activePath.length; i++) {
-        final c = _centerOf(view.activePath[i]);
-        p.lineTo(c.dx, c.dy);
-      }
-      canvas.drawPath(p, stroke);
-      canvas.drawPath(
-        p,
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.25)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = strokeWidth * 0.45
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round,
-      );
-    }
-
-    _drawArrows(
-      canvas,
-      path: view.activePath,
-      color: ZipColors.ember.withValues(alpha: 0.9),
-    );
-  }
-
-  void _drawArrows(
-    Canvas canvas, {
-    required List<Cell> path,
-    required Color color,
-  }) {
-    if (path.length < 2) return;
-
-    final line = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(2.0, _cellSize * 0.07)
-      ..strokeCap = StrokeCap.round;
-
-    for (var i = 1; i < path.length; i++) {
-      final a = _centerOf(path[i - 1]);
-      final b = _centerOf(path[i]);
-      canvas.drawLine(a, b, line);
-
-      final dx = b.dx - a.dx;
-      final dy = b.dy - a.dy;
-      final len = math.sqrt(dx * dx + dy * dy);
-      if (len < 0.001) continue;
-      final ux = dx / len;
-      final uy = dy / len;
-
-      final arrowLength = _cellSize * 0.22;
-      final arrowWidth = _cellSize * 0.14;
-      final tip = b;
-      final base = Offset(tip.dx - ux * arrowLength, tip.dy - uy * arrowLength);
-      final perp = Offset(-uy, ux);
-      final left = Offset(
-        base.dx + perp.dx * (arrowWidth / 2),
-        base.dy + perp.dy * (arrowWidth / 2),
-      );
-      final right = Offset(
-        base.dx - perp.dx * (arrowWidth / 2),
-        base.dy - perp.dy * (arrowWidth / 2),
-      );
-
-      final head = Path()
-        ..moveTo(tip.dx, tip.dy)
-        ..lineTo(left.dx, left.dy)
-        ..lineTo(right.dx, right.dy)
-        ..close();
-      canvas.drawPath(head, Paint()..color = color.withValues(alpha: 0.95));
-    }
-  }
-
-  void _drawStartChecks(Canvas canvas) {
-    final completed = view.completedPathsByTargetId.keys.toSet();
-    final paint = Paint()
-      ..color = ZipColors.onInk.withValues(alpha: 0.42)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(2.0, _cellSize * 0.06)
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    for (final target in view.puzzle.targets) {
-      if (completed.contains(target.id)) continue;
-      final rect = _cellRect(target.start, inset: _cellSize * 0.1);
-      final anchor = Offset(
-        rect.right - _cellSize * 0.06,
-        rect.top + _cellSize * 0.14,
-      );
-      final s = _cellSize * 0.11;
-      final p = Path()
-        ..moveTo(anchor.dx - s * 0.95, anchor.dy + s * 0.05)
-        ..lineTo(anchor.dx - s * 0.3, anchor.dy + s * 0.75)
-        ..lineTo(anchor.dx + s, anchor.dy - s * 0.85);
-      canvas.drawPath(p, paint);
-    }
   }
 
   void _drawHintFlash(Canvas canvas) {
-    final cell = view.hintFlashCell;
-    if (cell == null) return;
+    final path = view.hintPath;
+    if (path.isEmpty) return;
 
     final startedAt = _hintFlashStartedAt ?? DateTime.now();
     final t = DateTime.now().difference(startedAt).inMilliseconds / 1000.0;
     final pulse = (math.sin(t * math.pi * 2) * 0.5 + 0.5);
     final alpha = (0.25 + pulse * 0.35).clamp(0.0, 1.0);
+    final fill = ZipColors.success.withValues(alpha: alpha);
+    final stroke = Colors.white.withValues(alpha: alpha * 0.9);
 
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        _cellRect(cell, inset: 2),
-        Radius.circular(_cellSize * 0.2),
-      ),
-      Paint()..color = ZipColors.success.withValues(alpha: alpha),
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        _cellRect(cell, inset: 2),
-        Radius.circular(_cellSize * 0.2),
-      ),
-      Paint()
-        ..color = Colors.white.withValues(alpha: alpha * 0.9)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = math.max(2.0, _cellSize * 0.06),
-    );
+    for (final cell in path) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          _cellRect(cell, inset: 2),
+          Radius.circular(_cellSize * 0.2),
+        ),
+        Paint()..color = fill,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          _cellRect(cell, inset: 2),
+          Radius.circular(_cellSize * 0.2),
+        ),
+        Paint()
+          ..color = stroke
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = math.max(2.0, _cellSize * 0.06),
+      );
+    }
   }
 
   void _drawLetters(Canvas canvas) {
@@ -478,10 +442,13 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
     for (var row = 0; row < view.puzzle.size; row++) {
       for (var col = 0; col < view.puzzle.size; col++) {
         final cell = Cell(row, col);
+        final letter = view.puzzle.letterAt(cell);
+        if (letter.isEmpty) continue;
+
         final center = _centerOf(cell);
         final isCompleted = completedCells.contains(cell);
         final isActive = activeCells.contains(cell);
-        final isHint = view.hintFlashCell == cell;
+        final isHint = view.hintPath.contains(cell);
 
         final color = isActive
             ? Colors.white
@@ -493,7 +460,7 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
 
         final tp = TextPainter(
           text: TextSpan(
-            text: view.puzzle.letterAt(cell).toUpperCase(),
+            text: letter.toUpperCase(),
             style: TextStyle(
               color: color,
               fontSize: _cellSize * 0.38,

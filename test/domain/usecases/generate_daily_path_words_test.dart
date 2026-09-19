@@ -7,7 +7,7 @@ class _MockWords extends Mock implements WordListRepository {}
 
 List<String> _fixtureWords() {
   final words = <String>[];
-  for (var len = 4; len <= 10; len++) {
+  for (var len = 3; len <= 5; len++) {
     for (var i = 0; i < 20; i++) {
       words.add('${'a' * (len - 1)}${String.fromCharCode(97 + (i % 26))}');
     }
@@ -28,13 +28,14 @@ void main() {
 
   test('loads words and generates daily puzzle', () async {
     when(
-      () => repo.loadEnglishWords(minLen: 4, maxLen: 10),
+      () => repo.loadEnglishWords(minLen: 3, maxLen: 5),
     ).thenAnswer((_) async => fixtureWords);
 
     final puzzle = await usecase(day: DateTime(2026, 9, 17));
 
     expect(puzzle.id, 'path_words_20260917');
-    expect(puzzle.size, 8);
-    verify(() => repo.loadEnglishWords(minLen: 4, maxLen: 10)).called(1);
+    expect(puzzle.size, inInclusiveRange(3, 6));
+    expect(puzzle.targets.length, inInclusiveRange(3, 6));
+    verify(() => repo.loadEnglishWords(minLen: 3, maxLen: 5)).called(1);
   });
 }

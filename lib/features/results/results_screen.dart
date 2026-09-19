@@ -159,15 +159,16 @@ class ResultsScreen extends StatelessWidget {
                     ).textTheme.bodySmall?.copyWith(color: ZipColors.inkSoft),
                   ),
                 const Spacer(),
-                if (replayDaily || replayId != null)
+                if (replayDaily || replayId != null || args.replayRoute != null)
                   ZipPrimaryButton(
                     label: 'Play again',
                     icon: Icons.refresh_rounded,
                     onPressed: () {
-                      if (replayDaily) {
-                        context.pushReplacement('/zip');
-                      } else if (replayId != null) {
-                        context.pushReplacement('/zip');
+                      final route =
+                          args.replayRoute ??
+                          ((replayDaily || replayId != null) ? '/zip' : null);
+                      if (route != null) {
+                        context.pushReplacement(route);
                       }
                     },
                   ).animate().fadeIn(delay: 220.ms),

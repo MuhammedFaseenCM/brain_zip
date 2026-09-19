@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,6 +10,7 @@ import '../../../core/strings/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/zip_ui.dart';
 import '../../../domain/entities/cell.dart';
+import '../../../domain/path_words/path_words_rules.dart';
 import '../../../domain/usecases/generate_daily_path_words.dart';
 import '../../../domain/usecases/record_daily_clear.dart';
 import '../../../domain/usecases/submit_score.dart';
@@ -67,7 +71,13 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
       puzzle: puzzle,
       activePath: state.activePath,
       completedPathsByTargetId: completedPaths,
-      hintFlashCell: state.hintFlashCell,
+      hintPath: PathWordsRules.hintedPath(
+        puzzle: puzzle,
+        completedTargetIds: state.completedTargetIds,
+        revealedLength: state.hintRevealLength,
+      ),
+      hintRevealLength: state.hintRevealLength,
+      celebrate: state.finished,
       inputEnabled:
           !state.finished &&
           (state.status == PathWordsStatus.ready ||
@@ -213,36 +223,76 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                                         _bloc.add(const PathWordsEvent.reset()),
                               icon: const Icon(Icons.refresh_rounded),
                             ),
+                            const PathWordsHowToPlayButton(),
                           ],
                         ),
                       ),
                       Expanded(
-                        child: ListView(
-                          physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final available = math.min(
+                                constraints.maxWidth,
+                                constraints.maxHeight,
+                              );
+                              final grid = puzzle?.size ?? 6;
+                              final boardSide = (available * grid / 6).clamp(
+                                available * 0.78,
+                                available,
+                              );
+                              return Center(
+                                child:
+                                    SizedBox(
+                                          width: boardSide,
+                                          height: boardSide,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              24,
+                                            ),
+                                            child: _BoardPane(
+                                              game: game,
+                                              status: state.status,
+                                              errorMessage: state.errorMessage,
+                                              onRetry: () => _bloc.add(
+                                                PathWordsEvent.started(
+                                                  date: widget.date,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                        .animate(target: finished ? 1 : 0)
+                                        .scaleXY(
+                                          begin: 1,
+                                          end: 1.045,
+                                          duration: 520.ms,
+                                          curve: Curves.easeOutBack,
+                                        )
+                                        .shimmer(
+                                          duration: 1600.ms,
+                                          color: Colors.white.withValues(
+                                            alpha: 0.28,
+                                          ),
+                                        ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            AspectRatio(
-                              aspectRatio: 1,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: _BoardPane(
-                                  game: game,
-                                  status: state.status,
-                                  errorMessage: state.errorMessage,
-                                  onRetry: () => _bloc.add(
-                                    PathWordsEvent.started(date: widget.date),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 14),
                             if (puzzle != null) ...[
                               PathWordsWordList(
-                                targets: puzzle.targets,
+                                puzzle: puzzle,
+                                activePath: state.activePath,
                                 completedTargetIds: state.completedTargetIds,
                                 palette: PathWordsGame.pathColors,
                               ),
-                              const SizedBox(height: 14),
+                              const SizedBox(height: 10),
                             ],
                             Row(
                               children: [
@@ -264,7 +314,7 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                                       backgroundColor: ZipColors.wall,
                                       foregroundColor: ZipColors.onInk,
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
+                                        vertical: 14,
                                       ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
@@ -285,8 +335,6 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 14),
-                            const PathWordsHowToPlay(),
                           ],
                         ),
                       ),

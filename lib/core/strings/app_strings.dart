@@ -19,7 +19,12 @@ abstract final class AppStrings {
   static String pathWordsHintWithCount(int n) => 'Hint ($n)';
   static const pathWordsHowToPlayTitle = 'How to play';
   static const pathWordsHowToPlayBody =
-      'Drag a path from each marked start letter. Paths move up, down, left, or right—not diagonally. Find every listed word to clear the board. Undo backs up your current path. Hint reveals the next correct cell.';
+      'Start from any letter and drag a path. Lift your finger anytime—the path stays so you can continue from the last cell. Paths move up, down, left, or right—not diagonally. Find every hidden word to clear the board. Undo backs up. Hint reveals more of the current word, keeping earlier hinted letters connected.';
+  static const pathWordsHowToPlayGotIt = 'Got it';
+  static String pathWordsUnfoundWordLabel(int letterCount) =>
+      '$letterCount-letter word, not found yet';
+  static String pathWordsTracingWordLabel(String letters) =>
+      'Tracing ${letters.toUpperCase()}';
   static const pathWordsClearedTitle = 'Puzzle cleared!';
   static const pathWordsLoading = 'Building today’s puzzle…';
   static const pathWordsFailed = 'Could not load today’s puzzle.';

@@ -65,6 +65,7 @@ class ZipBloc extends Bloc<ZipEvent, ZipState> {
           improved: improved,
           points: event.points,
           replayDaily: true,
+          replayRoute: '/zip',
           currentStreak: streak.current,
           longestStreak: streak.longest,
         ),

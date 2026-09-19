@@ -6,6 +6,7 @@ class ResultsArgs {
     required this.improved,
     this.points,
     this.replayDaily = false,
+    this.replayRoute,
     this.replayLevelId,
     this.nextLevelId,
     this.currentStreak,
@@ -18,6 +19,7 @@ class ResultsArgs {
   final bool improved;
   final int? points;
   final bool replayDaily;
+  final String? replayRoute;
   final String? replayLevelId;
   final String? nextLevelId;
   final int? currentStreak;

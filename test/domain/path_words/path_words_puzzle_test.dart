@@ -25,5 +25,26 @@ void main() {
       ],
     );
     expect(puzzle.letterAt(const Cell(1, 0)), 'c');
+    expect(puzzle.hasLetter(const Cell(1, 0)), isTrue);
+  });
+
+  test('unused cells have no letter', () {
+    final puzzle = PathWordsPuzzle(
+      id: 'blank',
+      day: DateTime(2026, 9, 17),
+      size: 2,
+      letters: const ['a', '', 'c', ''],
+      targets: const [
+        PathWordsTarget(
+          id: 't0',
+          word: 'ac',
+          start: Cell(0, 0),
+          path: [Cell(0, 0), Cell(1, 0)],
+          colorIndex: 0,
+        ),
+      ],
+    );
+    expect(puzzle.hasLetter(const Cell(0, 1)), isFalse);
+    expect(puzzle.letterAt(const Cell(0, 1)), isEmpty);
   });
 }

@@ -6,13 +6,17 @@ class PathWordsBoardView {
     required this.puzzle,
     required this.activePath,
     required this.completedPathsByTargetId,
-    required this.hintFlashCell,
+    required this.hintPath,
+    required this.hintRevealLength,
+    required this.celebrate,
     required this.inputEnabled,
   });
 
   final PathWordsPuzzle puzzle;
   final List<Cell> activePath;
   final Map<String, List<Cell>> completedPathsByTargetId;
-  final Cell? hintFlashCell;
+  final List<Cell> hintPath;
+  final int hintRevealLength;
+  final bool celebrate;
   final bool inputEnabled;
 }

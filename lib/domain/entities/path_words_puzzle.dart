@@ -29,9 +29,11 @@ class PathWordsPuzzle {
   final DateTime day;
   final int size;
 
-  /// Row-major, length `size * size`, lowercase letters.
+  /// Row-major, length `size * size`. Lowercase letters, or empty for unused cells.
   final List<String> letters;
   final List<PathWordsTarget> targets;
 
   String letterAt(Cell cell) => letters[cell.row * size + cell.col];
+
+  bool hasLetter(Cell cell) => letterAt(cell).isNotEmpty;
 }

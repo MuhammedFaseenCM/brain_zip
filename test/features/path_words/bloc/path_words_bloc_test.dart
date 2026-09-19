@@ -80,11 +80,13 @@ void main() {
   late _MockGenerateDailyPathWords generateDaily;
   late _MockSubmitScore submitScore;
   late _MockRecordDailyClear recordDailyClear;
+  late List<Duration> waited;
 
   setUp(() {
     generateDaily = _MockGenerateDailyPathWords();
     submitScore = _MockSubmitScore();
     recordDailyClear = _MockRecordDailyClear();
+    waited = <Duration>[];
   });
 
   blocTest<PathWordsBloc, PathWordsState>(
@@ -118,7 +120,7 @@ void main() {
   );
 
   blocTest<PathWordsBloc, PathWordsState>(
-    'completing all targets submits score, records streak, and navigates',
+    'completing all targets pauses on the board, then submits and navigates',
     build: () {
       when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
         (inv) async => _tinyPuzzle(day: inv.namedArguments[#day] as DateTime),
@@ -152,6 +154,9 @@ void main() {
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
         now: clock.call,
+        wait: (duration) async {
+          waited.add(duration);
+        },
       );
     },
     act: (b) async {
@@ -200,6 +205,11 @@ void main() {
           )
           .having((s) => s.activePath, 'activePath', isEmpty),
       isA<PathWordsState>()
+          .having((s) => s.status, 'status', PathWordsStatus.celebrating)
+          .having((s) => s.finished, 'finished', isTrue)
+          .having((s) => s.points, 'points', 940)
+          .having((s) => s.timeSeconds, 'timeSeconds', 12),
+      isA<PathWordsState>()
           .having((s) => s.status, 'status', PathWordsStatus.submitting)
           .having((s) => s.finished, 'finished', isTrue)
           .having((s) => s.points, 'points', 940)
@@ -211,10 +221,16 @@ void main() {
           .having((s) => s.resultsExtra?.points, 'points', 940)
           .having((s) => s.resultsExtra?.timeSeconds, 'timeSeconds', 12)
           .having((s) => s.resultsExtra?.replayDaily, 'replayDaily', isTrue)
+          .having(
+            (s) => s.resultsExtra?.replayRoute,
+            'replayRoute',
+            '/path-words',
+          )
           .having((s) => s.resultsExtra?.currentStreak, 'currentStreak', 3)
           .having((s) => s.resultsExtra?.longestStreak, 'longestStreak', 5),
     ],
     verify: (_) {
+      expect(waited, [const Duration(seconds: 2)]);
       verify(
         () => submitScore(
           modeKey: 'path_words_20260917',
@@ -276,6 +292,126 @@ void main() {
   );
 
   blocTest<PathWordsBloc, PathWordsState>(
+    'drawing can start from any letter cell',
+    build: () {
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _tinyPuzzle(day: inv.namedArguments[#day] as DateTime),
+      );
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        now: () => DateTime(2026, 9, 17, 0, 0, 0),
+      );
+    },
+    act: (b) async {
+      b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerDown(Cell(0, 1)));
+    },
+    expect: () => [
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.loading,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.ready,
+      ),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 1),
+      ]),
+    ],
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
+    'pointer up keeps an incomplete path',
+    build: () {
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _linePuzzle3(day: inv.namedArguments[#day] as DateTime),
+      );
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        now: () => DateTime(2026, 9, 17, 0, 0, 0),
+      );
+    },
+    act: (b) async {
+      b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
+      b.add(const PathWordsEvent.pointerEnter(Cell(0, 1)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerUp());
+    },
+    expect: () => [
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.loading,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.ready,
+      ),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 0),
+      ]),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 0),
+        const Cell(0, 1),
+      ]),
+    ],
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
+    'resuming from the last cell keeps the incomplete path',
+    build: () {
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _linePuzzle3(day: inv.namedArguments[#day] as DateTime),
+      );
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        now: () => DateTime(2026, 9, 17, 0, 0, 0),
+      );
+    },
+    act: (b) async {
+      b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
+      b.add(const PathWordsEvent.pointerEnter(Cell(0, 1)));
+      b.add(const PathWordsEvent.pointerUp());
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerDown(Cell(0, 1)));
+    },
+    expect: () => [
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.loading,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.ready,
+      ),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 0),
+      ]),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 0),
+        const Cell(0, 1),
+      ]),
+    ],
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
     'hint decrements and sets hintFlashCell',
     build: () {
       when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
@@ -306,7 +442,99 @@ void main() {
       ),
       isA<PathWordsState>()
           .having((s) => s.hintsRemaining, 'hintsRemaining', 2)
-          .having((s) => s.hintFlashCell, 'hintFlashCell', const Cell(0, 0)),
+          .having((s) => s.hintFlashCell, 'hintFlashCell', const Cell(0, 0))
+          .having((s) => s.hintRevealLength, 'hintRevealLength', 1),
+    ],
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
+    'later hints keep connected cells on the unsolved word',
+    build: () {
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _tinyPuzzle(day: inv.namedArguments[#day] as DateTime),
+      );
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        now: () => DateTime(2026, 9, 17, 0, 0, 0),
+      );
+    },
+    act: (b) async {
+      b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.hint());
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.hint());
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.hint());
+    },
+    expect: () => [
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.loading,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.ready,
+      ),
+      isA<PathWordsState>()
+          .having((s) => s.hintFlashCell, 'hintFlashCell', const Cell(0, 0))
+          .having((s) => s.hintRevealLength, 'hintRevealLength', 1),
+      isA<PathWordsState>()
+          .having((s) => s.hintFlashCell, 'hintFlashCell', const Cell(0, 1))
+          .having((s) => s.hintRevealLength, 'hintRevealLength', 2),
+    ],
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
+    'a third hint on a longer unsolved word adds the next connected cell',
+    build: () {
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _linePuzzle3(day: inv.namedArguments[#day] as DateTime),
+      );
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        now: () => DateTime(2026, 9, 17, 0, 0, 0),
+      );
+    },
+    act: (b) async {
+      b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.hint());
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.hint());
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.hint());
+    },
+    expect: () => [
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.loading,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.ready,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.hintRevealLength,
+        'hintRevealLength',
+        1,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.hintRevealLength,
+        'hintRevealLength',
+        2,
+      ),
+      isA<PathWordsState>()
+          .having((s) => s.hintRevealLength, 'hintRevealLength', 3)
+          .having((s) => s.hintFlashCell, 'hintFlashCell', const Cell(0, 2)),
     ],
   );
 
@@ -402,6 +630,7 @@ void main() {
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
         now: clock.call,
+        wait: (_) async {},
       );
     },
     act: (b) async {
@@ -449,6 +678,9 @@ void main() {
             containsAll(['t0', 't1']),
           )
           .having((s) => s.activePath, 'activePath', isEmpty),
+      isA<PathWordsState>()
+          .having((s) => s.status, 'status', PathWordsStatus.celebrating)
+          .having((s) => s.finished, 'finished', isTrue),
       isA<PathWordsState>()
           .having((s) => s.status, 'status', PathWordsStatus.submitting)
           .having((s) => s.finished, 'finished', isTrue),

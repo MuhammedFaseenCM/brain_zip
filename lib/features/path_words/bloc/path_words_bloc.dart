@@ -18,7 +18,10 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     required this.submitScore,
     required this.recordDailyClear,
     DateTime Function()? now,
+    Future<void> Function(Duration duration)? wait,
+    this.celebrationDuration = const Duration(seconds: 2),
   }) : _now = now ?? DateTime.now,
+       _wait = wait ?? ((duration) => Future<void>.delayed(duration)),
        super(PathWordsState.initial((now ?? DateTime.now)())) {
     on<PathWordsStarted>(_onStarted);
     on<PathWordsPointerDown>(_onPointerDown);
@@ -32,7 +35,9 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
   final GenerateDailyPathWords generateDailyPathWords;
   final SubmitScore submitScore;
   final RecordDailyClear recordDailyClear;
+  final Duration celebrationDuration;
   final DateTime Function() _now;
+  final Future<void> Function(Duration duration) _wait;
 
   Future<void> _onStarted(
     PathWordsStarted event,
@@ -49,6 +54,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         activePath: const [],
         completedTargetIds: const {},
         hintsRemaining: 3,
+        hintRevealLength: 0,
         startedAt: null,
         hintFlashCell: null,
         errorMessage: null,
@@ -70,6 +76,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
           puzzle: puzzle,
           startedAt: _now(),
           hintsRemaining: 3,
+          hintRevealLength: 0,
           activePath: const [],
           completedTargetIds: const {},
           hintFlashCell: null,
@@ -99,6 +106,12 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     final puzzle = state.puzzle;
     if (puzzle == null) return;
 
+    if (state.activePath.isNotEmpty && state.activePath.last == event.cell) {
+      if (state.hintFlashCell == null) return;
+      emit(state.copyWith(hintFlashCell: null));
+      return;
+    }
+
     final locked = PathWordsRules.lockedCells(puzzle, state.completedTargetIds);
     final begun = PathWordsRules.tryBegin(
       puzzle: puzzle,
@@ -108,12 +121,8 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     );
 
     if (begun == null) {
-      if (state.activePath.isEmpty) {
-        if (state.hintFlashCell == null) return;
-        emit(state.copyWith(hintFlashCell: null));
-        return;
-      }
-      emit(state.copyWith(activePath: const [], hintFlashCell: null));
+      if (state.hintFlashCell == null) return;
+      emit(state.copyWith(hintFlashCell: null));
       return;
     }
 
@@ -172,6 +181,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         activePath: const [],
         completedTargetIds: updatedCompleted,
         hintFlashCell: null,
+        hintRevealLength: 0,
       ),
     );
 
@@ -200,7 +210,8 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     );
 
     if (completed == null) {
-      emit(state.copyWith(activePath: const [], hintFlashCell: null));
+      if (state.hintFlashCell == null) return;
+      emit(state.copyWith(hintFlashCell: null));
       return;
     }
 
@@ -211,6 +222,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         activePath: const [],
         completedTargetIds: updatedCompleted,
         hintFlashCell: null,
+        hintRevealLength: 0,
       ),
     );
 
@@ -243,17 +255,21 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     if (puzzle == null) return;
     if (state.hintsRemaining <= 0) return;
 
-    final cell = PathWordsRules.nextHintCell(
+    final nextLength = state.hintRevealLength + 1;
+    final path = PathWordsRules.hintedPath(
       puzzle: puzzle,
-      activePath: state.activePath,
       completedTargetIds: state.completedTargetIds,
+      revealedLength: nextLength,
     );
-    if (cell == null) return;
+    if (path.isEmpty || path.length <= state.hintRevealLength) {
+      return;
+    }
 
     emit(
       state.copyWith(
         hintsRemaining: state.hintsRemaining - 1,
-        hintFlashCell: cell,
+        hintFlashCell: path.last,
+        hintRevealLength: path.length,
       ),
     );
   }
@@ -272,6 +288,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         activePath: const [],
         completedTargetIds: const {},
         hintsRemaining: 3,
+        hintRevealLength: 0,
         hintFlashCell: null,
         errorMessage: null,
         finished: false,
@@ -284,7 +301,12 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
   }
 
   Future<void> _finish(Emitter<PathWordsState> emit) async {
-    if (state.finished || state.status == PathWordsStatus.submitting) return;
+    if (state.finished ||
+        state.status == PathWordsStatus.celebrating ||
+        state.status == PathWordsStatus.submitting ||
+        state.status == PathWordsStatus.navigating) {
+      return;
+    }
     final startedAt = state.startedAt;
     if (startedAt == null) return;
 
@@ -294,11 +316,17 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     emit(
       state.copyWith(
         finished: true,
-        status: PathWordsStatus.submitting,
+        status: PathWordsStatus.celebrating,
         points: points,
         timeSeconds: elapsed,
+        hintFlashCell: null,
       ),
     );
+
+    await _wait(celebrationDuration);
+    if (emit.isDone) return;
+
+    emit(state.copyWith(status: PathWordsStatus.submitting));
 
     final dateId = StreakCalculator.dateId(state.day);
     final improved = await submitScore(
@@ -325,6 +353,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
           improved: improved,
           points: points,
           replayDaily: true,
+          replayRoute: '/path-words',
           currentStreak: streak.current,
           longestStreak: streak.longest,
         ),

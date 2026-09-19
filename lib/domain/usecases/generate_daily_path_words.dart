@@ -7,7 +7,7 @@ class GenerateDailyPathWords {
   final WordListRepository _words;
 
   Future<PathWordsPuzzle> call({required DateTime day}) async {
-    final list = await _words.loadEnglishWords(minLen: 4, maxLen: 10);
+    final list = await _words.loadEnglishWords(minLen: 3, maxLen: 5);
     return PathWordsGenerator.generate(day: day, words: list);
   }
 }

@@ -5,9 +5,12 @@ import '../entities/path_words_puzzle.dart';
 import '../streak_calculator.dart';
 
 abstract final class PathWordsGenerator {
-  static const generatorVersion = 1;
+  static const generatorVersion = 5;
 
-  static const int _size = 8;
+  static const int _minSize = 3;
+  static const int _maxSize = 6;
+  static const int _minWordLen = 3;
+  static const int _maxWordLen = 5;
 
   static PathWordsPuzzle generate({
     required DateTime day,
@@ -24,7 +27,7 @@ abstract final class PathWordsGenerator {
             .map((w) => w.trim().toLowerCase())
             .where((w) => w.isNotEmpty)
             .where((w) => RegExp(r'^[a-z]+$').hasMatch(w))
-            .where((w) => w.length >= 4 && w.length <= 10)
+            .where((w) => w.length >= _minWordLen && w.length <= _maxWordLen)
             .toSet()
             .toList()
           ..sort();
@@ -34,27 +37,26 @@ abstract final class PathWordsGenerator {
       (buckets[word.length] ??= <String>[]).add(word);
     }
 
-    final viableCompositions = _preferredLengthCompositions
-        .where((c) => _compositionIsPossible(c, buckets))
-        .toList();
-
-    if (viableCompositions.isEmpty) {
-      throw StateError('PathWordsGenerator failed for $dateId');
-    }
-
-    const maxAttempts = 80;
+    const maxAttempts = 120;
     for (var attempt = 0; attempt < maxAttempts; attempt++) {
-      final composition =
-          viableCompositions[attempt % viableCompositions.length];
-      final puzzle = _tryPack(
-        rng: rng,
-        day: localDay,
-        dateId: dateId,
-        buckets: buckets,
-        composition: composition,
-      );
-      if (puzzle != null) {
-        return puzzle;
+      final wordCount = _pickWordCount(rng);
+      final composition = _pickComposition(rng, wordCount, buckets);
+      if (composition == null) continue;
+
+      final baseSize = _gridSizeFor(composition);
+      final maxTrySize = baseSize + 1 > _maxSize ? _maxSize : baseSize + 1;
+      for (var size = baseSize; size <= maxTrySize; size++) {
+        final puzzle = _tryPack(
+          rng: rng,
+          day: localDay,
+          dateId: dateId,
+          buckets: buckets,
+          composition: composition,
+          size: size,
+        );
+        if (puzzle != null) {
+          return puzzle;
+        }
       }
     }
 
@@ -67,12 +69,12 @@ abstract final class PathWordsGenerator {
     required String dateId,
     required Map<int, List<String>> buckets,
     required List<int> composition,
+    required int size,
   }) {
-    final lengths = [...composition]..shuffle(rng);
+    final lengths = [...composition]..sort((a, b) => b.compareTo(a));
 
     final availableByLength = <int, List<String>>{};
     final chosenWords = <String>[];
-
     for (final len in lengths) {
       final pool = (availableByLength[len] ??= [...?buckets[len]]
         ..shuffle(rng));
@@ -81,22 +83,23 @@ abstract final class PathWordsGenerator {
     }
 
     final occupied = <Cell>{};
-    final letters = List<String?>.filled(_size * _size, null);
+    final letters = List<String?>.filled(size * size, null);
     final targets = <PathWordsTarget>[];
-
-    final fullPath = _buildFullCoverPath(rng);
-    var cursor = 0;
 
     for (var i = 0; i < chosenWords.length; i++) {
       final word = chosenWords[i];
-      final len = word.length;
-      final path = fullPath.sublist(cursor, cursor + len);
-      cursor += len;
+      final path = _placeTwistyPath(
+        rng: rng,
+        length: word.length,
+        occupied: occupied,
+        size: size,
+      );
+      if (path == null) return null;
 
+      occupied.addAll(path);
       for (var j = 0; j < path.length; j++) {
         final cell = path[j];
-        occupied.add(cell);
-        letters[cell.row * _size + cell.col] = word[j];
+        letters[cell.row * size + cell.col] = word[j];
       }
 
       targets.add(
@@ -110,103 +113,282 @@ abstract final class PathWordsGenerator {
       );
     }
 
-    if (occupied.length != _size * _size || letters.any((c) => c == null)) {
-      return null;
-    }
-
-    return PathWordsPuzzle(
-      id: 'path_words_$dateId',
-      day: day,
-      size: _size,
-      letters: letters.cast<String>(),
-      targets: targets,
+    return _trimEmptySquareBorders(
+      PathWordsPuzzle(
+        id: 'path_words_$dateId',
+        day: day,
+        size: size,
+        letters: [for (final letter in letters) letter ?? ''],
+        targets: targets,
+      ),
     );
   }
 
-  static List<Cell> _buildFullCoverPath(Random rng) {
-    final base = _snakePath();
-    final rotation = rng.nextInt(4);
-    final reflect = rng.nextBool();
-    final reverse = rng.nextBool();
-
-    final max = _size - 1;
-    Cell transform(Cell cell) {
-      var r = cell.row;
-      var c = cell.col;
-
-      switch (rotation) {
-        case 0:
-          break;
-        case 1:
-          (r, c) = (c, max - r);
-          break;
-        case 2:
-          (r, c) = (max - r, max - c);
-          break;
-        case 3:
-          (r, c) = (max - c, r);
-          break;
-      }
-
-      if (reflect) {
-        c = max - c;
-      }
-
-      return Cell(r, c);
+  static int _gridSizeFor(List<int> composition) {
+    final letterCount = composition.fold<int>(0, (sum, n) => sum + n);
+    var size = _minSize;
+    while (size * size < letterCount && size < _maxSize) {
+      size++;
     }
-
-    final transformed = base.map(transform).toList(growable: false);
-    if (reverse) {
-      return transformed.reversed.toList(growable: false);
-    }
-    return transformed;
+    return size;
   }
 
-  static List<Cell> _snakePath() {
-    final path = <Cell>[];
-    for (var row = 0; row < _size; row++) {
-      if (row.isEven) {
-        for (var col = 0; col < _size; col++) {
-          path.add(Cell(row, col));
-        }
-      } else {
-        for (var col = _size - 1; col >= 0; col--) {
-          path.add(Cell(row, col));
-        }
-      }
-    }
-    return path;
+  static int _pickWordCount(Random rng) {
+    final roll = rng.nextDouble();
+    if (roll < 0.08) return 6;
+    if (roll < 0.30) return 5;
+    if (roll < 0.70) return 4;
+    return 3;
   }
 
-  static bool _compositionIsPossible(
-    List<int> composition,
+  static List<int>? _pickComposition(
+    Random rng,
+    int wordCount,
     Map<int, List<String>> buckets,
   ) {
-    final counts = <int, int>{};
-    for (final len in composition) {
-      counts[len] = (counts[len] ?? 0) + 1;
+    final composition = <int>[];
+    final used = <int, int>{};
+    for (var i = 0; i < wordCount; i++) {
+      final len = _pickLength(rng, buckets, used);
+      if (len == null) return null;
+      composition.add(len);
+      used[len] = (used[len] ?? 0) + 1;
     }
-    for (final entry in counts.entries) {
-      final available = buckets[entry.key]?.length ?? 0;
-      if (available < entry.value) return false;
-    }
-    return composition.fold<int>(0, (sum, n) => sum + n) == _size * _size;
+    return composition;
   }
 
-  static const List<List<int>> _preferredLengthCompositions = [
-    // Primary.
-    [10, 9, 8, 7, 6, 6, 5, 5, 4, 4],
+  static int? _pickLength(
+    Random rng,
+    Map<int, List<String>> buckets,
+    Map<int, int> used,
+  ) {
+    final options = <int>[];
+    for (var len = _minWordLen; len <= _maxWordLen; len++) {
+      final available = (buckets[len]?.length ?? 0) - (used[len] ?? 0);
+      if (available > 0) options.add(len);
+    }
+    if (options.isEmpty) return null;
 
-    // Backups.
-    [10, 10, 10, 10, 8, 6, 5, 5],
-    [10, 10, 9, 8, 7, 6, 5, 5, 4],
-    [10, 9, 9, 8, 6, 6, 6, 5, 5],
-    [10, 9, 8, 8, 7, 7, 5, 5, 5],
-    [9, 9, 9, 9, 7, 7, 7, 7],
-    [9, 9, 8, 8, 8, 8, 7, 7],
-    [8, 8, 8, 8, 8, 8, 8, 8],
-    [7, 7, 7, 7, 7, 7, 7, 7, 8],
-    [6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-  ];
+    final roll = rng.nextDouble();
+    final preferred = roll < 0.22
+        ? 3
+        : roll < 0.70
+        ? 4
+        : 5;
+    if (options.contains(preferred)) return preferred;
+    return options[rng.nextInt(options.length)];
+  }
+
+  static List<Cell>? _placeTwistyPath({
+    required Random rng,
+    required int length,
+    required Set<Cell> occupied,
+    required int size,
+  }) {
+    final starts = [
+      for (var row = 0; row < size; row++)
+        for (var col = 0; col < size; col++)
+          if (!occupied.contains(Cell(row, col))) Cell(row, col),
+    ]..shuffle(rng);
+    starts.sort((a, b) => _ringDepth(a, size).compareTo(_ringDepth(b, size)));
+
+    for (final start in starts) {
+      final path = <Cell>[start];
+      final used = {...occupied, start};
+      if (_extendPath(
+            path: path,
+            used: used,
+            length: length,
+            rng: rng,
+            size: size,
+          ) &&
+          _isTwistyEnough(path)) {
+        return List<Cell>.of(path);
+      }
+    }
+    return null;
+  }
+
+  static bool _extendPath({
+    required List<Cell> path,
+    required Set<Cell> used,
+    required int length,
+    required Random rng,
+    required int size,
+  }) {
+    if (path.length == length) return true;
+
+    final last = path.last;
+    final neighbors = _neighbors(
+      last,
+      size,
+    ).where((cell) => !used.contains(cell)).toList();
+    neighbors.shuffle(rng);
+    neighbors.sort((a, b) {
+      final byRing = _ringDepth(a, size).compareTo(_ringDepth(b, size));
+      if (byRing != 0) return byRing;
+      if (path.length < 2) return 0;
+      final prev = path[path.length - 2];
+      final straight = Cell(
+        last.row + (last.row - prev.row),
+        last.col + (last.col - prev.col),
+      );
+      final aStraight = a == straight ? 1 : 0;
+      final bStraight = b == straight ? 1 : 0;
+      return aStraight.compareTo(bStraight);
+    });
+
+    for (final next in neighbors) {
+      path.add(next);
+      used.add(next);
+      if (_extendPath(
+        path: path,
+        used: used,
+        length: length,
+        rng: rng,
+        size: size,
+      )) {
+        return true;
+      }
+      used.remove(next);
+      path.removeLast();
+    }
+    return false;
+  }
+
+  static bool _isTwistyEnough(List<Cell> path) {
+    final turns = _turnCount(path);
+    if (path.length <= 3) return turns >= 1;
+    return turns >= 2;
+  }
+
+  static int _turnCount(List<Cell> path) {
+    var turns = 0;
+    for (var i = 2; i < path.length; i++) {
+      final d1Row = path[i - 1].row - path[i - 2].row;
+      final d1Col = path[i - 1].col - path[i - 2].col;
+      final d2Row = path[i].row - path[i - 1].row;
+      final d2Col = path[i].col - path[i - 1].col;
+      if (d1Row != d2Row || d1Col != d2Col) {
+        turns++;
+      }
+    }
+    return turns;
+  }
+
+  static int _ringDepth(Cell cell, int size) {
+    final toRight = size - 1 - cell.col;
+    final toBottom = size - 1 - cell.row;
+    return min(min(cell.row, cell.col), min(toBottom, toRight));
+  }
+
+  static PathWordsPuzzle _trimEmptySquareBorders(PathWordsPuzzle puzzle) {
+    var minRow = 0;
+    var minCol = 0;
+    var maxRow = puzzle.size - 1;
+    var maxCol = puzzle.size - 1;
+
+    bool rowEmpty(int row) {
+      for (var col = minCol; col <= maxCol; col++) {
+        if (puzzle.hasLetter(Cell(row, col))) return false;
+      }
+      return true;
+    }
+
+    bool colEmpty(int col) {
+      for (var row = minRow; row <= maxRow; row++) {
+        if (puzzle.hasLetter(Cell(row, col))) return false;
+      }
+      return true;
+    }
+
+    var changed = true;
+    while (changed && maxRow > minRow && maxCol > minCol) {
+      changed = false;
+      final top = rowEmpty(minRow);
+      final bottom = rowEmpty(maxRow);
+      final left = colEmpty(minCol);
+      final right = colEmpty(maxCol);
+      if (top && bottom && left && right) {
+        minRow++;
+        maxRow--;
+        minCol++;
+        maxCol--;
+        changed = true;
+        continue;
+      }
+      if (top && left) {
+        minRow++;
+        minCol++;
+        changed = true;
+        continue;
+      }
+      if (top && right) {
+        minRow++;
+        maxCol--;
+        changed = true;
+        continue;
+      }
+      if (bottom && left) {
+        maxRow--;
+        minCol++;
+        changed = true;
+        continue;
+      }
+      if (bottom && right) {
+        maxRow--;
+        maxCol--;
+        changed = true;
+      }
+    }
+
+    final newSize = maxRow - minRow + 1;
+    if (newSize == puzzle.size && minRow == 0 && minCol == 0) {
+      return puzzle;
+    }
+
+    Cell mapCell(Cell cell) => Cell(cell.row - minRow, cell.col - minCol);
+    final letters = List<String>.filled(newSize * newSize, '');
+    for (var row = minRow; row <= maxRow; row++) {
+      for (var col = minCol; col <= maxCol; col++) {
+        final letter = puzzle.letterAt(Cell(row, col));
+        if (letter.isEmpty) continue;
+        final to = mapCell(Cell(row, col));
+        letters[to.row * newSize + to.col] = letter;
+      }
+    }
+
+    return PathWordsPuzzle(
+      id: puzzle.id,
+      day: puzzle.day,
+      size: newSize,
+      letters: letters,
+      targets: [
+        for (final target in puzzle.targets)
+          PathWordsTarget(
+            id: target.id,
+            word: target.word,
+            start: mapCell(target.start),
+            path: [for (final cell in target.path) mapCell(cell)],
+            colorIndex: target.colorIndex,
+          ),
+      ],
+    );
+  }
+
+  static List<Cell> _neighbors(Cell cell, int size) {
+    const deltas = <(int, int)>[(-1, 0), (1, 0), (0, -1), (0, 1)];
+    final next = <Cell>[];
+    for (final delta in deltas) {
+      final candidate = Cell(cell.row + delta.$1, cell.col + delta.$2);
+      if (candidate.row < 0 ||
+          candidate.row >= size ||
+          candidate.col < 0 ||
+          candidate.col >= size) {
+        continue;
+      }
+      next.add(candidate);
+    }
+    return next;
+  }
 }

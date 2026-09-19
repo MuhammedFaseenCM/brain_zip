@@ -6,7 +6,15 @@ import '../../results/results_args.dart';
 
 part 'path_words_state.freezed.dart';
 
-enum PathWordsStatus { loading, ready, playing, submitting, navigating, failed }
+enum PathWordsStatus {
+  loading,
+  ready,
+  playing,
+  celebrating,
+  submitting,
+  navigating,
+  failed,
+}
 
 @freezed
 sealed class PathWordsState with _$PathWordsState {
@@ -17,6 +25,7 @@ sealed class PathWordsState with _$PathWordsState {
     @Default(<Cell>[]) List<Cell> activePath,
     @Default(<String>{}) Set<String> completedTargetIds,
     @Default(3) int hintsRemaining,
+    @Default(0) int hintRevealLength,
     DateTime? startedAt,
     Cell? hintFlashCell,
     String? errorMessage,
