@@ -18,17 +18,11 @@ class ZipAtmosphere extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF152033),
-                ZipColors.ink,
-                Color(0xFF0B1220),
-              ],
+              colors: [Color(0xFF152033), ZipColors.ink, Color(0xFF0B1220)],
             ),
           ),
         ),
-        const Positioned.fill(
-          child: CustomPaint(painter: _PathMotifPainter()),
-        ),
+        const Positioned.fill(child: CustomPaint(painter: _PathMotifPainter())),
         child,
       ],
     );
@@ -104,11 +98,13 @@ class ZipPrimaryButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
+    this.backgroundColor,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +112,9 @@ class ZipPrimaryButton extends StatelessWidget {
       width: double.infinity,
       child: FilledButton(
         onPressed: onPressed,
+        style: backgroundColor == null
+            ? null
+            : FilledButton.styleFrom(backgroundColor: backgroundColor),
         child: icon == null
             ? Text(label)
             : Row(
@@ -176,8 +175,8 @@ class ZipHudPill extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: emphasize ? ZipColors.ember : ZipColors.onInk,
-                ),
+              color: emphasize ? ZipColors.ember : ZipColors.onInk,
+            ),
           ),
         ],
       ),

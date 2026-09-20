@@ -34,6 +34,10 @@ abstract final class ZipColors {
   static const success = Color(0xFF2DD4BF);
   static const successSoft = Color(0xFF134E4A);
 
+  /// Path Words accent (sky, distinct from Zip ember).
+  static const sky = Color(0xFF38BDF8);
+  static const skySoft = Color(0xFF163044);
+
   /// Zip number markers (readable on dark board).
   static const number = Color(0xFFFB7185);
 
@@ -48,10 +52,9 @@ ThemeData buildAppTheme() {
     scaffoldBackgroundColor: ZipColors.ink,
   );
 
-  final textTheme = GoogleFonts.lexendTextTheme(base.textTheme).apply(
-    bodyColor: ZipColors.onInk,
-    displayColor: ZipColors.onInk,
-  );
+  final textTheme = GoogleFonts.lexendTextTheme(
+    base.textTheme,
+  ).apply(bodyColor: ZipColors.onInk, displayColor: ZipColors.onInk);
 
   return base.copyWith(
     colorScheme: const ColorScheme.dark(
@@ -119,7 +122,10 @@ ThemeData buildAppTheme() {
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        textStyle: GoogleFonts.lexend(fontWeight: FontWeight.w700, fontSize: 16),
+        textStyle: GoogleFonts.lexend(
+          fontWeight: FontWeight.w700,
+          fontSize: 16,
+        ),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -128,7 +134,10 @@ ThemeData buildAppTheme() {
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
         side: const BorderSide(color: ZipColors.outline, width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        textStyle: GoogleFonts.lexend(fontWeight: FontWeight.w600, fontSize: 15),
+        textStyle: GoogleFonts.lexend(
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
       ),
     ),
     textButtonTheme: TextButtonThemeData(

@@ -16,6 +16,12 @@ sealed class HomeState with _$HomeState {
     @Default(0) int longestStreak,
     @Default(false) bool isOnFreeze,
     @Default(true) bool freezeAvailable,
+    @Default(0) int pathWordsBestPoints,
+    int? pathWordsBestTimeSeconds,
+    @Default(0) int pathWordsCurrentStreak,
+    @Default(0) int pathWordsLongestStreak,
+    @Default(false) bool pathWordsIsOnFreeze,
+    @Default(true) bool pathWordsFreezeAvailable,
   }) = _HomeState;
 
   factory HomeState.initial(DateTime now) {

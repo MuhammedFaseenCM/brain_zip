@@ -106,12 +106,6 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     final puzzle = state.puzzle;
     if (puzzle == null) return;
 
-    if (state.activePath.isNotEmpty && state.activePath.last == event.cell) {
-      if (state.hintFlashCell == null) return;
-      emit(state.copyWith(hintFlashCell: null));
-      return;
-    }
-
     final locked = PathWordsRules.lockedCells(puzzle, state.completedTargetIds);
     final begun = PathWordsRules.tryBegin(
       puzzle: puzzle,
@@ -135,10 +129,10 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     );
   }
 
-  Future<void> _onPointerEnter(
+  void _onPointerEnter(
     PathWordsPointerEnter event,
     Emitter<PathWordsState> emit,
-  ) async {
+  ) {
     if (state.finished) return;
     if (state.status != PathWordsStatus.ready &&
         state.status != PathWordsStatus.playing) {
@@ -157,37 +151,13 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     );
     if (next == null) return;
 
-    final completed = PathWordsRules.completedTarget(
-      puzzle: puzzle,
-      path: next,
-      completedTargetIds: state.completedTargetIds,
-    );
-
-    if (completed == null) {
-      emit(
-        state.copyWith(
-          status: PathWordsStatus.playing,
-          activePath: next,
-          hintFlashCell: null,
-        ),
-      );
-      return;
-    }
-
-    final updatedCompleted = {...state.completedTargetIds, completed.id};
     emit(
       state.copyWith(
         status: PathWordsStatus.playing,
-        activePath: const [],
-        completedTargetIds: updatedCompleted,
+        activePath: next,
         hintFlashCell: null,
-        hintRevealLength: 0,
       ),
     );
-
-    if (updatedCompleted.length >= puzzle.targets.length) {
-      await _finish(emit);
-    }
   }
 
   Future<void> _onPointerUp(

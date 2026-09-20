@@ -119,6 +119,66 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
     );
   }
 
+  double get _tileLift => _cellSize * 0.07;
+
+  Color _tileFace(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl
+        .withSaturation((hsl.saturation * 0.72).clamp(0.35, 0.72))
+        .withLightness(0.30)
+        .toColor();
+  }
+
+  Color _tileHighlight(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl
+        .withSaturation((hsl.saturation * 0.78).clamp(0.4, 0.8))
+        .withLightness(0.46)
+        .toColor();
+  }
+
+  Color _tileShade(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl.withLightness(0.16).toColor();
+  }
+
+  void _drawRaisedCell(
+    Canvas canvas, {
+    required Cell cell,
+    required Color color,
+  }) {
+    final radius = Radius.circular(_cellSize * 0.2);
+    final lift = _tileLift;
+    final base = _cellRect(cell, inset: _cellSize * 0.06);
+    final faceRect = base.translate(0, -lift);
+    final faceRRect = RRect.fromRectAndRadius(faceRect, radius);
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(base.translate(0, lift * 0.35), radius),
+      Paint()..color = Colors.black.withValues(alpha: 0.42),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(base, radius),
+      Paint()..color = _tileShade(color),
+    );
+    canvas.drawRRect(
+      faceRRect,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [_tileHighlight(color), _tileFace(color)],
+        ).createShader(faceRect),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(faceRect.deflate(_cellSize * 0.045), radius),
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.22)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = math.max(1.0, _cellSize * 0.03),
+    );
+  }
+
   void _tracePointer(Vector2 from, Vector2 to) {
     final delta = to - from;
     final distance = delta.length;
@@ -337,26 +397,8 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
       final target = targets[targetId];
       final colorIndex = target?.colorIndex ?? 0;
       final color = pathColors[colorIndex % pathColors.length];
-
-      final pulse = view.celebrate
-          ? (0.55 +
-                0.45 *
-                    (0.5 +
-                        0.5 *
-                            math.sin(
-                              (_celebrateT * math.pi * 2.4) + colorIndex,
-                            )))
-          : 1.0;
-      final fill = Paint()
-        ..color = color.withValues(alpha: (0.28 * pulse).clamp(0.18, 0.7));
       for (final cell in path) {
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            _cellRect(cell, inset: 2.5),
-            Radius.circular(_cellSize * 0.18),
-          ),
-          fill,
-        );
+        _drawRaisedCell(canvas, cell: cell, color: color);
       }
     }
   }
@@ -388,15 +430,8 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
 
   void _drawActivePath(Canvas canvas) {
     if (view.activePath.isEmpty) return;
-    final fill = Paint()..color = ZipColors.emberSoft.withValues(alpha: 0.85);
     for (final cell in view.activePath) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          _cellRect(cell, inset: 3),
-          Radius.circular(_cellSize * 0.18),
-        ),
-        fill,
-      );
+      _drawRaisedCell(canvas, cell: cell, color: ZipColors.ember);
     }
   }
 
@@ -406,29 +441,10 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
 
     final startedAt = _hintFlashStartedAt ?? DateTime.now();
     final t = DateTime.now().difference(startedAt).inMilliseconds / 1000.0;
-    final pulse = (math.sin(t * math.pi * 2) * 0.5 + 0.5);
-    final alpha = (0.25 + pulse * 0.35).clamp(0.0, 1.0);
-    final fill = ZipColors.success.withValues(alpha: alpha);
-    final stroke = Colors.white.withValues(alpha: alpha * 0.9);
-
+    final pulse = 0.5 + 0.5 * math.sin(t * math.pi * 2);
+    final color = Color.lerp(ZipColors.success, Colors.white, pulse * 0.16)!;
     for (final cell in path) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          _cellRect(cell, inset: 2),
-          Radius.circular(_cellSize * 0.2),
-        ),
-        Paint()..color = fill,
-      );
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          _cellRect(cell, inset: 2),
-          Radius.circular(_cellSize * 0.2),
-        ),
-        Paint()
-          ..color = stroke
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = math.max(2.0, _cellSize * 0.06),
-      );
+      _drawRaisedCell(canvas, cell: cell, color: color);
     }
   }
 
@@ -450,22 +466,28 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
         final isActive = activeCells.contains(cell);
         final isHint = view.hintPath.contains(cell);
 
-        final color = isActive
-            ? Colors.white
-            : isHint
-            ? Colors.white.withValues(alpha: 0.95)
-            : isCompleted
-            ? ZipColors.onInk.withValues(alpha: 0.92)
-            : ZipColors.onInk;
+        final isRaised = isActive || isCompleted || isHint;
+        final color = isRaised ? Colors.white : ZipColors.onInk;
+        final lift = isRaised ? _tileLift : 0.0;
 
         final tp = TextPainter(
           text: TextSpan(
             text: letter.toUpperCase(),
             style: TextStyle(
               color: color,
-              fontSize: _cellSize * 0.38,
+              fontSize: _cellSize * 0.4,
               fontWeight: FontWeight.w800,
-              letterSpacing: 0.5,
+              letterSpacing: 0.4,
+              height: 1,
+              shadows: isRaised
+                  ? const [
+                      Shadow(
+                        color: Color(0x99000000),
+                        blurRadius: 3,
+                        offset: Offset(0, 1),
+                      ),
+                    ]
+                  : null,
             ),
           ),
           textDirection: TextDirection.ltr,
@@ -473,7 +495,10 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
 
         tp.paint(
           canvas,
-          Offset(center.dx - tp.width / 2, center.dy - tp.height / 2),
+          Offset(
+            center.dx - tp.width / 2,
+            center.dy - tp.height / 2 - lift,
+          ),
         );
       }
     }

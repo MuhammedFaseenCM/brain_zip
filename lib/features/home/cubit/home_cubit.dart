@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 
 import '../../../domain/game_ids.dart';
+import '../../../domain/streak_calculator.dart';
 import '../../../domain/usecases/get_best_points.dart';
 import '../../../domain/usecases/get_best_time_seconds.dart';
 import '../../../domain/usecases/get_streak.dart';
@@ -24,16 +25,28 @@ class HomeCubit extends Cubit<HomeState> {
   final DateTime? _now;
 
   Future<void> load() async {
-    final key = 'zip_${state.dailyLevel.id}';
-    final streak = await _getStreak(gameId: GameIds.zip, now: _now);
+    final zipKey = 'zip_${state.dailyLevel.id}';
+    final pathWordsKey =
+        'path_words_${StreakCalculator.dateId(_now ?? DateTime.now())}';
+    final zipStreak = await _getStreak(gameId: GameIds.zip, now: _now);
+    final pathWordsStreak = await _getStreak(
+      gameId: GameIds.pathWords,
+      now: _now,
+    );
     emit(
       state.copyWith(
-        bestPoints: _getBestPoints(key),
-        bestTimeSeconds: _getBestTimeSeconds(key),
-        currentStreak: streak.current,
-        longestStreak: streak.longest,
-        isOnFreeze: streak.isOnFreeze,
-        freezeAvailable: streak.freezeAvailable,
+        bestPoints: _getBestPoints(zipKey),
+        bestTimeSeconds: _getBestTimeSeconds(zipKey),
+        currentStreak: zipStreak.current,
+        longestStreak: zipStreak.longest,
+        isOnFreeze: zipStreak.isOnFreeze,
+        freezeAvailable: zipStreak.freezeAvailable,
+        pathWordsBestPoints: _getBestPoints(pathWordsKey),
+        pathWordsBestTimeSeconds: _getBestTimeSeconds(pathWordsKey),
+        pathWordsCurrentStreak: pathWordsStreak.current,
+        pathWordsLongestStreak: pathWordsStreak.longest,
+        pathWordsIsOnFreeze: pathWordsStreak.isOnFreeze,
+        pathWordsFreezeAvailable: pathWordsStreak.freezeAvailable,
       ),
     );
   }

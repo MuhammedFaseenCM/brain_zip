@@ -166,11 +166,13 @@ void main() {
       // target t0: (0,0) -> (0,1)
       b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
       b.add(const PathWordsEvent.pointerEnter(Cell(0, 1)));
+      b.add(const PathWordsEvent.pointerUp());
       await pumpEventQueue();
 
       // target t1: (1,0) -> (1,1)
       b.add(const PathWordsEvent.pointerDown(Cell(1, 0)));
       b.add(const PathWordsEvent.pointerEnter(Cell(1, 1)));
+      b.add(const PathWordsEvent.pointerUp());
       await pumpEventQueue();
     },
     expect: () => [
@@ -188,6 +190,12 @@ void main() {
           .having((s) => s.status, 'status', PathWordsStatus.playing)
           .having((s) => s.activePath, 'activePath', [const Cell(0, 0)]),
       isA<PathWordsState>()
+          .having((s) => s.activePath, 'activePath', [
+            const Cell(0, 0),
+            const Cell(0, 1),
+          ])
+          .having((s) => s.completedTargetIds, 'completedTargetIds', isEmpty),
+      isA<PathWordsState>()
           .having(
             (s) => s.completedTargetIds,
             'completedTargetIds',
@@ -197,6 +205,16 @@ void main() {
       isA<PathWordsState>()
           .having((s) => s.status, 'status', PathWordsStatus.playing)
           .having((s) => s.activePath, 'activePath', [const Cell(1, 0)]),
+      isA<PathWordsState>()
+          .having((s) => s.activePath, 'activePath', [
+            const Cell(1, 0),
+            const Cell(1, 1),
+          ])
+          .having(
+            (s) => s.completedTargetIds,
+            'completedTargetIds',
+            contains('t0'),
+          ),
       isA<PathWordsState>()
           .having(
             (s) => s.completedTargetIds,
@@ -242,6 +260,113 @@ void main() {
         () => recordDailyClear(gameId: GameIds.pathWords, dateId: '20260917'),
       ).called(1);
     },
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
+    'dragging through a matching word does not complete until pointer up',
+    build: () {
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _linePuzzle3(day: inv.namedArguments[#day] as DateTime),
+      );
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        now: () => DateTime(2026, 9, 17, 0, 0, 0),
+        wait: (_) async {},
+      );
+    },
+    act: (b) async {
+      b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
+      b.add(const PathWordsEvent.pointerEnter(Cell(0, 1)));
+      b.add(const PathWordsEvent.pointerEnter(Cell(0, 2)));
+      b.add(const PathWordsEvent.pointerEnter(Cell(1, 2)));
+      await pumpEventQueue();
+    },
+    expect: () => [
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.loading,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.ready,
+      ),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 0),
+      ]),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 0),
+        const Cell(0, 1),
+      ]),
+      isA<PathWordsState>()
+          .having((s) => s.activePath, 'activePath', [
+            const Cell(0, 0),
+            const Cell(0, 1),
+            const Cell(0, 2),
+          ])
+          .having((s) => s.completedTargetIds, 'completedTargetIds', isEmpty),
+      isA<PathWordsState>()
+          .having((s) => s.activePath, 'activePath', [
+            const Cell(0, 0),
+            const Cell(0, 1),
+            const Cell(0, 2),
+            const Cell(1, 2),
+          ])
+          .having((s) => s.completedTargetIds, 'completedTargetIds', isEmpty)
+          .having((s) => s.finished, 'finished', isFalse),
+    ],
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
+    'completing a word happens on pointer up of an exact path',
+    build: () {
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _tinyPuzzle(day: inv.namedArguments[#day] as DateTime),
+      );
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        now: () => DateTime(2026, 9, 17, 0, 0, 0),
+      );
+    },
+    act: (b) async {
+      b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
+      b.add(const PathWordsEvent.pointerEnter(Cell(0, 1)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerUp());
+    },
+    expect: () => [
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.loading,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.ready,
+      ),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 0),
+      ]),
+      isA<PathWordsState>()
+          .having((s) => s.activePath, 'activePath', [
+            const Cell(0, 0),
+            const Cell(0, 1),
+          ])
+          .having((s) => s.completedTargetIds, 'completedTargetIds', isEmpty),
+      isA<PathWordsState>()
+          .having((s) => s.completedTargetIds, 'completedTargetIds', {'t0'})
+          .having((s) => s.activePath, 'activePath', isEmpty),
+    ],
   );
 
   blocTest<PathWordsBloc, PathWordsState>(
@@ -369,7 +494,7 @@ void main() {
   );
 
   blocTest<PathWordsBloc, PathWordsState>(
-    'resuming from the last cell keeps the incomplete path',
+    'tapping a selected cell clears the path and starts from that cell',
     build: () {
       when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
         (inv) async => _linePuzzle3(day: inv.namedArguments[#day] as DateTime),
@@ -389,6 +514,8 @@ void main() {
       b.add(const PathWordsEvent.pointerUp());
       await pumpEventQueue();
       b.add(const PathWordsEvent.pointerDown(Cell(0, 1)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
     },
     expect: () => [
       isA<PathWordsState>().having(
@@ -407,6 +534,12 @@ void main() {
       isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
         const Cell(0, 0),
         const Cell(0, 1),
+      ]),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 1),
+      ]),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 0),
       ]),
     ],
   );
@@ -558,6 +691,7 @@ void main() {
 
       b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
       b.add(const PathWordsEvent.pointerEnter(Cell(0, 1)));
+      b.add(const PathWordsEvent.pointerUp());
       await pumpEventQueue();
 
       b.add(const PathWordsEvent.reset());
@@ -578,6 +712,12 @@ void main() {
         'status',
         PathWordsStatus.playing,
       ),
+      isA<PathWordsState>()
+          .having((s) => s.activePath, 'activePath', [
+            const Cell(0, 0),
+            const Cell(0, 1),
+          ])
+          .having((s) => s.completedTargetIds, 'completedTargetIds', isEmpty),
       isA<PathWordsState>().having(
         (s) => s.completedTargetIds,
         'completedTargetIds',
@@ -639,10 +779,12 @@ void main() {
 
       b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
       b.add(const PathWordsEvent.pointerEnter(Cell(0, 1)));
+      b.add(const PathWordsEvent.pointerUp());
       await pumpEventQueue();
 
       b.add(const PathWordsEvent.pointerDown(Cell(1, 0)));
       b.add(const PathWordsEvent.pointerEnter(Cell(1, 1)));
+      b.add(const PathWordsEvent.pointerUp());
       await pumpEventQueue();
 
       b.add(const PathWordsEvent.reset());
@@ -662,6 +804,12 @@ void main() {
           .having((s) => s.status, 'status', PathWordsStatus.playing)
           .having((s) => s.activePath, 'activePath', [const Cell(0, 0)]),
       isA<PathWordsState>()
+          .having((s) => s.activePath, 'activePath', [
+            const Cell(0, 0),
+            const Cell(0, 1),
+          ])
+          .having((s) => s.completedTargetIds, 'completedTargetIds', isEmpty),
+      isA<PathWordsState>()
           .having(
             (s) => s.completedTargetIds,
             'completedTargetIds',
@@ -671,6 +819,16 @@ void main() {
       isA<PathWordsState>()
           .having((s) => s.status, 'status', PathWordsStatus.playing)
           .having((s) => s.activePath, 'activePath', [const Cell(1, 0)]),
+      isA<PathWordsState>()
+          .having((s) => s.activePath, 'activePath', [
+            const Cell(1, 0),
+            const Cell(1, 1),
+          ])
+          .having(
+            (s) => s.completedTargetIds,
+            'completedTargetIds',
+            contains('t0'),
+          ),
       isA<PathWordsState>()
           .having(
             (s) => s.completedTargetIds,

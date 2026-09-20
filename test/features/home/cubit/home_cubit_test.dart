@@ -44,6 +44,12 @@ void main() {
           lastClearedDateId: '20260913',
         ),
       );
+      when(
+        () => getStreak(
+          gameId: GameIds.pathWords,
+          now: any(named: 'now'),
+        ),
+      ).thenAnswer((_) async => const GameStreak(gameId: GameIds.pathWords));
 
       return HomeCubit(
         getBestPoints: pts,
@@ -66,6 +72,66 @@ void main() {
       verify(
         () => getStreak(
           gameId: GameIds.zip,
+          now: any(named: 'now'),
+        ),
+      ).called(1);
+    },
+  );
+
+  blocTest<HomeCubit, HomeState>(
+    'loads bests and streak for daily path words',
+    build: () {
+      when(() => pts(any())).thenReturn(0);
+      when(() => time(any())).thenReturn(null);
+      when(() => pts('path_words_20260913')).thenReturn(18);
+      when(() => time('path_words_20260913')).thenReturn(29);
+      when(
+        () => getStreak(
+          gameId: GameIds.zip,
+          now: any(named: 'now'),
+        ),
+      ).thenAnswer((_) async => const GameStreak(gameId: GameIds.zip));
+      when(
+        () => getStreak(
+          gameId: GameIds.pathWords,
+          now: any(named: 'now'),
+        ),
+      ).thenAnswer(
+        (_) async => const GameStreak(
+          gameId: GameIds.pathWords,
+          current: 3,
+          longest: 5,
+          lastClearedDateId: '20260913',
+          isOnFreeze: true,
+        ),
+      );
+
+      return HomeCubit(
+        getBestPoints: pts,
+        getBestTimeSeconds: time,
+        getStreak: getStreak,
+        now: DateTime.utc(2026, 9, 13),
+      );
+    },
+    act: (c) => c.load(),
+    expect: () => [
+      isA<HomeState>()
+          .having((s) => s.pathWordsBestPoints, 'pathWordsBestPoints', 18)
+          .having(
+            (s) => s.pathWordsBestTimeSeconds,
+            'pathWordsBestTimeSeconds',
+            29,
+          )
+          .having((s) => s.pathWordsCurrentStreak, 'pathWordsCurrentStreak', 3)
+          .having((s) => s.pathWordsLongestStreak, 'pathWordsLongestStreak', 5)
+          .having((s) => s.pathWordsIsOnFreeze, 'pathWordsIsOnFreeze', true),
+    ],
+    verify: (_) {
+      verify(() => pts('path_words_20260913')).called(1);
+      verify(() => time('path_words_20260913')).called(1);
+      verify(
+        () => getStreak(
+          gameId: GameIds.pathWords,
           now: any(named: 'now'),
         ),
       ).called(1);
