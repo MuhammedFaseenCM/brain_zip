@@ -54,7 +54,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCINzqIpBqip2LbWDg0u-NhkCw0O138phQ',
-    appId: '1:43073222004:android:04264a03ef2495c806a821',
+    appId: '1:43073222004:android:ef6288c5b95ca6f306a821',
     messagingSenderId: '43073222004',
     projectId: 'brain-zip-app',
     storageBucket: 'brain-zip-app.firebasestorage.app',

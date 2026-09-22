@@ -5,7 +5,15 @@ import '../../results/results_args.dart';
 
 part 'category_race_state.freezed.dart';
 
-enum CategoryRaceStatus { initial, loading, ready, playing, submitting, navigating, failure }
+enum CategoryRaceStatus {
+  initial,
+  loading,
+  ready,
+  playing,
+  submitting,
+  navigating,
+  failure,
+}
 
 @freezed
 sealed class CategoryRaceState with _$CategoryRaceState {
@@ -23,4 +31,3 @@ sealed class CategoryRaceState with _$CategoryRaceState {
     @Default(false) bool finished,
   }) = _CategoryRaceState;
 }
-

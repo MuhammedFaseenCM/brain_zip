@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/strings/app_strings.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/zip_ui.dart';
+import '../../domain/repositories/analytics_repository.dart';
 import 'results_args.dart';
 
 class ResultsScreen extends StatelessWidget {
   const ResultsScreen({super.key, required this.args});
 
   final ResultsArgs args;
+
+  Future<void> _logAction(BuildContext context, String action) {
+    final gameId = args.gameId;
+    if (gameId == null || gameId.isEmpty) return Future<void>.value();
+    return context.read<AnalyticsRepository>().logResultsAction(
+      gameId: gameId,
+      action: action,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,38 +163,61 @@ class ResultsScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 if (replayDaily)
                   Text(
-                    'A new puzzle unlocks tomorrow.',
+                    AppStrings.newPuzzleUnlocksTomorrow,
                     textAlign: TextAlign.center,
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: ZipColors.inkSoft),
                   ),
                 const Spacer(),
-                if (replayDaily || replayId != null || args.replayRoute != null)
+                if (!replayDaily &&
+                    (replayId != null || args.replayRoute != null))
                   ZipPrimaryButton(
-                    label: 'Play again',
+                    label: AppStrings.playAgain,
                     icon: Icons.refresh_rounded,
-                    onPressed: () {
+                    onPressed: () async {
+                      await _logAction(context, 'play_again');
+                      if (!context.mounted) return;
                       final route =
                           args.replayRoute ??
-                          ((replayDaily || replayId != null) ? '/zip' : null);
+                          (replayId != null ? '/zip' : null);
                       if (route != null) {
                         context.pushReplacement(route);
                       }
+                    },
+                  ).animate().fadeIn(delay: 220.ms)
+                else if (replayDaily)
+                  ZipPrimaryButton(
+                    label: AppStrings.backHome,
+                    icon: Icons.home_rounded,
+                    onPressed: () async {
+                      await _logAction(context, 'home');
+                      if (!context.mounted) return;
+                      context.go('/');
                     },
                   ).animate().fadeIn(delay: 220.ms),
                 if (nextId != null) ...[
                   const SizedBox(height: 10),
                   OutlinedButton(
-                    onPressed: () => context.pushReplacement('/zip'),
+                    onPressed: () async {
+                      await _logAction(context, 'play_other');
+                      if (!context.mounted) return;
+                      context.pushReplacement('/zip');
+                    },
                     child: const Text('Next puzzle'),
                   ),
                 ],
-                const SizedBox(height: 6),
-                TextButton(
-                  onPressed: () => context.go('/'),
-                  child: const Text('Back home'),
-                ),
+                if (!replayDaily) ...[
+                  const SizedBox(height: 6),
+                  TextButton(
+                    onPressed: () async {
+                      await _logAction(context, 'home');
+                      if (!context.mounted) return;
+                      context.go('/');
+                    },
+                    child: Text(AppStrings.backHome),
+                  ),
+                ],
               ],
             ),
           ),
@@ -192,9 +226,9 @@ class ResultsScreen extends StatelessWidget {
     );
   }
 
-  String _formatTime(int seconds) {
-    final m = seconds ~/ 60;
-    final s = seconds % 60;
+  String _formatTime(int totalSeconds) {
+    final m = totalSeconds ~/ 60;
+    final s = totalSeconds % 60;
     return '$m:${s.toString().padLeft(2, '0')}';
   }
 }

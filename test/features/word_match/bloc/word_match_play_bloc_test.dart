@@ -11,7 +11,10 @@ import 'package:brain_zip/features/word_match/bloc/word_match_play_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _MockFetchWordMatchDeckById extends Mock implements FetchWordMatchDeckById {}
+import '../../../helpers/mock_analytics_repository.dart';
+
+class _MockFetchWordMatchDeckById extends Mock
+    implements FetchWordMatchDeckById {}
 
 class _MockSubmitScore extends Mock implements SubmitScore {}
 
@@ -20,7 +23,11 @@ void main() {
   late _MockSubmitScore submitScore;
   late StreamController<int> ticks;
 
+  late MockAnalyticsRepository analytics;
+
   setUp(() {
+    analytics = MockAnalyticsRepository();
+    stubAnalytics(analytics);
     fetchDeckById = _MockFetchWordMatchDeckById();
     submitScore = _MockSubmitScore();
     ticks = StreamController<int>.broadcast();
@@ -31,22 +38,25 @@ void main() {
   });
 
   WordMatchDeck _deck({required int seconds}) => WordMatchDeck(
-        id: 'animals',
-        title: 'Animals',
-        seconds: seconds,
-        pairs: const [
-          WordPair(a: 'cat', b: 'meow'),
-          WordPair(a: 'cow', b: 'moo'),
-        ],
-      );
+    id: 'animals',
+    title: 'Animals',
+    seconds: seconds,
+    pairs: const [
+      WordPair(a: 'cat', b: 'meow'),
+      WordPair(a: 'cow', b: 'moo'),
+    ],
+  );
 
   blocTest<WordMatchPlayBloc, WordMatchPlayState>(
     'started loads deck and begins playing',
     build: () {
-      when(() => fetchDeckById(any())).thenAnswer((_) async => _deck(seconds: 3));
+      when(
+        () => fetchDeckById(any()),
+      ).thenAnswer((_) async => _deck(seconds: 3));
       return WordMatchPlayBloc(
         fetchDeckById: fetchDeckById,
         submitScore: submitScore,
+        analytics: analytics,
         ticker: () => ticks.stream,
       );
     },
@@ -69,10 +79,13 @@ void main() {
   blocTest<WordMatchPlayBloc, WordMatchPlayState>(
     'ticks down and navigates on timeout without submit',
     build: () {
-      when(() => fetchDeckById(any())).thenAnswer((_) async => _deck(seconds: 2));
+      when(
+        () => fetchDeckById(any()),
+      ).thenAnswer((_) async => _deck(seconds: 2));
       return WordMatchPlayBloc(
         fetchDeckById: fetchDeckById,
         submitScore: submitScore,
+        analytics: analytics,
         ticker: () => ticks.stream,
       );
     },
@@ -86,15 +99,27 @@ void main() {
       await pumpEventQueue();
     },
     expect: () => [
-      isA<WordMatchPlayState>().having((s) => s.status, 'status', WordMatchPlayStatus.loading),
+      isA<WordMatchPlayState>().having(
+        (s) => s.status,
+        'status',
+        WordMatchPlayStatus.loading,
+      ),
       isA<WordMatchPlayState>()
           .having((s) => s.status, 'status', WordMatchPlayStatus.playing)
           .having((s) => s.remainingSeconds, 'remainingSeconds', 2),
       isA<WordMatchPlayState>()
           .having((s) => s.matched, 'matched', 1)
           .having((s) => s.total, 'total', 2),
-      isA<WordMatchPlayState>().having((s) => s.remainingSeconds, 'remainingSeconds', 1),
-      isA<WordMatchPlayState>().having((s) => s.remainingSeconds, 'remainingSeconds', 0),
+      isA<WordMatchPlayState>().having(
+        (s) => s.remainingSeconds,
+        'remainingSeconds',
+        1,
+      ),
+      isA<WordMatchPlayState>().having(
+        (s) => s.remainingSeconds,
+        'remainingSeconds',
+        0,
+      ),
       isA<WordMatchPlayState>()
           .having((s) => s.status, 'status', WordMatchPlayStatus.navigating)
           .having((s) => s.resultsExtra?.title, 'title', 'Time up')
@@ -103,7 +128,11 @@ void main() {
     ],
     verify: (_) {
       verifyNever(
-        () => submitScore(modeKey: any(named: 'modeKey'), points: any(named: 'points'), timeSeconds: any(named: 'timeSeconds')),
+        () => submitScore(
+          modeKey: any(named: 'modeKey'),
+          points: any(named: 'points'),
+          timeSeconds: any(named: 'timeSeconds'),
+        ),
       );
     },
   );
@@ -111,14 +140,18 @@ void main() {
   blocTest<WordMatchPlayBloc, WordMatchPlayState>(
     'won submits score then navigates',
     build: () {
-      when(() => fetchDeckById(any())).thenAnswer((_) async => _deck(seconds: 10));
       when(
-        () => submitScore(modeKey: 'match_animals', points: 500, timeSeconds: 7),
+        () => fetchDeckById(any()),
+      ).thenAnswer((_) async => _deck(seconds: 10));
+      when(
+        () =>
+            submitScore(modeKey: 'match_animals', points: 500, timeSeconds: 7),
       ).thenAnswer((_) async => true);
 
       return WordMatchPlayBloc(
         fetchDeckById: fetchDeckById,
         submitScore: submitScore,
+        analytics: analytics,
         ticker: () => ticks.stream,
       );
     },
@@ -128,16 +161,31 @@ void main() {
       b.add(const WordMatchPlayEvent.won(points: 500, elapsedSeconds: 7));
     },
     expect: () => [
-      isA<WordMatchPlayState>().having((s) => s.status, 'status', WordMatchPlayStatus.loading),
-      isA<WordMatchPlayState>().having((s) => s.status, 'status', WordMatchPlayStatus.playing),
-      isA<WordMatchPlayState>().having((s) => s.status, 'status', WordMatchPlayStatus.submitting),
+      isA<WordMatchPlayState>().having(
+        (s) => s.status,
+        'status',
+        WordMatchPlayStatus.loading,
+      ),
+      isA<WordMatchPlayState>().having(
+        (s) => s.status,
+        'status',
+        WordMatchPlayStatus.playing,
+      ),
+      isA<WordMatchPlayState>().having(
+        (s) => s.status,
+        'status',
+        WordMatchPlayStatus.submitting,
+      ),
       isA<WordMatchPlayState>()
           .having((s) => s.status, 'status', WordMatchPlayStatus.navigating)
           .having((s) => s.resultsExtra?.title, 'title', 'All matched!')
           .having((s) => s.resultsExtra?.improved, 'improved', isTrue),
     ],
     verify: (_) {
-      verify(() => submitScore(modeKey: 'match_animals', points: 500, timeSeconds: 7)).called(1);
+      verify(
+        () =>
+            submitScore(modeKey: 'match_animals', points: 500, timeSeconds: 7),
+      ).called(1);
     },
   );
 
@@ -146,6 +194,7 @@ void main() {
     final bloc = WordMatchPlayBloc(
       fetchDeckById: fetchDeckById,
       submitScore: submitScore,
+      analytics: analytics,
       ticker: () => ticks.stream,
     );
 
@@ -157,4 +206,3 @@ void main() {
     expect(ticks.hasListener, isFalse);
   });
 }
-

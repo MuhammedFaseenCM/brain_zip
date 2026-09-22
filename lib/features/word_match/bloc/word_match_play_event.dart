@@ -19,4 +19,3 @@ sealed class WordMatchPlayEvent with _$WordMatchPlayEvent {
     required int elapsedSeconds,
   }) = WordMatchPlayWon;
 }
-

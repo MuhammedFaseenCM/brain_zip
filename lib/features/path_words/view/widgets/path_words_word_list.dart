@@ -22,17 +22,12 @@ class PathWordsWordList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tracing = PathWordsRules.activeTarget(
+    final tracing = PathWordsRules.liveFillTarget(
       puzzle: puzzle,
       activePath: activePath,
       completedTargetIds: completedTargetIds,
     );
-    final orderedTargets = [...puzzle.targets]
-      ..sort((a, b) {
-        final byLength = a.word.length.compareTo(b.word.length);
-        if (byLength != 0) return byLength;
-        return a.id.compareTo(b.id);
-      });
+    final orderedTargets = PathWordsRules.orderedTargets(puzzle);
 
     return Container(
       width: double.infinity,

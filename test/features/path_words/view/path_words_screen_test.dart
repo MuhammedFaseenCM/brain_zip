@@ -1,18 +1,24 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:brain_zip/core/strings/app_strings.dart';
+import 'package:brain_zip/core/widgets/game_tutorial_overlay.dart';
 import 'package:brain_zip/domain/entities/cell.dart';
 import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
+import 'package:brain_zip/domain/game_ids.dart';
+import 'package:brain_zip/domain/repositories/tutorial_repository.dart';
 import 'package:brain_zip/features/path_words/bloc/path_words_bloc.dart';
 import 'package:brain_zip/features/path_words/bloc/path_words_event.dart';
 import 'package:brain_zip/features/path_words/bloc/path_words_state.dart';
 import 'package:brain_zip/features/path_words/view/path_words_screen.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockPathWordsBloc extends MockBloc<PathWordsEvent, PathWordsState>
     implements PathWordsBloc {}
+
+class _MockTutorialRepository extends Mock implements TutorialRepository {}
 
 PathWordsPuzzle _tinyPuzzle({required DateTime day}) {
   return PathWordsPuzzle(
@@ -58,8 +64,17 @@ void main() {
       initialState: readyState,
     );
 
+    final tutorials = _MockTutorialRepository();
+    when(
+      () => tutorials.hasSeen(GameIds.pathWords),
+    ).thenAnswer((_) async => true);
+    when(() => tutorials.markSeen(GameIds.pathWords)).thenAnswer((_) async {});
+
     await tester.pumpWidget(
-      MaterialApp(home: PathWordsScreen(bloc: bloc, autoStart: false)),
+      RepositoryProvider<TutorialRepository>.value(
+        value: tutorials,
+        child: MaterialApp(home: PathWordsScreen(bloc: bloc, autoStart: false)),
+      ),
     );
 
     // Self-heal path uses a post-frame callback.
@@ -74,8 +89,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.text(AppStrings.pathWordsHowToPlayBody), findsOneWidget);
+    expect(find.byType(GameTutorialOverlay), findsOneWidget);
+    expect(find.text(AppStrings.pathWordsTutorialDrag), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
   });
 }

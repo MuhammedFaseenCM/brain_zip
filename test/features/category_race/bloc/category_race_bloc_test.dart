@@ -11,6 +11,8 @@ import 'package:brain_zip/features/category_race/bloc/category_race_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../../helpers/mock_analytics_repository.dart';
+
 class _MockFetchCategories extends Mock implements FetchCategories {}
 
 class _MockSubmitScore extends Mock implements SubmitScore {}
@@ -51,7 +53,11 @@ void main() {
     words: const ['apple', 'banana'],
   );
 
+  late MockAnalyticsRepository analytics;
+
   setUp(() {
+    analytics = MockAnalyticsRepository();
+    stubAnalytics(analytics);
     fetchCategories = _MockFetchCategories();
     submitScore = _MockSubmitScore();
     ticks = StreamController<int>.broadcast();
@@ -68,12 +74,20 @@ void main() {
       return CategoryRaceBloc(
         fetchCategories: fetchCategories,
         submitScore: submitScore,
-        random: _FakeRandom([1, 1]), // category index 1, viable letter index 1 => 'B'
+        analytics: analytics,
+        random: _FakeRandom([
+          1,
+          1,
+        ]), // category index 1, viable letter index 1 => 'B'
       );
     },
     act: (b) => b.add(const CategoryRaceEvent.fetchCategories()),
     expect: () => [
-      isA<CategoryRaceState>().having((s) => s.status, 'status', CategoryRaceStatus.loading),
+      isA<CategoryRaceState>().having(
+        (s) => s.status,
+        'status',
+        CategoryRaceStatus.loading,
+      ),
       isA<CategoryRaceState>()
           .having((s) => s.status, 'status', CategoryRaceStatus.ready)
           .having((s) => s.category?.id, 'category.id', 'fruits')
@@ -89,6 +103,7 @@ void main() {
       return CategoryRaceBloc(
         fetchCategories: fetchCategories,
         submitScore: submitScore,
+        analytics: analytics,
         random: _FakeRandom([0]), // viable letters [A, B] => pick A
         roundSeconds: 2,
         ticker: () => ticks.stream,
@@ -102,14 +117,22 @@ void main() {
       b.add(const CategoryRaceEvent.answerSubmitted('banana'));
     },
     expect: () => [
-      isA<CategoryRaceState>().having((s) => s.status, 'status', CategoryRaceStatus.loading),
+      isA<CategoryRaceState>().having(
+        (s) => s.status,
+        'status',
+        CategoryRaceStatus.loading,
+      ),
       isA<CategoryRaceState>()
           .having((s) => s.status, 'status', CategoryRaceStatus.ready)
           .having((s) => s.letter, 'letter', 'A'),
       isA<CategoryRaceState>()
           .having((s) => s.status, 'status', CategoryRaceStatus.playing)
           .having((s) => s.remainingSeconds, 'remainingSeconds', 2),
-      isA<CategoryRaceState>().having((s) => s.feedback, 'feedback', 'Must start with A'),
+      isA<CategoryRaceState>().having(
+        (s) => s.feedback,
+        'feedback',
+        'Must start with A',
+      ),
     ],
   );
 
@@ -124,6 +147,7 @@ void main() {
       return CategoryRaceBloc(
         fetchCategories: fetchCategories,
         submitScore: submitScore,
+        analytics: analytics,
         random: _FakeRandom([0]), // viable letters [A, B] => pick A
         roundSeconds: 2,
         ticker: () => ticks.stream,
@@ -141,15 +165,39 @@ void main() {
       await pumpEventQueue();
     },
     expect: () => [
-      isA<CategoryRaceState>().having((s) => s.status, 'status', CategoryRaceStatus.loading),
-      isA<CategoryRaceState>().having((s) => s.status, 'status', CategoryRaceStatus.ready),
-      isA<CategoryRaceState>().having((s) => s.status, 'status', CategoryRaceStatus.playing),
+      isA<CategoryRaceState>().having(
+        (s) => s.status,
+        'status',
+        CategoryRaceStatus.loading,
+      ),
+      isA<CategoryRaceState>().having(
+        (s) => s.status,
+        'status',
+        CategoryRaceStatus.ready,
+      ),
+      isA<CategoryRaceState>().having(
+        (s) => s.status,
+        'status',
+        CategoryRaceStatus.playing,
+      ),
       isA<CategoryRaceState>()
           .having((s) => s.answers, 'answers', ['apple'])
           .having((s) => s.feedback, 'feedback', isNull),
-      isA<CategoryRaceState>().having((s) => s.remainingSeconds, 'remainingSeconds', 1),
-      isA<CategoryRaceState>().having((s) => s.remainingSeconds, 'remainingSeconds', 0),
-      isA<CategoryRaceState>().having((s) => s.status, 'status', CategoryRaceStatus.submitting),
+      isA<CategoryRaceState>().having(
+        (s) => s.remainingSeconds,
+        'remainingSeconds',
+        1,
+      ),
+      isA<CategoryRaceState>().having(
+        (s) => s.remainingSeconds,
+        'remainingSeconds',
+        0,
+      ),
+      isA<CategoryRaceState>().having(
+        (s) => s.status,
+        'status',
+        CategoryRaceStatus.submitting,
+      ),
       isA<CategoryRaceState>()
           .having((s) => s.status, 'status', CategoryRaceStatus.navigating)
           .having((s) => s.resultsExtra?.title, 'title', 'Round over')
@@ -157,7 +205,9 @@ void main() {
           .having((s) => s.resultsExtra?.points, 'points', 50),
     ],
     verify: (_) {
-      verify(() => submitScore(modeKey: 'race_fruits', points: 50, timeSeconds: 2)).called(1);
+      verify(
+        () => submitScore(modeKey: 'race_fruits', points: 50, timeSeconds: 2),
+      ).called(1);
     },
   );
 
@@ -166,6 +216,7 @@ void main() {
     final bloc = CategoryRaceBloc(
       fetchCategories: fetchCategories,
       submitScore: submitScore,
+      analytics: analytics,
       random: Random(0),
       roundSeconds: 2,
       ticker: () => ticks.stream,
@@ -181,4 +232,3 @@ void main() {
     expect(ticks.hasListener, isFalse);
   });
 }
-

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'core/router/app_router.dart';
 import 'core/strings/app_strings.dart';
 import 'core/theme/app_theme.dart';
+import 'domain/repositories/analytics_repository.dart';
 
 class WinkloApp extends StatefulWidget {
   const WinkloApp({super.key});
@@ -12,10 +15,11 @@ class WinkloApp extends StatefulWidget {
 }
 
 class _WinkloAppState extends State<WinkloApp> {
-  late final _router = buildRouter();
+  GoRouter? _router;
 
   @override
   Widget build(BuildContext context) {
+    _router ??= buildRouter(analytics: context.read<AnalyticsRepository>());
     return MaterialApp.router(
       title: AppStrings.appTitle,
       theme: buildAppTheme(),

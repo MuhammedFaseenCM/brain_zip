@@ -10,9 +10,10 @@ class ZipLevelRepositoryImpl implements ZipLevelRepository {
   ZipLevelRepositoryImpl({
     FirebaseFirestore? firestore,
     AssetBundle? assetBundle,
-  })  : _firestore = firestore ??
-            (FirebaseBootstrap.isReady ? FirebaseFirestore.instance : null),
-        _assetBundle = assetBundle ?? rootBundle;
+  }) : _firestore =
+           firestore ??
+           (FirebaseBootstrap.isReady ? FirebaseFirestore.instance : null),
+       _assetBundle = assetBundle ?? rootBundle;
 
   final FirebaseFirestore? _firestore;
   final AssetBundle _assetBundle;
@@ -54,4 +55,3 @@ class ZipLevelRepositoryImpl implements ZipLevelRepository {
     return levels;
   }
 }
-

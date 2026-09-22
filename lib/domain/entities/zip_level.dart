@@ -11,6 +11,7 @@ class ZipLevel {
     required this.numbers,
     required this.walls,
     this.order = 0,
+    this.solution = const [],
   });
 
   final String id;
@@ -18,6 +19,7 @@ class ZipLevel {
   final Map<Cell, int> numbers;
   final List<Wall> walls;
   final int order;
+  final List<Cell> solution;
 
   int get maxNumber {
     if (numbers.isEmpty) return 0;
@@ -43,12 +45,10 @@ class ZipLevel {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'size': size,
-        'order': order,
-        'numbers': {
-          for (final e in numbers.entries) e.key.toString(): e.value,
-        },
-        'walls': walls.map((w) => w.toJson()).toList(),
-      };
+    'id': id,
+    'size': size,
+    'order': order,
+    'numbers': {for (final e in numbers.entries) e.key.toString(): e.value},
+    'walls': walls.map((w) => w.toJson()).toList(),
+  };
 }

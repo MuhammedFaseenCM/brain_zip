@@ -6,12 +6,17 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/dev_flags.dart';
 import '../../../core/strings/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/game_rule_tip_banner.dart';
 import '../../../core/widgets/zip_ui.dart';
 import '../../../domain/entities/cell.dart';
 import '../../../domain/path_words/path_words_rules.dart';
+import '../../../domain/repositories/analytics_repository.dart';
 import '../../../domain/usecases/generate_daily_path_words.dart';
+import '../../../domain/usecases/get_best_points.dart';
+import '../../../domain/usecases/get_best_time_seconds.dart';
 import '../../../domain/usecases/record_daily_clear.dart';
 import '../../../domain/usecases/submit_score.dart';
 import '../bloc/path_words_bloc.dart';
@@ -20,6 +25,7 @@ import '../bloc/path_words_state.dart';
 import '../game/path_words_board_view.dart';
 import '../game/path_words_game.dart';
 import 'widgets/path_words_how_to_play.dart';
+import 'widgets/path_words_tutorial.dart';
 import 'widgets/path_words_word_list.dart';
 
 class PathWordsScreen extends StatefulWidget {
@@ -42,6 +48,7 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
   late final PathWordsBloc _bloc;
   late final bool _ownsBloc;
   PathWordsGame? _game;
+  bool _tutorialPrompted = false;
 
   void _applyViewToGame(PathWordsBoardView view) {
     final game = _game;
@@ -77,7 +84,7 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
         revealedLength: state.hintRevealLength,
       ),
       hintRevealLength: state.hintRevealLength,
-      celebrate: state.finished,
+      celebrate: state.status == PathWordsStatus.celebrating,
       inputEnabled:
           !state.finished &&
           (state.status == PathWordsStatus.ready ||
@@ -122,6 +129,21 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
     });
   }
 
+  void _maybeShowTutorial(PathWordsState state) {
+    if (_tutorialPrompted) return;
+    final canPlay =
+        !state.finished &&
+        state.puzzle != null &&
+        (state.status == PathWordsStatus.ready ||
+            state.status == PathWordsStatus.playing);
+    if (!canPlay) return;
+    _tutorialPrompted = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      PathWordsTutorial.maybeShow(context);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -133,6 +155,10 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
           generateDailyPathWords: context.read<GenerateDailyPathWords>(),
           submitScore: context.read<SubmitScore>(),
           recordDailyClear: context.read<RecordDailyClear>(),
+          getBestPoints: context.read<GetBestPoints>(),
+          getBestTimeSeconds: context.read<GetBestTimeSeconds>(),
+          analytics: context.read<AnalyticsRepository>(),
+          playPeriod: DevFlags.playPeriod,
         );
 
     if (widget.autoStart) {
@@ -181,14 +207,22 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
               _applyViewToGame(view);
             },
           ),
+          BlocListener<PathWordsBloc, PathWordsState>(
+            listenWhen: (prev, curr) =>
+                prev.status != curr.status ||
+                prev.puzzle?.id != curr.puzzle?.id,
+            listener: (context, state) => _maybeShowTutorial(state),
+          ),
         ],
         child: BlocBuilder<PathWordsBloc, PathWordsState>(
           builder: (context, state) {
             _selfHealGame(state);
+            _maybeShowTutorial(state);
             final puzzle = state.puzzle;
             final finished = state.finished;
             final game = _game;
 
+            final isReview = state.status == PathWordsStatus.locked;
             final isReadyToPlay =
                 !finished &&
                 (state.status == PathWordsStatus.ready ||
@@ -216,13 +250,15 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                                 style: Theme.of(context).textTheme.titleLarge,
                               ),
                             ),
-                            IconButton(
-                              onPressed: !isReadyToPlay
-                                  ? null
-                                  : () =>
-                                        _bloc.add(const PathWordsEvent.reset()),
-                              icon: const Icon(Icons.refresh_rounded),
-                            ),
+                            if (!isReview)
+                              IconButton(
+                                onPressed: !isReadyToPlay
+                                    ? null
+                                    : () => _bloc.add(
+                                        const PathWordsEvent.reset(),
+                                      ),
+                                icon: const Icon(Icons.refresh_rounded),
+                              ),
                             const PathWordsHowToPlayButton(),
                           ],
                         ),
@@ -262,7 +298,13 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                                             ),
                                           ),
                                         )
-                                        .animate(target: finished ? 1 : 0)
+                                        .animate(
+                                          target:
+                                              state.status ==
+                                                  PathWordsStatus.celebrating
+                                              ? 1
+                                              : 0,
+                                        )
                                         .scaleXY(
                                           begin: 1,
                                           end: 1.045,
@@ -292,49 +334,62 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                                 completedTargetIds: state.completedTargetIds,
                                 palette: PathWordsGame.pathColors,
                               ),
-                              const SizedBox(height: 10),
                             ],
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: canUndo
-                                        ? () => _bloc.add(
-                                            const PathWordsEvent.undo(),
-                                          )
-                                        : null,
-                                    icon: const Icon(Icons.undo_rounded),
-                                    label: const Text(AppStrings.pathWordsUndo),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: FilledButton.tonalIcon(
-                                    style: FilledButton.styleFrom(
-                                      backgroundColor: ZipColors.wall,
-                                      foregroundColor: ZipColors.onInk,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                    ),
-                                    onPressed: canHint
-                                        ? () => _bloc.add(
-                                            const PathWordsEvent.hint(),
-                                          )
-                                        : null,
-                                    icon: const Icon(Icons.lightbulb_rounded),
-                                    label: Text(
-                                      AppStrings.pathWordsHintWithCount(
-                                        state.hintsRemaining,
+                            if (state.ruleTip != null && isReadyToPlay) ...[
+                              const SizedBox(height: 10),
+                              GameRuleTipBanner(
+                                message: state.ruleTip!,
+                                accent: ZipColors.sky,
+                              ),
+                            ],
+                            if (!isReview) ...[
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      onPressed: canUndo
+                                          ? () => _bloc.add(
+                                              const PathWordsEvent.undo(),
+                                            )
+                                          : null,
+                                      icon: const Icon(Icons.undo_rounded),
+                                      label: const Text(
+                                        AppStrings.pathWordsUndo,
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: FilledButton.tonalIcon(
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: ZipColors.wall,
+                                        foregroundColor: ZipColors.onInk,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 14,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: canHint
+                                          ? () => _bloc.add(
+                                              const PathWordsEvent.hint(),
+                                            )
+                                          : null,
+                                      icon: const Icon(Icons.lightbulb_rounded),
+                                      label: Text(
+                                        AppStrings.pathWordsHintWithCount(
+                                          state.hintsRemaining,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),

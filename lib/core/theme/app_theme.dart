@@ -36,6 +36,9 @@ abstract final class ZipColors {
 
   /// Path Words accent (sky, distinct from Zip ember).
   static const sky = Color(0xFF38BDF8);
+
+  /// Filled controls — dark enough for white label contrast.
+  static const skyDeep = Color(0xFF0369A1);
   static const skySoft = Color(0xFF163044);
 
   /// Zip number markers (readable on dark board).

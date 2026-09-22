@@ -73,16 +73,37 @@ void main() {
     expect(find.text('CD'), findsNothing);
   });
 
-  testWidgets('fills the active word cells from the drag, even if wrong', (
+  testWidgets('fills an empty slot of the drag length, not the official word', (
     tester,
   ) async {
-    final puzzle = _puzzle();
+    final puzzle = PathWordsPuzzle(
+      id: 'decoy',
+      day: DateTime(2026, 9, 17),
+      size: 3,
+      letters: const ['b', 'o', 'n', 'd', 'c', 'a', 't', 'x', 'y'],
+      targets: const [
+        PathWordsTarget(
+          id: 'bond',
+          word: 'bond',
+          start: Cell(0, 0),
+          path: [Cell(0, 0), Cell(0, 1), Cell(0, 2), Cell(1, 0)],
+          colorIndex: 0,
+        ),
+        PathWordsTarget(
+          id: 'cat',
+          word: 'cat',
+          start: Cell(1, 1),
+          path: [Cell(1, 1), Cell(1, 2), Cell(2, 0)],
+          colorIndex: 1,
+        ),
+      ],
+    );
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: PathWordsWordList(
             puzzle: puzzle,
-            activePath: const [Cell(0, 0), Cell(1, 0)],
+            activePath: const [Cell(0, 0), Cell(0, 1), Cell(0, 2)],
             completedTargetIds: const {},
             palette: const [Colors.red, Colors.blue],
           ),
@@ -90,20 +111,26 @@ void main() {
       ),
     );
 
-    final tracing = find.byKey(const Key('pathWordsWord_t0'));
-    final idle = find.byKey(const Key('pathWordsWord_t1'));
+    final decoy = find.byKey(const Key('pathWordsWord_cat'));
+    final official = find.byKey(const Key('pathWordsWord_bond'));
 
     expect(
-      find.descendant(of: tracing, matching: find.text('A')),
+      find.descendant(of: decoy, matching: find.text('B')),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: tracing, matching: find.text('C')),
+      find.descendant(of: decoy, matching: find.text('O')),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('pathWordsCheck_t0')), findsNothing);
-    expect(find.descendant(of: idle, matching: find.text('A')), findsNothing);
-    expect(find.descendant(of: idle, matching: find.text('C')), findsNothing);
+    expect(
+      find.descendant(of: decoy, matching: find.text('N')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: official, matching: find.text('B')),
+      findsNothing,
+    );
+    expect(find.byKey(const Key('pathWordsCheck_cat')), findsNothing);
   });
 
   testWidgets('shows word slots in ascending length order', (tester) async {

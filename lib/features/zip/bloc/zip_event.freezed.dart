@@ -55,12 +55,14 @@ extension ZipEventPatterns on ZipEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ZipStarted value)?  started,TResult Function( ZipCompleted value)?  completed,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ZipStarted value)?  started,TResult Function( ZipCompleted value)?  completed,TResult Function( ZipHint value)?  hint,TResult Function( ZipReset value)?  reset,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ZipStarted() when started != null:
 return started(_that);case ZipCompleted() when completed != null:
-return completed(_that);case _:
+return completed(_that);case ZipHint() when hint != null:
+return hint(_that);case ZipReset() when reset != null:
+return reset(_that);case _:
   return orElse();
 
 }
@@ -78,12 +80,14 @@ return completed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ZipStarted value)  started,required TResult Function( ZipCompleted value)  completed,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ZipStarted value)  started,required TResult Function( ZipCompleted value)  completed,required TResult Function( ZipHint value)  hint,required TResult Function( ZipReset value)  reset,}){
 final _that = this;
 switch (_that) {
 case ZipStarted():
 return started(_that);case ZipCompleted():
-return completed(_that);}
+return completed(_that);case ZipHint():
+return hint(_that);case ZipReset():
+return reset(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -97,12 +101,14 @@ return completed(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ZipStarted value)?  started,TResult? Function( ZipCompleted value)?  completed,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ZipStarted value)?  started,TResult? Function( ZipCompleted value)?  completed,TResult? Function( ZipHint value)?  hint,TResult? Function( ZipReset value)?  reset,}){
 final _that = this;
 switch (_that) {
 case ZipStarted() when started != null:
 return started(_that);case ZipCompleted() when completed != null:
-return completed(_that);case _:
+return completed(_that);case ZipHint() when hint != null:
+return hint(_that);case ZipReset() when reset != null:
+return reset(_that);case _:
   return null;
 
 }
@@ -119,11 +125,13 @@ return completed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DateTime? date)?  started,TResult Function( int points,  int timeSeconds)?  completed,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DateTime? date)?  started,TResult Function( int points,  int timeSeconds)?  completed,TResult Function( int hintsRemaining)?  hint,TResult Function()?  reset,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ZipStarted() when started != null:
 return started(_that.date);case ZipCompleted() when completed != null:
-return completed(_that.points,_that.timeSeconds);case _:
+return completed(_that.points,_that.timeSeconds);case ZipHint() when hint != null:
+return hint(_that.hintsRemaining);case ZipReset() when reset != null:
+return reset();case _:
   return orElse();
 
 }
@@ -141,11 +149,13 @@ return completed(_that.points,_that.timeSeconds);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DateTime? date)  started,required TResult Function( int points,  int timeSeconds)  completed,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DateTime? date)  started,required TResult Function( int points,  int timeSeconds)  completed,required TResult Function( int hintsRemaining)  hint,required TResult Function()  reset,}) {final _that = this;
 switch (_that) {
 case ZipStarted():
 return started(_that.date);case ZipCompleted():
-return completed(_that.points,_that.timeSeconds);}
+return completed(_that.points,_that.timeSeconds);case ZipHint():
+return hint(_that.hintsRemaining);case ZipReset():
+return reset();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -159,11 +169,13 @@ return completed(_that.points,_that.timeSeconds);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DateTime? date)?  started,TResult? Function( int points,  int timeSeconds)?  completed,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DateTime? date)?  started,TResult? Function( int points,  int timeSeconds)?  completed,TResult? Function( int hintsRemaining)?  hint,TResult? Function()?  reset,}) {final _that = this;
 switch (_that) {
 case ZipStarted() when started != null:
 return started(_that.date);case ZipCompleted() when completed != null:
-return completed(_that.points,_that.timeSeconds);case _:
+return completed(_that.points,_that.timeSeconds);case ZipHint() when hint != null:
+return hint(_that.hintsRemaining);case ZipReset() when reset != null:
+return reset();case _:
   return null;
 
 }
@@ -304,5 +316,103 @@ as int,
 
 
 }
+
+/// @nodoc
+
+
+class ZipHint implements ZipEvent {
+  const ZipHint({required this.hintsRemaining});
+  
+
+ final  int hintsRemaining;
+
+/// Create a copy of ZipEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ZipHintCopyWith<ZipHint> get copyWith => _$ZipHintCopyWithImpl<ZipHint>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZipHint&&(identical(other.hintsRemaining, hintsRemaining) || other.hintsRemaining == hintsRemaining));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,hintsRemaining);
+
+@override
+String toString() {
+  return 'ZipEvent.hint(hintsRemaining: $hintsRemaining)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ZipHintCopyWith<$Res> implements $ZipEventCopyWith<$Res> {
+  factory $ZipHintCopyWith(ZipHint value, $Res Function(ZipHint) _then) = _$ZipHintCopyWithImpl;
+@useResult
+$Res call({
+ int hintsRemaining
+});
+
+
+
+
+}
+/// @nodoc
+class _$ZipHintCopyWithImpl<$Res>
+    implements $ZipHintCopyWith<$Res> {
+  _$ZipHintCopyWithImpl(this._self, this._then);
+
+  final ZipHint _self;
+  final $Res Function(ZipHint) _then;
+
+/// Create a copy of ZipEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? hintsRemaining = null,}) {
+  return _then(ZipHint(
+hintsRemaining: null == hintsRemaining ? _self.hintsRemaining : hintsRemaining // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class ZipReset implements ZipEvent {
+  const ZipReset();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZipReset);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'ZipEvent.reset()';
+}
+
+
+}
+
+
+
 
 // dart format on

@@ -1,0 +1,15 @@
+Winklo is a collection of quick solo mini-games you can finish in a spare minute.
+
+ZIP
+Start at 1. Fill every cell. Finish on the last number. Move up, down, left, or right—not diagonally. A new puzzle each day.
+
+PATH WORDS
+Trace every word across the grid. Lift your finger anytime and keep going from the last cell. A new puzzle each day.
+
+WORD MATCH
+Match related words against the clock.
+
+CATEGORY RACE
+Name as many words as you can in a category.
+
+Keep a streak, beat your best time, and come back tomorrow for a new puzzle.

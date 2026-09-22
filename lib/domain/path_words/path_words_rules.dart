@@ -86,6 +86,48 @@ class PathWordsRules {
     return fallback;
   }
 
+  /// Empty word-list row to fill while dragging, without revealing the official word.
+  static PathWordsTarget? liveFillTarget({
+    required PathWordsPuzzle puzzle,
+    required List<Cell> activePath,
+    required Set<String> completedTargetIds,
+  }) {
+    if (activePath.isEmpty) return null;
+    final empty = [
+      for (final target in orderedTargets(puzzle))
+        if (!completedTargetIds.contains(target.id)) target,
+    ];
+    if (empty.isEmpty) return null;
+
+    final n = activePath.length;
+    final exact = [
+      for (final t in empty)
+        if (t.word.length == n) t,
+    ];
+    if (exact.isNotEmpty) {
+      return exact[_stablePick(activePath, exact.length)];
+    }
+    final longer = [
+      for (final t in empty)
+        if (t.word.length > n) t,
+    ];
+    if (longer.isNotEmpty) return longer.first;
+    return empty.last;
+  }
+
+  static List<PathWordsTarget> orderedTargets(PathWordsPuzzle puzzle) {
+    return [...puzzle.targets]..sort((a, b) {
+      final byLength = a.word.length.compareTo(b.word.length);
+      if (byLength != 0) return byLength;
+      return a.id.compareTo(b.id);
+    });
+  }
+
+  static int _stablePick(List<Cell> path, int count) {
+    final first = path.first;
+    return (first.row * 31 + first.col * 17 + path.length * 13).abs() % count;
+  }
+
   static PathWordsTarget? completedTarget({
     required PathWordsPuzzle puzzle,
     required List<Cell> path,
@@ -100,6 +142,29 @@ class PathWordsRules {
       }
     }
     return null;
+  }
+
+  /// True when the released path is the same length as an unfinished word
+  /// but does not match any remaining target (user thought they finished).
+  static bool looksLikeFailedWordAttempt({
+    required PathWordsPuzzle puzzle,
+    required List<Cell> path,
+    required Set<String> completedTargetIds,
+  }) {
+    if (path.length < 2) return false;
+    if (completedTarget(
+          puzzle: puzzle,
+          path: path,
+          completedTargetIds: completedTargetIds,
+        ) !=
+        null) {
+      return false;
+    }
+    for (final target in puzzle.targets) {
+      if (completedTargetIds.contains(target.id)) continue;
+      if (target.path.length == path.length) return true;
+    }
+    return false;
   }
 
   static List<Cell> hintedPath({

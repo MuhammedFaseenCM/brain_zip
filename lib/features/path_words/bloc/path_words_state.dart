@@ -13,6 +13,7 @@ enum PathWordsStatus {
   celebrating,
   submitting,
   navigating,
+  locked,
   failed,
 }
 
@@ -29,6 +30,7 @@ sealed class PathWordsState with _$PathWordsState {
     DateTime? startedAt,
     Cell? hintFlashCell,
     String? errorMessage,
+    String? ruleTip,
     @Default(false) bool finished,
     int? points,
     int? timeSeconds,

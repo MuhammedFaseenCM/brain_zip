@@ -11,6 +11,7 @@ class ResultsArgs {
     this.nextLevelId,
     this.currentStreak,
     this.longestStreak,
+    this.gameId,
   });
 
   final String title;
@@ -24,4 +25,5 @@ class ResultsArgs {
   final String? nextLevelId;
   final int? currentStreak;
   final int? longestStreak;
+  final String? gameId;
 }

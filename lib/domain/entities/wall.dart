@@ -13,12 +13,11 @@ class Wall {
   factory Wall.fromJson(Map<String, dynamic> json) {
     final a = (json['a'] as List).cast<num>();
     final b = (json['b'] as List).cast<num>();
-    return Wall(Cell(a[0].toInt(), a[1].toInt()),
-        Cell(b[0].toInt(), b[1].toInt()));
+    return Wall(
+      Cell(a[0].toInt(), a[1].toInt()),
+      Cell(b[0].toInt(), b[1].toInt()),
+    );
   }
 
-  Map<String, dynamic> toJson() => {
-        'a': a.toList(),
-        'b': b.toList(),
-      };
+  Map<String, dynamic> toJson() => {'a': a.toList(), 'b': b.toList()};
 }

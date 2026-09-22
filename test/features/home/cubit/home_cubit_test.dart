@@ -1,6 +1,10 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:brain_zip/domain/entities/app_update_decision.dart';
 import 'package:brain_zip/domain/entities/game_streak.dart';
 import 'package:brain_zip/domain/game_ids.dart';
+import 'package:brain_zip/domain/play_period.dart';
+import 'package:brain_zip/domain/repositories/app_update_repository.dart';
+import 'package:brain_zip/domain/usecases/check_app_update.dart';
 import 'package:brain_zip/domain/usecases/get_best_points.dart';
 import 'package:brain_zip/domain/usecases/get_best_time_seconds.dart';
 import 'package:brain_zip/domain/usecases/get_streak.dart';
@@ -9,22 +13,68 @@ import 'package:brain_zip/features/home/cubit/home_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../../helpers/mock_analytics_repository.dart';
+
 class _MockGetBestPoints extends Mock implements GetBestPoints {}
 
 class _MockGetBestTimeSeconds extends Mock implements GetBestTimeSeconds {}
 
 class _MockGetStreak extends Mock implements GetStreak {}
 
+class _MockCheckAppUpdate extends Mock implements CheckAppUpdate {}
+
+class _MockAppUpdateRepository extends Mock implements AppUpdateRepository {}
+
 void main() {
   late _MockGetBestPoints pts;
   late _MockGetBestTimeSeconds time;
   late _MockGetStreak getStreak;
+  late MockAnalyticsRepository analytics;
+  late _MockCheckAppUpdate checkAppUpdate;
+  late _MockAppUpdateRepository appUpdateRepository;
 
   setUp(() {
     pts = _MockGetBestPoints();
     time = _MockGetBestTimeSeconds();
     getStreak = _MockGetStreak();
+    analytics = MockAnalyticsRepository();
+    checkAppUpdate = _MockCheckAppUpdate();
+    appUpdateRepository = _MockAppUpdateRepository();
+    stubAnalytics(analytics);
+    when(
+      () => checkAppUpdate(),
+    ).thenAnswer((_) async => AppUpdateDecision.none);
+    when(
+      () => appUpdateRepository.openStore(any()),
+    ).thenAnswer((_) async => true);
   });
+
+  HomeCubit buildCubit({
+    DateTime? now,
+    Duration playPeriod = PlayPeriod.daily,
+  }) {
+    return HomeCubit(
+      getBestPoints: pts,
+      getBestTimeSeconds: time,
+      getStreak: getStreak,
+      analytics: analytics,
+      checkAppUpdate: checkAppUpdate,
+      appUpdateRepository: appUpdateRepository,
+      now: now ?? DateTime.utc(2026, 9, 13),
+      playPeriod: playPeriod,
+    );
+  }
+
+  void stubIdleScores() {
+    when(() => pts(any())).thenReturn(0);
+    when(() => time(any())).thenReturn(null);
+    when(
+      () => getStreak(
+        gameId: any(named: 'gameId'),
+        now: any(named: 'now'),
+      ),
+    ).thenAnswer((_) async => const GameStreak(gameId: GameIds.zip));
+  }
 
   blocTest<HomeCubit, HomeState>(
     'loads bests and streak for daily zip',
@@ -51,12 +101,7 @@ void main() {
         ),
       ).thenAnswer((_) async => const GameStreak(gameId: GameIds.pathWords));
 
-      return HomeCubit(
-        getBestPoints: pts,
-        getBestTimeSeconds: time,
-        getStreak: getStreak,
-        now: DateTime.utc(2026, 9, 13),
-      );
+      return buildCubit();
     },
     act: (c) => c.load(),
     expect: () => [
@@ -64,7 +109,8 @@ void main() {
           .having((s) => s.bestPoints, 'bestPoints', 42)
           .having((s) => s.bestTimeSeconds, 'bestTimeSeconds', 11)
           .having((s) => s.currentStreak, 'currentStreak', 4)
-          .having((s) => s.longestStreak, 'longestStreak', 7),
+          .having((s) => s.longestStreak, 'longestStreak', 7)
+          .having((s) => s.updateStatus, 'updateStatus', AppUpdateStatus.none),
     ],
     verify: (_) {
       verify(() => pts('zip_daily_20260913')).called(1);
@@ -106,12 +152,7 @@ void main() {
         ),
       );
 
-      return HomeCubit(
-        getBestPoints: pts,
-        getBestTimeSeconds: time,
-        getStreak: getStreak,
-        now: DateTime.utc(2026, 9, 13),
-      );
+      return buildCubit();
     },
     act: (c) => c.load(),
     expect: () => [
@@ -136,5 +177,107 @@ void main() {
         ),
       ).called(1);
     },
+  );
+
+  blocTest<HomeCubit, HomeState>(
+    'minute play period reads this minute\'s scores',
+    build: () {
+      when(() => pts(any())).thenReturn(0);
+      when(() => time(any())).thenReturn(null);
+      when(() => pts('zip_daily_202609201431')).thenReturn(500);
+      when(() => time('path_words_202609201431')).thenReturn(20);
+      when(
+        () => getStreak(
+          gameId: any(named: 'gameId'),
+          now: any(named: 'now'),
+        ),
+      ).thenAnswer((_) async => const GameStreak(gameId: GameIds.zip));
+
+      return buildCubit(
+        now: DateTime(2026, 9, 20, 14, 31, 50),
+        playPeriod: PlayPeriod.minute,
+      );
+    },
+    act: (c) => c.load(),
+    expect: () => [
+      isA<HomeState>()
+          .having((s) => s.dateId, 'dateId', 'daily_202609201431')
+          .having((s) => s.bestPoints, 'bestPoints', 500)
+          .having((s) => s.pathWordsBestTimeSeconds, 'pathWordsTime', 20),
+    ],
+  );
+
+  blocTest<HomeCubit, HomeState>(
+    'openGame logs home_game_opened',
+    build: () {
+      stubIdleScores();
+      return buildCubit();
+    },
+    act: (c) => c.openGame(GameIds.zip),
+    expect: () => <HomeState>[],
+    verify: (_) {
+      verify(() => analytics.logHomeGameOpened(gameId: GameIds.zip)).called(1);
+    },
+  );
+
+  blocTest<HomeCubit, HomeState>(
+    'load applies a soft update decision and labels',
+    build: () {
+      stubIdleScores();
+      when(() => checkAppUpdate()).thenAnswer(
+        (_) async => const AppUpdateDecision(
+          status: AppUpdateStatus.soft,
+          storeUrl:
+              'https://play.google.com/store/apps/details?id=com.winklo.faseencm',
+          currentLabel: '1.0.0+1',
+          requiredLabel: '1.0.0+2',
+        ),
+      );
+      return buildCubit();
+    },
+    act: (c) => c.load(),
+    expect: () => [
+      isA<HomeState>()
+          .having((s) => s.updateStatus, 'updateStatus', AppUpdateStatus.soft)
+          .having((s) => s.updateCurrentLabel, 'updateCurrentLabel', '1.0.0+1')
+          .having(
+            (s) => s.updateRequiredLabel,
+            'updateRequiredLabel',
+            '1.0.0+2',
+          )
+          .having(
+            (s) => s.updateStoreUrl,
+            'updateStoreUrl',
+            'https://play.google.com/store/apps/details?id=com.winklo.faseencm',
+          ),
+    ],
+  );
+
+  blocTest<HomeCubit, HomeState>(
+    'load applies a forced update decision',
+    build: () {
+      stubIdleScores();
+      when(() => checkAppUpdate()).thenAnswer(
+        (_) async => const AppUpdateDecision(
+          status: AppUpdateStatus.forced,
+          storeUrl:
+              'https://play.google.com/store/apps/details?id=com.winklo.faseencm',
+          currentLabel: '1.0.0+10',
+          requiredLabel: '2.0.0+0',
+        ),
+      );
+      return buildCubit();
+    },
+    act: (c) => c.load(),
+    expect: () => [
+      isA<HomeState>()
+          .having((s) => s.updateStatus, 'updateStatus', AppUpdateStatus.forced)
+          .having((s) => s.updateCurrentLabel, 'updateCurrentLabel', '1.0.0+10')
+          .having(
+            (s) => s.updateRequiredLabel,
+            'updateRequiredLabel',
+            '2.0.0+0',
+          ),
+    ],
   );
 }

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import '../entities/cell.dart';
 import '../entities/path_words_puzzle.dart';
-import '../streak_calculator.dart';
+import '../play_period.dart';
 
 abstract final class PathWordsGenerator {
   static const generatorVersion = 5;
@@ -15,10 +15,12 @@ abstract final class PathWordsGenerator {
   static PathWordsPuzzle generate({
     required DateTime day,
     required List<String> words,
+    Duration period = PlayPeriod.daily,
   }) {
     final local = day.toLocal();
-    final localDay = DateTime(local.year, local.month, local.day);
-    final dateId = StreakCalculator.dateId(localDay);
+    final bucket = PlayPeriod.bucket(local, period);
+    final dateId = PlayPeriod.id(bucket, period);
+    final localDay = DateTime(bucket.year, bucket.month, bucket.day);
     final seed = Object.hash(dateId, generatorVersion);
     final rng = Random(seed);
 

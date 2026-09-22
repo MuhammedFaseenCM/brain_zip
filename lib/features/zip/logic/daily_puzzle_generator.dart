@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../../domain/entities/zip_level.dart';
+import '../../../domain/play_period.dart';
 
 /// Daily Zip puzzles in the style of popular path-fill games:
 /// grids about 6–8, checkpoints from 1 up to at most 15.
@@ -10,48 +11,58 @@ class DailyPuzzleGenerator {
   static const int maxNumbers = 15;
   static const List<int> _gridSizes = [6, 6, 7, 7, 8];
 
-  static String dateId(DateTime date) {
-    final local = DateTime(date.year, date.month, date.day);
-    final y = local.year.toString().padLeft(4, '0');
-    final m = local.month.toString().padLeft(2, '0');
-    final d = local.day.toString().padLeft(2, '0');
-    return 'daily_$y$m$d';
+  static String dateId(DateTime date, {Duration period = PlayPeriod.daily}) {
+    return 'daily_${PlayPeriod.id(date, period)}';
   }
 
   static String displayDate(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final local = DateTime(date.year, date.month, date.day);
     return '${months[local.month - 1]} ${local.day}, ${local.year}';
   }
 
-  static int seedFor(DateTime date) {
-    final local = DateTime(date.year, date.month, date.day);
-    return local.year * 10000 + local.month * 100 + local.day;
+  static int seedFor(DateTime date, {Duration period = PlayPeriod.daily}) {
+    final local = PlayPeriod.bucket(date, period);
+    final daySeed = local.year * 10000 + local.month * 100 + local.day;
+    if (!PlayPeriod.isSubDaily(period)) return daySeed;
+    return daySeed * 10000 + local.hour * 100 + local.minute;
   }
 
-  /// Same calendar day → same puzzle for every player.
-  static ZipLevel forDate(DateTime date) {
-    final seed = seedFor(date);
+  /// Same play period → same puzzle for every player.
+  static ZipLevel forDate(DateTime date, {Duration period = PlayPeriod.daily}) {
+    final seed = seedFor(date, period: period);
     final rng = Random(seed);
     final size = _gridSizes[seed % _gridSizes.length];
-    final path = _orientedSerpentine(size, rng);
+    final path = _twistyHamiltonian(size, rng);
     final numberCount = _numberCountFor(size, rng);
     final numbers = _placeNumbers(path, numberCount);
     final walls = _placeWalls(size, path, rng);
 
     return ZipLevel(
-      id: dateId(date),
+      id: dateId(date, period: period),
       size: size,
       numbers: numbers,
       walls: walls,
       order: seed,
+      solution: path,
     );
   }
 
-  static ZipLevel today([DateTime? now]) => forDate(now ?? DateTime.now());
+  static ZipLevel today([DateTime? now, Duration period = PlayPeriod.daily]) =>
+      forDate(now ?? DateTime.now(), period: period);
 
   static int _numberCountFor(int size, Random rng) {
     final cells = size * size;
@@ -59,6 +70,77 @@ class DailyPuzzleGenerator {
     final maxCount = min(maxNumbers, cells);
     final lo = min(minCount, maxCount);
     return lo + rng.nextInt(maxCount - lo + 1);
+  }
+
+  static List<Cell> _twistyHamiltonian(int size, Random rng) {
+    var path = _orientedSerpentine(size, rng);
+    final mutations = size * size * 8;
+    for (var i = 0; i < mutations; i++) {
+      final next = _tryBackbite(path, size, rng);
+      if (next != null) path = next;
+      if (rng.nextInt(4) == 0) {
+        path = path.reversed.toList();
+      }
+      if (_longestStraightRun(path) < size) {
+        // Keep mutating a bit after the first kink so the snake is not almost-straight.
+        if (i > size * size) return path;
+      }
+    }
+    if (_longestStraightRun(path) < size) return path;
+
+    for (var i = 0; i < mutations; i++) {
+      final next = _tryBackbite(path, size, rng);
+      if (next != null) path = next;
+      path = path.reversed.toList();
+      if (_longestStraightRun(path) < size) return path;
+    }
+    return path;
+  }
+
+  static List<Cell>? _tryBackbite(List<Cell> path, int size, Random rng) {
+    final end = path.last;
+    final indexByCell = <Cell, int>{
+      for (var i = 0; i < path.length; i++) path[i]: i,
+    };
+    final pivots = <int>[];
+    for (final neighbor in _neighbors(end, size)) {
+      final index = indexByCell[neighbor];
+      if (index == null || index >= path.length - 2) continue;
+      pivots.add(index);
+    }
+    if (pivots.isEmpty) return null;
+    final pivot = pivots[rng.nextInt(pivots.length)];
+    return [...path.sublist(0, pivot + 1), ...path.sublist(pivot + 1).reversed];
+  }
+
+  static List<Cell> _neighbors(Cell cell, int size) {
+    return [
+      if (cell.row > 0) Cell(cell.row - 1, cell.col),
+      if (cell.row + 1 < size) Cell(cell.row + 1, cell.col),
+      if (cell.col > 0) Cell(cell.row, cell.col - 1),
+      if (cell.col + 1 < size) Cell(cell.row, cell.col + 1),
+    ];
+  }
+
+  static int _longestStraightRun(List<Cell> path) {
+    if (path.length < 2) return path.length;
+    var best = 1;
+    var run = 1;
+    var previousDr = path[1].row - path[0].row;
+    var previousDc = path[1].col - path[0].col;
+    for (var i = 1; i < path.length; i++) {
+      final dr = path[i].row - path[i - 1].row;
+      final dc = path[i].col - path[i - 1].col;
+      if (dr == previousDr && dc == previousDc) {
+        run++;
+      } else {
+        previousDr = dr;
+        previousDc = dc;
+        run = 2;
+      }
+      if (run > best) best = run;
+    }
+    return best;
   }
 
   static List<Cell> _orientedSerpentine(int size, Random rng) {

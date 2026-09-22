@@ -24,9 +24,9 @@ class WordCategory {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'order': order,
-        'words': words,
-      };
+    'id': id,
+    'name': name,
+    'order': order,
+    'words': words,
+  };
 }

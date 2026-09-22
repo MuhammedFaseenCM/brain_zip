@@ -10,9 +10,10 @@ class WordMatchRepositoryImpl implements WordMatchRepository {
   WordMatchRepositoryImpl({
     FirebaseFirestore? firestore,
     AssetBundle? assetBundle,
-  })  : _firestore = firestore ??
-            (FirebaseBootstrap.isReady ? FirebaseFirestore.instance : null),
-        _assetBundle = assetBundle ?? rootBundle;
+  }) : _firestore =
+           firestore ??
+           (FirebaseBootstrap.isReady ? FirebaseFirestore.instance : null),
+       _assetBundle = assetBundle ?? rootBundle;
 
   final FirebaseFirestore? _firestore;
   final AssetBundle _assetBundle;
@@ -49,8 +50,10 @@ class WordMatchRepositoryImpl implements WordMatchRepository {
     final firestore = _firestore;
     if (firestore != null) {
       try {
-        final doc =
-            await firestore.collection('word_match_decks').doc(id).get();
+        final doc = await firestore
+            .collection('word_match_decks')
+            .doc(id)
+            .get();
         final data = doc.data();
         if (doc.exists && data != null) {
           return WordMatchDeck.fromJson(data, id: doc.id);
@@ -73,10 +76,11 @@ class WordMatchRepositoryImpl implements WordMatchRepository {
     final decks = <WordMatchDeck>[];
     for (final path in _assetFiles) {
       final raw = await _assetBundle.loadString(path);
-      decks.add(WordMatchDeck.fromJson(jsonDecode(raw) as Map<String, dynamic>));
+      decks.add(
+        WordMatchDeck.fromJson(jsonDecode(raw) as Map<String, dynamic>),
+      );
     }
     decks.sort((a, b) => a.order.compareTo(b.order));
     return decks;
   }
 }
-

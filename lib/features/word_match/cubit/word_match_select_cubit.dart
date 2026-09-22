@@ -30,13 +30,7 @@ class WordMatchSelectCubit extends Cubit<WordMatchSelectState> {
 
       emit(state.copyWith(status: WordMatchSelectStatus.ready, items: items));
     } catch (e) {
-      emit(
-        state.copyWith(
-          status: WordMatchSelectStatus.failure,
-          error: '$e',
-        ),
-      );
+      emit(state.copyWith(status: WordMatchSelectStatus.failure, error: '$e'));
     }
   }
 }
-

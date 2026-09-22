@@ -5,7 +5,14 @@ import '../../results/results_args.dart';
 
 part 'word_match_play_state.freezed.dart';
 
-enum WordMatchPlayStatus { initial, loading, playing, submitting, navigating, failure }
+enum WordMatchPlayStatus {
+  initial,
+  loading,
+  playing,
+  submitting,
+  navigating,
+  failure,
+}
 
 @freezed
 sealed class WordMatchPlayState with _$WordMatchPlayState {
@@ -21,4 +28,3 @@ sealed class WordMatchPlayState with _$WordMatchPlayState {
     String? error,
   }) = _WordMatchPlayState;
 }
-

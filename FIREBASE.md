@@ -1,13 +1,15 @@
 # Firebase setup (Brain Zip)
 
 The app works **without** Firebase using local seed JSON under `assets/`.  
-Connect Firebase when you want to edit words/levels remotely.
+Connect Firebase when you want to edit words/levels remotely, and for Analytics / Crashlytics.
 
 ## 1. Create project
 
 1. Open [Firebase Console](https://console.firebase.google.com/)
 2. Create a project (Spark / free plan is fine)
-3. Add an **Android** app with package name: `com.brainzip.brain_zip`
+3. Add an **Android** app with package name: `com.winklo.faseencm`
+4. Enable **Google Analytics** for the project (recommended; also powers Crashlytics breadcrumbs)
+5. In Build → **Crashlytics**, click through to enable Crashlytics for the Android app
 
 ## 2. Wire the Android app
 
@@ -21,9 +23,11 @@ Or manually:
 
 1. Download `google-services.json` into `android/app/`
 2. In `android/settings.gradle.kts` plugins block, add:
-   `id("com.google.gms.google-services") version "4.4.2" apply false`
+   `id("com.google.gms.google-services") version "4.4.4" apply false`
+   `id("com.google.firebase.crashlytics") version "3.0.8" apply false`
 3. In `android/app/build.gradle.kts` plugins block, add:
    `id("com.google.gms.google-services")`
+   `id("com.google.firebase.crashlytics")`
 
 ## 3. Firestore
 
@@ -66,9 +70,100 @@ You can copy fields from files in:
 - `assets/word_match/decks/`
 - `assets/words/categories/`
 
-## 4. Behavior
+## 4. Analytics + Crashlytics
+
+Packages: `firebase_analytics`, `firebase_crashlytics`.
+
+- Collection is always on when Firebase initializes successfully
+- Crashlytics upload is **release-only** (`!kDebugMode`)
+- Product events go through `AnalyticsRepository` (domain) → `FirebaseAnalyticsRepositoryImpl`
+- Screen views are logged via `AnalyticsRouteObserver` on GoRouter
+
+### Verify Analytics (debug)
+
+1. Enable Analytics DebugView for your device (see [DebugView](https://firebase.google.com/docs/analytics/debugview))
+2. Open games from home, use hint/reset, finish a puzzle
+3. Confirm events such as `home_game_opened`, `game_started`, `game_completed`, `hint_used`, `screen_view` in the Firebase console
+
+### Verify Crashlytics
+
+1. Ship a release build (or temporarily enable collection in debug)
+2. Force a test crash once, relaunch the app so the report uploads
+3. Check Crashlytics → Issues in the Firebase console (can take a few minutes)
+
+## 5. Behavior
 
 - On launch, the app tries `Firebase.initializeApp()`
 - If that fails (no config yet), it uses asset seeds and shows a home banner
 - If Firebase works but a collection is empty, it also falls back to assets
 - Firestore offline persistence is enabled for solo play after first sync
+- Analytics / Crashlytics no-op safely when Firebase is not ready
+
+## 6. Remote Config (force update)
+
+Winklo reads **Firebase Remote Config** on Home to soft-prompt or block players when their install is below a minimum **version** and/or **build number**. Checks run on Home load and again when the app resumes (so updating from the Play Store and returning can clear a forced overlay without restart).
+
+### Enable in the console
+
+1. In [Firebase Console](https://console.firebase.google.com/) → your project → **Remote Config**, create parameters if they do not exist yet.
+2. Publish values when you are ready for clients to fetch them (app initializes Remote Config after a successful `Firebase.initializeApp()`).
+
+**Fetch interval (client cache):** `FirebaseBootstrap` sets Remote Config `minimumFetchInterval` to **`Duration.zero` in debug** (immediate fetch while developing) and **15 minutes in release**. Publishing new parameters in the console is **not instant** for installs that are already running: the app re-checks on Home load and when the app **resumes**, but the SDK may still serve **cached** values until the minimum fetch interval has elapsed since the last successful fetch.
+
+Package: `firebase_remote_config` (see `lib/data/clients/remote_config_client.dart` for key names and in-app defaults).
+
+### Keys, types, and in-app defaults
+
+| Key | Type | Default (in app) | Purpose |
+|-----|------|------------------|---------|
+| `appVersion` | String | `0.0.0` | Minimum required marketing version (e.g. `1.0.0`) |
+| `minBuildNumber` | Number | `0` | Minimum build when installed version **equals** `appVersion` |
+| `forceUpdate` | Boolean | `false` | `true` → Home-only blocking overlay; `false` → non-dismissible soft banner |
+| `playStoreUrl` | String | `https://play.google.com/store/apps/details?id=com.winklo.faseencm` | Android store link opened by **Update** |
+| `appStoreUrl` | String | `''` (empty) | Reserved for iOS later; not used for update decisions on Android today |
+
+**Comparison (summary):**
+
+- `appVersion` empty or `0.0.0` → treat as **not configured** → no update prompt.
+- `playStoreUrl` empty → **no update prompt** (fail open; Android uses Play URL only for now).
+- If installed version **&lt;** required → update needed; if **==** required and build **&lt;** `minBuildNumber` → update needed; if installed version **&gt;** required → no update.
+- If update is needed and `forceUpdate` is `true` → **forced** overlay on Home; otherwise **soft** banner (games still playable).
+
+### Operator procedures
+
+**Soft prompt (recommended first):**
+
+1. Set `appVersion` and/or `minBuildNumber` above what most installed clients report (version from `pubspec`, build from CI/`versionCode`).
+2. Leave `forceUpdate` **false**.
+3. Set `playStoreUrl` to the live listing (default matches package `com.winklo.faseencm`).
+4. Publish Remote Config.
+
+Users see a non-dismissible banner on Home until their install is no longer behind; **Update** opens the Play Store.
+
+**Force update (escalation):**
+
+1. Same minimum `appVersion` / `minBuildNumber` as soft.
+2. Set `forceUpdate` **true**.
+3. Confirm `playStoreUrl` is valid and published.
+
+Home shows a blocking overlay (no skip); only **Update Now** and returning after install clears it via resume re-check.
+
+**Roll back / disable:**
+
+- Set `appVersion` to `0.0.0` and `minBuildNumber` to `0`, or lower mins below current installs, and publish — prompts stop for clients that fetch the new config.
+
+### Fail-open behavior
+
+The app **must not brick** if Remote Config or Firebase is unavailable:
+
+- If Firebase does not initialize, Remote Config is not initialized and every update check returns **no prompt**.
+- Fetch/refresh errors are logged; clients fall back to in-app defaults (no forced update unless you publish stricter values and fetch succeeds).
+- Empty `playStoreUrl` or unconfigured `appVersion` (`0.0.0`) → **no prompt**, even if other keys are set.
+
+Always keep a valid `playStoreUrl` when you intentionally prompt or force updates.
+
+### Data Safety / privacy
+
+Remote Config uses the same Firebase project as Analytics and Crashlytics. Parameters are **operator-defined minimums and store URLs** — the app does not send user PII to Remote Config for this feature. **No new personal data collection** beyond existing Firebase SDK disclosures.
+
+Before each store release, confirm [Google Play Data Safety](https://play.google.com/console) still matches `play/data_safety.csv` and project docs; update the CSV or console only if Google requires an explicit Remote Config disclosure beyond your current Firebase entries.

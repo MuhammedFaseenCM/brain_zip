@@ -22,23 +22,22 @@ class WordMatchSelectScreen extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(title: const Text('Word Match decks')),
             body: switch (state.status) {
-              WordMatchSelectStatus.initial ||
-              WordMatchSelectStatus.loading =>
+              WordMatchSelectStatus.initial || WordMatchSelectStatus.loading =>
                 const Center(child: CircularProgressIndicator()),
               WordMatchSelectStatus.failure => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(state.error ?? 'Unable to load decks'),
-                      const SizedBox(height: 12),
-                      FilledButton(
-                        onPressed: () =>
-                            context.read<WordMatchSelectCubit>().load(),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(state.error ?? 'Unable to load decks'),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: () =>
+                          context.read<WordMatchSelectCubit>().load(),
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
+              ),
               WordMatchSelectStatus.ready => _DeckList(items: state.items),
             },
           );
@@ -82,4 +81,3 @@ class _DeckList extends StatelessWidget {
     );
   }
 }
-

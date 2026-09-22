@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../domain/repositories/analytics_repository.dart';
 import '../../../domain/usecases/fetch_categories.dart';
 import '../../../domain/usecases/submit_score.dart';
 import '../bloc/category_race_bloc.dart';
@@ -27,6 +28,7 @@ class _CategoryRaceScreenState extends State<CategoryRaceScreen> {
     _bloc = CategoryRaceBloc(
       fetchCategories: context.read<FetchCategories>(),
       submitScore: context.read<SubmitScore>(),
+      analytics: context.read<AnalyticsRepository>(),
     )..add(const CategoryRaceEvent.fetchCategories());
   }
 
@@ -53,7 +55,8 @@ class _CategoryRaceScreenState extends State<CategoryRaceScreen> {
         listeners: [
           BlocListener<CategoryRaceBloc, CategoryRaceState>(
             listenWhen: (p, c) =>
-                p.status != c.status && c.status == CategoryRaceStatus.navigating,
+                p.status != c.status &&
+                c.status == CategoryRaceStatus.navigating,
             listener: (context, state) {
               context.pushReplacement('/results', extra: state.resultsExtra);
             },
@@ -76,7 +79,9 @@ class _CategoryRaceScreenState extends State<CategoryRaceScreen> {
             if (state.status == CategoryRaceStatus.failure) {
               return Scaffold(
                 appBar: AppBar(title: const Text('Category Race')),
-                body: Center(child: Text(state.error ?? 'Unable to load categories')),
+                body: Center(
+                  child: Text(state.error ?? 'Unable to load categories'),
+                ),
               );
             }
 
@@ -129,8 +134,11 @@ class _CategoryRaceScreenState extends State<CategoryRaceScreen> {
                             const SizedBox(height: 8),
                             Text(
                               'Letter: ${state.letter}',
-                              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
+                              style: Theme.of(context).textTheme.displaySmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     fontWeight: FontWeight.w800,
                                   ),
                             ),
@@ -146,7 +154,8 @@ class _CategoryRaceScreenState extends State<CategoryRaceScreen> {
                     const SizedBox(height: 16),
                     if (!started)
                       FilledButton(
-                        onPressed: () => _bloc.add(const CategoryRaceEvent.started()),
+                        onPressed: () =>
+                            _bloc.add(const CategoryRaceEvent.started()),
                         child: Text('Start ${state.totalSeconds}s'),
                       )
                     else ...[
@@ -162,7 +171,10 @@ class _CategoryRaceScreenState extends State<CategoryRaceScreen> {
                         onSubmitted: (_) => _submit(),
                       ),
                       const SizedBox(height: 8),
-                      FilledButton(onPressed: _submit, child: const Text('Submit')),
+                      FilledButton(
+                        onPressed: _submit,
+                        child: const Text('Submit'),
+                      ),
                       const SizedBox(height: 16),
                       Text('Accepted (${state.answers.length})'),
                       const SizedBox(height: 8),
@@ -172,7 +184,8 @@ class _CategoryRaceScreenState extends State<CategoryRaceScreen> {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              for (final word in state.answers) Chip(label: Text(word)),
+                              for (final word in state.answers)
+                                Chip(label: Text(word)),
                             ],
                           ),
                         ),
@@ -188,4 +201,3 @@ class _CategoryRaceScreenState extends State<CategoryRaceScreen> {
     );
   }
 }
-

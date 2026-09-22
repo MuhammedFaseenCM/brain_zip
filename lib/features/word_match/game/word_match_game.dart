@@ -138,7 +138,8 @@ class WordMatchGame extends FlameGame with DragCallbacks {
       if (_matchedIds.length == deck.pairs.length * 2) {
         _won = true;
         final elapsed = DateTime.now().difference(_startedAt!).inSeconds;
-        final points = (800 - elapsed * 4).clamp(50, 800) + deck.pairs.length * 20;
+        final points =
+            (800 - elapsed * 4).clamp(50, 800) + deck.pairs.length * 20;
         onWin(points, elapsed);
       }
     } else {
@@ -198,17 +199,12 @@ class _WordNode extends PositionComponent {
     final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(12));
     canvas.drawRRect(
       rrect,
-      Paint()
-        ..color = isMatched
-            ? ZipColors.successSoft
-            : ZipColors.wall,
+      Paint()..color = isMatched ? ZipColors.successSoft : ZipColors.wall,
     );
     canvas.drawRRect(
       rrect,
       Paint()
-        ..color = isMatched
-            ? ZipColors.success
-            : ZipColors.ember
+        ..color = isMatched ? ZipColors.success : ZipColors.ember
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2,
     );
@@ -225,10 +221,7 @@ class _WordNode extends PositionComponent {
       maxLines: 1,
       ellipsis: '…',
     )..layout(maxWidth: size.x - 12);
-    tp.paint(
-      canvas,
-      Offset((size.x - tp.width) / 2, (size.y - tp.height) / 2),
-    );
+    tp.paint(canvas, Offset((size.x - tp.width) / 2, (size.y - tp.height) / 2));
     canvas.restore();
   }
 }

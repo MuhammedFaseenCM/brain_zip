@@ -1,9 +1,13 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:brain_zip/core/strings/app_strings.dart';
 import 'package:brain_zip/domain/entities/cell.dart';
 import 'package:brain_zip/domain/entities/game_streak.dart';
 import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
 import 'package:brain_zip/domain/game_ids.dart';
+import 'package:brain_zip/domain/repositories/analytics_repository.dart';
 import 'package:brain_zip/domain/usecases/generate_daily_path_words.dart';
+import 'package:brain_zip/domain/usecases/get_best_points.dart';
+import 'package:brain_zip/domain/usecases/get_best_time_seconds.dart';
 import 'package:brain_zip/domain/usecases/record_daily_clear.dart';
 import 'package:brain_zip/domain/usecases/submit_score.dart';
 import 'package:brain_zip/features/path_words/bloc/path_words_bloc.dart';
@@ -18,6 +22,12 @@ class _MockGenerateDailyPathWords extends Mock
 class _MockSubmitScore extends Mock implements SubmitScore {}
 
 class _MockRecordDailyClear extends Mock implements RecordDailyClear {}
+
+class _MockGetBestPoints extends Mock implements GetBestPoints {}
+
+class _MockGetBestTimeSeconds extends Mock implements GetBestTimeSeconds {}
+
+class _MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
 class _FakeClock {
   _FakeClock(this._times);
@@ -80,13 +90,42 @@ void main() {
   late _MockGenerateDailyPathWords generateDaily;
   late _MockSubmitScore submitScore;
   late _MockRecordDailyClear recordDailyClear;
+  late _MockGetBestPoints getBestPoints;
+  late _MockGetBestTimeSeconds getBestTimeSeconds;
+  late _MockAnalyticsRepository analytics;
   late List<Duration> waited;
 
   setUp(() {
     generateDaily = _MockGenerateDailyPathWords();
     submitScore = _MockSubmitScore();
     recordDailyClear = _MockRecordDailyClear();
+    getBestPoints = _MockGetBestPoints();
+    getBestTimeSeconds = _MockGetBestTimeSeconds();
+    analytics = _MockAnalyticsRepository();
     waited = <Duration>[];
+    when(() => getBestPoints(any())).thenReturn(0);
+    when(() => getBestTimeSeconds(any())).thenReturn(null);
+    when(
+      () => analytics.logGameStarted(gameId: any(named: 'gameId')),
+    ).thenAnswer((_) async {});
+    when(
+      () => analytics.logGameCompleted(
+        gameId: any(named: 'gameId'),
+        points: any(named: 'points'),
+        timeSeconds: any(named: 'timeSeconds'),
+        streak: any(named: 'streak'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      () => analytics.logHintUsed(
+        gameId: any(named: 'gameId'),
+        hintsRemaining: any(named: 'hintsRemaining'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      () => analytics.logGameReset(gameId: any(named: 'gameId')),
+    ).thenAnswer((_) async {});
+    registerFallbackValue(DateTime(2026, 9, 17));
   });
 
   blocTest<PathWordsBloc, PathWordsState>(
@@ -99,6 +138,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
       );
     },
@@ -117,6 +159,43 @@ void main() {
     ],
     verify: (_) =>
         verify(() => generateDaily(day: DateTime(2026, 9, 17))).called(1),
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
+    'started locks when today is already cleared',
+    build: () {
+      when(() => getBestPoints('path_words_20260917')).thenReturn(940);
+      when(() => getBestTimeSeconds('path_words_20260917')).thenReturn(12);
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _tinyPuzzle(day: inv.namedArguments[#day] as DateTime),
+      );
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
+        now: () => DateTime(2026, 9, 17, 0, 0, 0),
+      );
+    },
+    act: (b) => b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17))),
+    expect: () => [
+      isA<PathWordsState>()
+          .having((s) => s.status, 'status', PathWordsStatus.loading)
+          .having((s) => s.day, 'day', DateTime(2026, 9, 17)),
+      isA<PathWordsState>()
+          .having((s) => s.status, 'status', PathWordsStatus.locked)
+          .having((s) => s.finished, 'finished', isTrue)
+          .having((s) => s.puzzle?.id, 'puzzle.id', 't')
+          .having((s) => s.completedTargetIds, 'completedTargetIds', {
+            't0',
+            't1',
+          }),
+    ],
+    verify: (_) {
+      verify(() => generateDaily(day: DateTime(2026, 9, 17))).called(1);
+    },
   );
 
   blocTest<PathWordsBloc, PathWordsState>(
@@ -153,6 +232,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: clock.call,
         wait: (duration) async {
           waited.add(duration);
@@ -272,6 +354,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
         wait: (_) async {},
       );
@@ -332,6 +417,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
       );
     },
@@ -379,6 +467,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
       );
     },
@@ -426,6 +517,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
       );
     },
@@ -461,6 +555,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
       );
     },
@@ -503,6 +600,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
       );
     },
@@ -554,6 +654,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
       );
     },
@@ -590,6 +693,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
       );
     },
@@ -632,6 +738,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => DateTime(2026, 9, 17, 0, 0, 0),
       );
     },
@@ -682,6 +791,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: () => fixedNow,
       );
     },
@@ -769,6 +881,9 @@ void main() {
         generateDailyPathWords: generateDaily,
         submitScore: submitScore,
         recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
         now: clock.call,
         wait: (_) async {},
       );
@@ -855,5 +970,52 @@ void main() {
       expect(bloc.state.status, PathWordsStatus.navigating);
       expect(bloc.state.finished, isTrue);
     },
+  );
+
+  blocTest<PathWordsBloc, PathWordsState>(
+    'failed same-length word attempt sets an off-board rule tip',
+    build: () {
+      when(() => generateDaily(day: any(named: 'day'))).thenAnswer(
+        (inv) async => _tinyPuzzle(day: inv.namedArguments[#day] as DateTime),
+      );
+      return PathWordsBloc(
+        generateDailyPathWords: generateDaily,
+        submitScore: submitScore,
+        recordDailyClear: recordDailyClear,
+        getBestPoints: getBestPoints,
+        getBestTimeSeconds: getBestTimeSeconds,
+        analytics: analytics,
+        now: () => DateTime(2026, 9, 17, 0, 0, 0),
+      );
+    },
+    act: (b) async {
+      b.add(PathWordsEvent.started(date: DateTime(2026, 9, 17)));
+      await pumpEventQueue();
+      b.add(const PathWordsEvent.pointerDown(Cell(0, 0)));
+      b.add(const PathWordsEvent.pointerEnter(Cell(1, 0)));
+      b.add(const PathWordsEvent.pointerUp());
+    },
+    expect: () => [
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.loading,
+      ),
+      isA<PathWordsState>().having(
+        (s) => s.status,
+        'status',
+        PathWordsStatus.ready,
+      ),
+      isA<PathWordsState>()
+          .having((s) => s.activePath, 'activePath', [const Cell(0, 0)])
+          .having((s) => s.ruleTip, 'ruleTip', isNull),
+      isA<PathWordsState>().having((s) => s.activePath, 'activePath', [
+        const Cell(0, 0),
+        const Cell(1, 0),
+      ]),
+      isA<PathWordsState>()
+          .having((s) => s.ruleTip, 'ruleTip', AppStrings.pathWordsTipMatchList)
+          .having((s) => s.completedTargetIds, 'completedTargetIds', isEmpty),
+    ],
   );
 }

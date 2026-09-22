@@ -11,6 +11,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Bloc.observer = AppBlocObserver();
   await FirebaseBootstrap.init();
+  FirebaseBootstrap.installErrorHandlers();
   final prefs = await SharedPreferences.getInstance();
 
   runApp(

@@ -49,14 +49,10 @@ void main() {
       }),
     });
 
-    final repo = ZipLevelRepositoryImpl(
-      firestore: null,
-      assetBundle: bundle,
-    );
+    final repo = ZipLevelRepositoryImpl(firestore: null, assetBundle: bundle);
 
     final levels = await repo.fetchLevels();
     expect(levels.map((l) => l.id).toList(), ['l1', 'l2', 'l3']);
     expect(levels.map((l) => l.order).toList(), [1, 2, 3]);
   });
 }
-

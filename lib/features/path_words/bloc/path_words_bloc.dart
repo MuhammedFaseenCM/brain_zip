@@ -2,10 +2,14 @@ import 'package:bloc/bloc.dart';
 
 import '../../../core/strings/app_strings.dart';
 import '../../../domain/game_ids.dart';
+import '../../../domain/play_period.dart';
 import '../../../domain/path_words/path_words_rules.dart';
 import '../../../domain/path_words/path_words_scoring.dart';
+import '../../../domain/repositories/analytics_repository.dart';
 import '../../../domain/streak_calculator.dart';
 import '../../../domain/usecases/generate_daily_path_words.dart';
+import '../../../domain/usecases/get_best_points.dart';
+import '../../../domain/usecases/get_best_time_seconds.dart';
 import '../../../domain/usecases/record_daily_clear.dart';
 import '../../../domain/usecases/submit_score.dart';
 import '../../results/results_args.dart';
@@ -17,9 +21,13 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     required this.generateDailyPathWords,
     required this.submitScore,
     required this.recordDailyClear,
+    required this.getBestPoints,
+    required this.getBestTimeSeconds,
+    required this.analytics,
     DateTime Function()? now,
     Future<void> Function(Duration duration)? wait,
     this.celebrationDuration = const Duration(seconds: 2),
+    this.playPeriod = PlayPeriod.daily,
   }) : _now = now ?? DateTime.now,
        _wait = wait ?? ((duration) => Future<void>.delayed(duration)),
        super(PathWordsState.initial((now ?? DateTime.now)())) {
@@ -35,7 +43,11 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
   final GenerateDailyPathWords generateDailyPathWords;
   final SubmitScore submitScore;
   final RecordDailyClear recordDailyClear;
+  final GetBestPoints getBestPoints;
+  final GetBestTimeSeconds getBestTimeSeconds;
+  final AnalyticsRepository analytics;
   final Duration celebrationDuration;
+  final Duration playPeriod;
   final DateTime Function() _now;
   final Future<void> Function(Duration duration) _wait;
 
@@ -66,9 +78,33 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
       ),
     );
 
+    final modeKey = 'path_words_${PlayPeriod.id(seed, playPeriod)}';
+    final alreadyCleared =
+        getBestPoints(modeKey) > 0 || getBestTimeSeconds(modeKey) != null;
+
     try {
-      final puzzle = await generateDailyPathWords(day: day);
+      final puzzle = await generateDailyPathWords(
+        day: PlayPeriod.bucket(seed, playPeriod),
+      );
       if (emit.isDone) return;
+
+      if (alreadyCleared) {
+        emit(
+          state.copyWith(
+            status: PathWordsStatus.locked,
+            puzzle: puzzle,
+            finished: true,
+            completedTargetIds: {
+              for (final target in puzzle.targets) target.id,
+            },
+            activePath: const [],
+            hintRevealLength: 0,
+            hintFlashCell: null,
+            errorMessage: null,
+          ),
+        );
+        return;
+      }
 
       emit(
         state.copyWith(
@@ -81,6 +117,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
           completedTargetIds: const {},
           hintFlashCell: null,
           errorMessage: null,
+          ruleTip: null,
           finished: false,
           points: null,
           timeSeconds: null,
@@ -88,6 +125,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
           resultsExtra: null,
         ),
       );
+      await analytics.logGameStarted(gameId: GameIds.pathWords);
     } catch (e) {
       if (emit.isDone) return;
       emit(state.copyWith(status: PathWordsStatus.failed, errorMessage: '$e'));
@@ -115,8 +153,8 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     );
 
     if (begun == null) {
-      if (state.hintFlashCell == null) return;
-      emit(state.copyWith(hintFlashCell: null));
+      if (state.hintFlashCell == null && state.ruleTip == null) return;
+      emit(state.copyWith(hintFlashCell: null, ruleTip: null));
       return;
     }
 
@@ -125,6 +163,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         status: PathWordsStatus.playing,
         activePath: begun,
         hintFlashCell: null,
+        ruleTip: null,
       ),
     );
   }
@@ -180,8 +219,16 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     );
 
     if (completed == null) {
-      if (state.hintFlashCell == null) return;
-      emit(state.copyWith(hintFlashCell: null));
+      final failedAttempt = PathWordsRules.looksLikeFailedWordAttempt(
+        puzzle: puzzle,
+        path: state.activePath,
+        completedTargetIds: state.completedTargetIds,
+      );
+      final tip = failedAttempt ? AppStrings.pathWordsTipMatchList : null;
+      if (state.hintFlashCell == null && tip == null && state.ruleTip == null) {
+        return;
+      }
+      emit(state.copyWith(hintFlashCell: null, ruleTip: tip));
       return;
     }
 
@@ -193,6 +240,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         completedTargetIds: updatedCompleted,
         hintFlashCell: null,
         hintRevealLength: 0,
+        ruleTip: null,
       ),
     );
 
@@ -235,13 +283,15 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
       return;
     }
 
+    final remaining = state.hintsRemaining - 1;
     emit(
       state.copyWith(
-        hintsRemaining: state.hintsRemaining - 1,
+        hintsRemaining: remaining,
         hintFlashCell: path.last,
         hintRevealLength: path.length,
       ),
     );
+    analytics.logHintUsed(gameId: GameIds.pathWords, hintsRemaining: remaining);
   }
 
   void _onReset(PathWordsReset event, Emitter<PathWordsState> emit) {
@@ -261,6 +311,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         hintRevealLength: 0,
         hintFlashCell: null,
         errorMessage: null,
+        ruleTip: null,
         finished: false,
         points: null,
         timeSeconds: null,
@@ -268,6 +319,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         resultsExtra: null,
       ),
     );
+    analytics.logGameReset(gameId: GameIds.pathWords);
   }
 
   Future<void> _finish(Emitter<PathWordsState> emit) async {
@@ -299,8 +351,14 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     emit(state.copyWith(status: PathWordsStatus.submitting));
 
     final dateId = StreakCalculator.dateId(state.day);
+    final playId = PlayPeriod.id(
+      PlayPeriod.isSubDaily(playPeriod)
+          ? (state.startedAt ?? state.day)
+          : state.day,
+      playPeriod,
+    );
     final improved = await submitScore(
-      modeKey: 'path_words_$dateId',
+      modeKey: 'path_words_$playId',
       points: points,
       timeSeconds: elapsed,
     );
@@ -308,6 +366,13 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     final streak = await recordDailyClear(
       gameId: GameIds.pathWords,
       dateId: dateId,
+    );
+
+    await analytics.logGameCompleted(
+      gameId: GameIds.pathWords,
+      points: points,
+      timeSeconds: elapsed,
+      streak: streak.current,
     );
 
     if (emit.isDone) return;
@@ -326,6 +391,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
           replayRoute: '/path-words',
           currentStreak: streak.current,
           longestStreak: streak.longest,
+          gameId: GameIds.pathWords,
         ),
       ),
     );

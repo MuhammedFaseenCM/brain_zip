@@ -1,12 +1,13 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../domain/entities/zip_level.dart';
+import '../../../domain/play_period.dart';
 import '../../results/results_args.dart';
 import '../logic/daily_puzzle_generator.dart';
 
 part 'zip_state.freezed.dart';
 
-enum ZipStatus { initial, ready, submitting, navigating }
+enum ZipStatus { initial, ready, celebrating, submitting, navigating, locked }
 
 @freezed
 sealed class ZipState with _$ZipState {
@@ -21,9 +22,9 @@ sealed class ZipState with _$ZipState {
     ResultsArgs? resultsExtra,
   }) = _ZipState;
 
-  factory ZipState.initial(DateTime now) {
+  factory ZipState.initial(DateTime now, {Duration period = PlayPeriod.daily}) {
     final day = DateTime(now.year, now.month, now.day);
-    final level = DailyPuzzleGenerator.forDate(day);
+    final level = DailyPuzzleGenerator.forDate(now, period: period);
     return ZipState(day: day, level: level, status: ZipStatus.ready);
   }
 }

@@ -4,10 +4,8 @@ class WordPair {
   final String a;
   final String b;
 
-  factory WordPair.fromJson(Map<String, dynamic> json) => WordPair(
-        a: json['a'] as String,
-        b: json['b'] as String,
-      );
+  factory WordPair.fromJson(Map<String, dynamic> json) =>
+      WordPair(a: json['a'] as String, b: json['b'] as String);
 
   Map<String, dynamic> toJson() => {'a': a, 'b': b};
 

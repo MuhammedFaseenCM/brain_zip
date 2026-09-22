@@ -45,6 +45,12 @@ app.*.map.json
 *.keystore
 key.properties
 
+# Google Play API
+play/**/*.json
+fastlane/report.xml
+fastlane/.env
+fastlane/.env.*
+
 # Misc
 .env
 .env.*

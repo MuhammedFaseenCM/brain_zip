@@ -4,6 +4,7 @@ import 'package:brain_zip/data/repositories/word_list_repository_impl.dart';
 import 'package:brain_zip/domain/entities/cell.dart';
 import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
 import 'package:brain_zip/domain/path_words/path_words_generator.dart';
+import 'package:brain_zip/domain/play_period.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 int _turnCount(List<Cell> path) {
@@ -77,6 +78,22 @@ void main() {
       a.targets.map((t) => t.word).toList(),
       b.targets.map((t) => t.word).toList(),
     );
+  });
+
+  test('minute period gives a new puzzle id each minute', () {
+    final a = PathWordsGenerator.generate(
+      day: DateTime(2026, 9, 20, 14, 31),
+      words: words,
+      period: PlayPeriod.minute,
+    );
+    final b = PathWordsGenerator.generate(
+      day: DateTime(2026, 9, 20, 14, 32),
+      words: words,
+      period: PlayPeriod.minute,
+    );
+    expect(a.id, 'path_words_202609201431');
+    expect(b.id, 'path_words_202609201432');
+    expect(a.id, isNot(b.id));
   });
 
   test('sizes the grid to the packed words', () {

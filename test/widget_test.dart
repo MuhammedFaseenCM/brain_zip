@@ -1,9 +1,12 @@
+import 'package:flame/game.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:brain_zip/app.dart';
+import 'package:brain_zip/core/dev_flags.dart';
 import 'package:brain_zip/core/di/app_repositories.dart';
 import 'package:brain_zip/core/strings/app_strings.dart';
 import 'package:brain_zip/domain/game_ids.dart';
@@ -12,6 +15,16 @@ import 'package:brain_zip/domain/streak_calculator.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
+
+  setUp(() {
+    PackageInfo.setMockInitialValues(
+      appName: 'Winklo',
+      packageName: 'com.winklo.faseencm',
+      version: '1.0.0',
+      buildNumber: '1',
+      buildSignature: '',
+    );
+  });
 
   testWidgets('Home shows Winklo brand and daily CTAs', (tester) async {
     SharedPreferences.setMockInitialValues({});
@@ -29,10 +42,16 @@ void main() {
     expect(find.text(AppStrings.appTitle), findsOneWidget);
     expect(find.text(AppStrings.homeTagline), findsOneWidget);
     expect(find.text(AppStrings.zipTitle), findsOneWidget);
-    expect(find.text(AppStrings.pathWordsTitle), findsOneWidget);
     expect(find.text(AppStrings.playTodaysZip), findsOneWidget);
-    expect(find.text(AppStrings.playTodaysPathWords), findsOneWidget);
-    expect(find.text(AppStrings.today), findsNWidgets(2));
+    if (DevFlags.zipOnlyTesting) {
+      expect(find.text(AppStrings.pathWordsTitle), findsNothing);
+      expect(find.text(AppStrings.playTodaysPathWords), findsNothing);
+      expect(find.text(AppStrings.today), findsOneWidget);
+    } else {
+      expect(find.text(AppStrings.pathWordsTitle), findsOneWidget);
+      expect(find.text(AppStrings.playTodaysPathWords), findsOneWidget);
+      expect(find.text(AppStrings.today), findsNWidgets(2));
+    }
     expect(find.text('Choose a puzzle'), findsNothing);
     expect(find.text('Parked for later'), findsNothing);
     expect(find.text(AppStrings.wordMatch), findsNothing);
@@ -42,6 +61,7 @@ void main() {
   testWidgets('Home shows Path Words streak independently of Zip', (
     tester,
   ) async {
+    if (DevFlags.zipOnlyTesting) return;
     final todayId = StreakCalculator.dateId(DateTime.now());
     SharedPreferences.setMockInitialValues({
       'streak_current_${GameIds.pathWords}': 3,
@@ -62,10 +82,27 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.text(AppStrings.streakLabel(3)), findsOneWidget);
-    expect(find.textContaining(AppStrings.longestStreakLabel(5)), findsOneWidget);
+    expect(
+      find.textContaining(AppStrings.longestStreakLabel(5)),
+      findsOneWidget,
+    );
     expect(find.text(AppStrings.cleared), findsOneWidget);
-    expect(find.text(AppStrings.playAgain), findsOneWidget);
+    expect(find.text(AppStrings.result), findsOneWidget);
+    expect(find.text(AppStrings.comeBackTomorrow), findsNothing);
+    expect(find.text(AppStrings.playAgain), findsNothing);
     expect(find.text(AppStrings.playTodaysPathWords), findsNothing);
     expect(find.text(AppStrings.playTodaysZip), findsOneWidget);
+
+    await tester.tap(find.text(AppStrings.result));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text(AppStrings.pathWordsClearedTitle), findsNothing);
+    expect(find.text(AppStrings.newPuzzleUnlocksTomorrow), findsNothing);
+    expect(find.text(AppStrings.backHome), findsNothing);
+    expect(find.text(AppStrings.pathWordsTitle), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is GameWidget), findsOneWidget);
+    expect(find.text(AppStrings.pathWordsUndo), findsNothing);
   });
 }

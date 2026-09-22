@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:bloc/bloc.dart';
 
 import '../../../domain/entities/word_category.dart';
+import '../../../domain/game_ids.dart';
+import '../../../domain/repositories/analytics_repository.dart';
 import '../../../domain/usecases/fetch_categories.dart';
 import '../../../domain/usecases/submit_score.dart';
 import '../../results/results_args.dart';
@@ -14,19 +16,21 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
   CategoryRaceBloc({
     required this.fetchCategories,
     required this.submitScore,
+    required this.analytics,
     Random? random,
     int roundSeconds = 60,
     Stream<int> Function()? ticker,
-  })  : _rng = random ?? Random(),
-        _roundSeconds = roundSeconds,
-        _ticker = ticker ??
-            (() => Stream<int>.periodic(const Duration(seconds: 1), (i) => i)),
-        super(
-          CategoryRaceState(
-            totalSeconds: roundSeconds,
-            remainingSeconds: roundSeconds,
-          ),
-        ) {
+  }) : _rng = random ?? Random(),
+       _roundSeconds = roundSeconds,
+       _ticker =
+           ticker ??
+           (() => Stream<int>.periodic(const Duration(seconds: 1), (i) => i)),
+       super(
+         CategoryRaceState(
+           totalSeconds: roundSeconds,
+           remainingSeconds: roundSeconds,
+         ),
+       ) {
     on<CategoryRaceFetchCategories>(_onFetchCategories);
     on<CategoryRaceStarted>(_onStarted);
     on<CategoryRaceTick>(_onTick);
@@ -36,6 +40,7 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
 
   final FetchCategories fetchCategories;
   final SubmitScore submitScore;
+  final AnalyticsRepository analytics;
   final Random _rng;
   final int _roundSeconds;
   final Stream<int> Function() _ticker;
@@ -90,7 +95,10 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
     }
   }
 
-  Future<void> _onStarted(CategoryRaceStarted event, Emitter<CategoryRaceState> emit) async {
+  Future<void> _onStarted(
+    CategoryRaceStarted event,
+    Emitter<CategoryRaceState> emit,
+  ) async {
     final category = state.category;
     if (category == null || state.finished) return;
 
@@ -109,13 +117,17 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
         finished: false,
       ),
     );
+    await analytics.logGameStarted(gameId: GameIds.categoryRace);
 
     _tickerSub = _ticker().listen((_) {
       add(const CategoryRaceEvent.tick());
     });
   }
 
-  Future<void> _onTick(CategoryRaceTick event, Emitter<CategoryRaceState> emit) async {
+  Future<void> _onTick(
+    CategoryRaceTick event,
+    Emitter<CategoryRaceState> emit,
+  ) async {
     if (state.status != CategoryRaceStatus.playing || state.finished) return;
     if (state.remainingSeconds <= 0) return;
 
@@ -156,12 +168,7 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
       return;
     }
 
-    emit(
-      state.copyWith(
-        answers: [word, ...state.answers],
-        feedback: null,
-      ),
-    );
+    emit(state.copyWith(answers: [word, ...state.answers], feedback: null));
   }
 
   Future<void> _onFinishRequested(
@@ -184,6 +191,12 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
       timeSeconds: state.totalSeconds,
     );
 
+    await analytics.logGameCompleted(
+      gameId: GameIds.categoryRace,
+      points: points,
+      timeSeconds: state.totalSeconds,
+    );
+
     if (emit.isDone) return;
 
     emit(
@@ -197,6 +210,7 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
           timeSeconds: state.totalSeconds,
           improved: improved,
           points: points,
+          gameId: GameIds.categoryRace,
         ),
       ),
     );
@@ -222,4 +236,3 @@ class CategoryRaceBloc extends Bloc<CategoryRaceEvent, CategoryRaceState> {
     return super.close();
   }
 }
-

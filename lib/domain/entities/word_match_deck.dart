@@ -30,10 +30,10 @@ class WordMatchDeck {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'seconds': seconds,
-        'order': order,
-        'pairs': pairs.map((p) => p.toJson()).toList(),
-      };
+    'id': id,
+    'title': title,
+    'seconds': seconds,
+    'order': order,
+    'pairs': pairs.map((p) => p.toJson()).toList(),
+  };
 }

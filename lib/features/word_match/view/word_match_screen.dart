@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/word_match_deck.dart';
+import '../../../domain/repositories/analytics_repository.dart';
 import '../../../domain/usecases/fetch_word_match_deck_by_id.dart';
 import '../../../domain/usecases/submit_score.dart';
 import '../bloc/word_match_play_bloc.dart';
@@ -42,7 +43,10 @@ class _WordMatchScreenState extends State<WordMatchScreen> {
       deck: deck,
       onWin: (points, elapsedSeconds) {
         _bloc.add(
-          WordMatchPlayEvent.won(points: points, elapsedSeconds: elapsedSeconds),
+          WordMatchPlayEvent.won(
+            points: points,
+            elapsedSeconds: elapsedSeconds,
+          ),
         );
       },
       onProgress: (m, t) {
@@ -63,6 +67,7 @@ class _WordMatchScreenState extends State<WordMatchScreen> {
     _bloc = WordMatchPlayBloc(
       fetchDeckById: context.read<FetchWordMatchDeckById>(),
       submitScore: context.read<SubmitScore>(),
+      analytics: context.read<AnalyticsRepository>(),
     )..add(WordMatchPlayEvent.started(deckId: widget.deckId));
   }
 
@@ -83,7 +88,8 @@ class _WordMatchScreenState extends State<WordMatchScreen> {
         listeners: [
           BlocListener<WordMatchPlayBloc, WordMatchPlayState>(
             listenWhen: (p, c) =>
-                p.status != c.status && c.status == WordMatchPlayStatus.navigating,
+                p.status != c.status &&
+                c.status == WordMatchPlayStatus.navigating,
             listener: (context, state) {
               context.pushReplacement('/results', extra: state.resultsExtra);
             },
@@ -152,4 +158,3 @@ class _WordMatchScreenState extends State<WordMatchScreen> {
     );
   }
 }
-

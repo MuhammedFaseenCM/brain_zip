@@ -7,7 +7,25 @@ abstract final class AppStrings {
   static const zipTagline =
       'Start at 1. Fill every cell. Finish on the last number.';
   static const playTodaysZip = "Play today's Zip";
+  static const zipUndo = 'Undo';
+  static const zipClear = 'Clear';
+  static const zipHint = 'Hint';
+  static String zipHintWithCount(int n) => 'Hint ($n)';
+  static const zipHowToPlayTitle = 'How to play';
+  static const zipTutorialStart = 'Start at 1';
+  static const zipTutorialFinish = 'Finish on the last number';
+  static const zipTutorialFillEveryCell = 'Fill every cell';
+  static const zipTutorialWalls = 'Walls block the path';
+  static const zipHowToPlayGotIt = 'Got it';
+  static const tutorialGotIt = 'Got it';
+  static const zipTipStartAtOne = 'Start at 1';
+  static const zipTipFillEveryCell = 'Fill every cell before you finish';
+  static const zipTipFinishOnLast = 'Finish on the last number';
+  static const zipTipVisitInOrder = 'Visit the numbers in order';
+  static const zipClearedTitle = 'Puzzle cleared!';
   static const playAgain = 'Play again';
+  static const result = 'Result';
+  static const comeBackTomorrow = 'Come back tomorrow';
   static const today = 'TODAY';
   static const wordMatch = 'Word Match';
   static const categoryRace = 'Category Race';
@@ -23,9 +41,12 @@ abstract final class AppStrings {
   static const pathWordsHint = 'Hint';
   static String pathWordsHintWithCount(int n) => 'Hint ($n)';
   static const pathWordsHowToPlayTitle = 'How to play';
-  static const pathWordsHowToPlayBody =
-      'Start from any letter and drag a path. Lift your finger anytime—the path stays so you can continue from the last cell. Paths move up, down, left, or right—not diagonally. A word counts only when you release on its exact path. Undo backs up. Hint reveals more of the current word, keeping earlier hinted letters connected.';
+  static const pathWordsTutorialDrag = 'Drag letter to letter';
+  static const pathWordsTutorialLift = 'Lift anytime — keep going';
+  static const pathWordsTutorialMatchList = 'Match a word on the list';
   static const pathWordsHowToPlayGotIt = 'Got it';
+  static const pathWordsTipMatchList =
+      'That path isn’t on the list — match a listed word';
   static String pathWordsUnfoundWordLabel(int letterCount) =>
       '$letterCount-letter word, not found yet';
   static String pathWordsTracingWordLabel(String letters) =>
@@ -37,6 +58,8 @@ abstract final class AppStrings {
 
   // Results
   static const newPersonalBest = 'New personal best';
+  static const newPuzzleUnlocksTomorrow = 'A new puzzle unlocks tomorrow.';
+  static const backHome = 'Back home';
 
   // Zip game branding (feature, not app title)
   static const zipBrand = 'ZIP';
@@ -48,5 +71,19 @@ abstract final class AppStrings {
 
   static String longestStreakLabel(int days) {
     return 'Best: $days';
+  }
+
+  // Force update / soft update
+  static const updateRequiredTitle = 'Update required';
+  static const updateAvailableTitle = 'Update available';
+  static const updateRequiredBody =
+      'A new version of Winklo is required to continue. Please update from the Play Store.';
+  static const updateAvailableBody =
+      'A new version of Winklo is available. Please update for the latest fixes and puzzles.';
+  static const updateNow = 'Update now';
+  static const updateCantSkip = "This update can't be skipped.";
+
+  static String updateVersionRow(String current, String requiredLabel) {
+    return '$current → $requiredLabel';
   }
 }

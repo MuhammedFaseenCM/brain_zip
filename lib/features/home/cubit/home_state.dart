@@ -1,6 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../domain/entities/app_update_decision.dart';
 import '../../../domain/entities/zip_level.dart';
+import '../../../domain/play_period.dart';
 import '../../zip/logic/daily_puzzle_generator.dart';
 
 part 'home_state.freezed.dart';
@@ -22,14 +24,20 @@ sealed class HomeState with _$HomeState {
     @Default(0) int pathWordsLongestStreak,
     @Default(false) bool pathWordsIsOnFreeze,
     @Default(true) bool pathWordsFreezeAvailable,
+    @Default(AppUpdateStatus.none) AppUpdateStatus updateStatus,
+    @Default('') String updateStoreUrl,
+    @Default('') String updateCurrentLabel,
+    @Default('') String updateRequiredLabel,
   }) = _HomeState;
 
-  factory HomeState.initial(DateTime now) {
-    final day = DateTime(now.year, now.month, now.day);
-    final level = DailyPuzzleGenerator.forDate(day);
+  factory HomeState.initial(
+    DateTime now, {
+    Duration period = PlayPeriod.daily,
+  }) {
+    final level = DailyPuzzleGenerator.forDate(now, period: period);
     return HomeState(
       dailyLevel: level,
-      dateId: DailyPuzzleGenerator.dateId(day),
+      dateId: DailyPuzzleGenerator.dateId(now, period: period),
     );
   }
 }

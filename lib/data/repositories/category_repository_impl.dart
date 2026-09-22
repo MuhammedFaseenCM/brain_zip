@@ -10,9 +10,10 @@ class CategoryRepositoryImpl implements CategoryRepository {
   CategoryRepositoryImpl({
     FirebaseFirestore? firestore,
     AssetBundle? assetBundle,
-  })  : _firestore = firestore ??
-            (FirebaseBootstrap.isReady ? FirebaseFirestore.instance : null),
-        _assetBundle = assetBundle ?? rootBundle;
+  }) : _firestore =
+           firestore ??
+           (FirebaseBootstrap.isReady ? FirebaseFirestore.instance : null),
+       _assetBundle = assetBundle ?? rootBundle;
 
   final FirebaseFirestore? _firestore;
   final AssetBundle _assetBundle;
@@ -48,11 +49,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
     final categories = <WordCategory>[];
     for (final path in _assetFiles) {
       final raw = await _assetBundle.loadString(path);
-      categories
-          .add(WordCategory.fromJson(jsonDecode(raw) as Map<String, dynamic>));
+      categories.add(
+        WordCategory.fromJson(jsonDecode(raw) as Map<String, dynamic>),
+      );
     }
     categories.sort((a, b) => a.order.compareTo(b.order));
     return categories;
   }
 }
-

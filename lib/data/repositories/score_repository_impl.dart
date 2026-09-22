@@ -41,4 +41,3 @@ class ScoreRepositoryImpl implements ScoreRepository {
     return improved;
   }
 }
-

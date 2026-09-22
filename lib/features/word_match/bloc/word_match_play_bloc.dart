@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 
+import '../../../domain/game_ids.dart';
+import '../../../domain/repositories/analytics_repository.dart';
 import '../../../domain/usecases/fetch_word_match_deck_by_id.dart';
 import '../../../domain/usecases/submit_score.dart';
 import '../../results/results_args.dart';
@@ -12,13 +14,12 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
   WordMatchPlayBloc({
     required this.fetchDeckById,
     required this.submitScore,
+    required this.analytics,
     Stream<int> Function()? ticker,
-  })  : _ticker = ticker ??
-            (() => Stream<int>.periodic(
-                  const Duration(seconds: 1),
-                  (i) => i,
-                )),
-        super(const WordMatchPlayState()) {
+  }) : _ticker =
+           ticker ??
+           (() => Stream<int>.periodic(const Duration(seconds: 1), (i) => i)),
+       super(const WordMatchPlayState()) {
     on<WordMatchPlayStarted>(_onStarted);
     on<WordMatchPlayTick>(_onTick);
     on<WordMatchPlayProgressChanged>(_onProgressChanged);
@@ -27,6 +28,7 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
 
   final FetchWordMatchDeckById fetchDeckById;
   final SubmitScore submitScore;
+  final AnalyticsRepository analytics;
   final Stream<int> Function() _ticker;
 
   StreamSubscription<int>? _tickerSub;
@@ -74,6 +76,7 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
           total: deck.pairs.length,
         ),
       );
+      await analytics.logGameStarted(gameId: GameIds.wordMatch);
 
       _tickerSub = _ticker().listen((_) {
         add(const WordMatchPlayEvent.tick());
@@ -84,7 +87,10 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
     }
   }
 
-  Future<void> _onTick(WordMatchPlayTick event, Emitter<WordMatchPlayState> emit) async {
+  Future<void> _onTick(
+    WordMatchPlayTick event,
+    Emitter<WordMatchPlayState> emit,
+  ) async {
     if (state.status != WordMatchPlayStatus.playing || state.finished) return;
     if (state.remainingSeconds <= 0) return;
 
@@ -94,6 +100,13 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
     if (next <= 0 && state.matched < state.total) {
       await _tickerSub?.cancel();
       _tickerSub = null;
+      final points = state.matched * 25;
+      final timeSeconds = state.deck?.seconds ?? 60;
+      await analytics.logGameCompleted(
+        gameId: GameIds.wordMatch,
+        points: points,
+        timeSeconds: timeSeconds,
+      );
       emit(
         state.copyWith(
           status: WordMatchPlayStatus.navigating,
@@ -101,9 +114,10 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
           resultsExtra: ResultsArgs(
             title: 'Time up',
             subtitle: 'Matched ${state.matched} / ${state.total}',
-            timeSeconds: state.deck?.seconds ?? 60,
+            timeSeconds: timeSeconds,
             improved: false,
-            points: state.matched * 25,
+            points: points,
+            gameId: GameIds.wordMatch,
           ),
         ),
       );
@@ -118,17 +132,17 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
     emit(state.copyWith(matched: event.matched, total: event.total));
   }
 
-  Future<void> _onWon(WordMatchPlayWon event, Emitter<WordMatchPlayState> emit) async {
+  Future<void> _onWon(
+    WordMatchPlayWon event,
+    Emitter<WordMatchPlayState> emit,
+  ) async {
     if (state.status != WordMatchPlayStatus.playing || state.finished) return;
     final deckId = state.deckId;
     final deck = state.deck;
     if (deckId == null || deck == null) return;
 
     emit(
-      state.copyWith(
-        finished: true,
-        status: WordMatchPlayStatus.submitting,
-      ),
+      state.copyWith(finished: true, status: WordMatchPlayStatus.submitting),
     );
 
     await _tickerSub?.cancel();
@@ -136,6 +150,12 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
 
     final improved = await submitScore(
       modeKey: 'match_$deckId',
+      points: event.points,
+      timeSeconds: event.elapsedSeconds,
+    );
+
+    await analytics.logGameCompleted(
+      gameId: GameIds.wordMatch,
       points: event.points,
       timeSeconds: event.elapsedSeconds,
     );
@@ -151,6 +171,7 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
           timeSeconds: event.elapsedSeconds,
           improved: improved,
           points: event.points,
+          gameId: GameIds.wordMatch,
         ),
       ),
     );
@@ -163,4 +184,3 @@ class WordMatchPlayBloc extends Bloc<WordMatchPlayEvent, WordMatchPlayState> {
     return super.close();
   }
 }
-

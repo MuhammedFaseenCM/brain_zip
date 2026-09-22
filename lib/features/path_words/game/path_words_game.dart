@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/entities/cell.dart';
 import '../../../domain/entities/path_words_puzzle.dart';
+import '../../../domain/path_words/path_words_rules.dart';
 import 'path_words_board_view.dart';
 
 class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
@@ -182,7 +183,7 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
   void _tracePointer(Vector2 from, Vector2 to) {
     final delta = to - from;
     final distance = delta.length;
-    final step = math.max(_cellSize * 0.2, 1.0);
+    final step = math.max(_cellSize * 0.1, 1.0);
     final samples = math.max(1, (distance / step).ceil());
     for (var i = 0; i <= samples; i++) {
       final t = samples == 0 ? 1.0 : i / samples;
@@ -300,6 +301,7 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
     _drawCompletedPaths(canvas);
     _drawCelebrateGlow(canvas);
     _drawActivePath(canvas);
+    _drawLiveNeighbor(canvas);
     _drawHintFlash(canvas);
     _drawLetters(canvas);
   }
@@ -435,6 +437,78 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
     }
   }
 
+  void _drawLiveNeighbor(Canvas canvas) {
+    if (!_drawing || _lastPointer == null || view.activePath.isEmpty) return;
+
+    final last = view.activePath.last;
+    final origin = _centerOf(last);
+    final finger = Offset(_lastPointer!.x, _lastPointer!.y);
+    final dx = finger.dx - origin.dx;
+    final dy = finger.dy - origin.dy;
+    if (dx * dx + dy * dy < 1) return;
+
+    final Cell next;
+    final double progress;
+    if (dx.abs() >= dy.abs()) {
+      next = Cell(last.row, last.col + (dx > 0 ? 1 : -1));
+      progress = (dx.abs() / _cellSize).clamp(0.0, 1.0);
+    } else {
+      next = Cell(last.row + (dy > 0 ? 1 : -1), last.col);
+      progress = (dy.abs() / _cellSize).clamp(0.0, 1.0);
+    }
+    if (progress <= 0.02) return;
+
+    final locked = {
+      for (final path in view.completedPathsByTargetId.values) ...path,
+    };
+    if (PathWordsRules.tryExtend(
+          puzzle: view.puzzle,
+          path: view.activePath,
+          candidate: next,
+          locked: locked,
+        ) ==
+        null) {
+      return;
+    }
+
+    final full = _cellRect(next, inset: _cellSize * 0.06);
+    final Rect growing;
+    if (next.col > last.col) {
+      growing = Rect.fromLTRB(
+        full.left,
+        full.top,
+        full.left + full.width * progress,
+        full.bottom,
+      );
+    } else if (next.col < last.col) {
+      growing = Rect.fromLTRB(
+        full.right - full.width * progress,
+        full.top,
+        full.right,
+        full.bottom,
+      );
+    } else if (next.row > last.row) {
+      growing = Rect.fromLTRB(
+        full.left,
+        full.top,
+        full.right,
+        full.top + full.height * progress,
+      );
+    } else {
+      growing = Rect.fromLTRB(
+        full.left,
+        full.bottom - full.height * progress,
+        full.right,
+        full.bottom,
+      );
+    }
+
+    canvas.save();
+    canvas.clipRect(growing);
+    _drawRaisedCell(canvas, cell: next, color: ZipColors.ember);
+    canvas.restore();
+  }
+
   void _drawHintFlash(Canvas canvas) {
     final path = view.hintPath;
     if (path.isEmpty) return;
@@ -495,10 +569,7 @@ class PathWordsGame extends FlameGame with DragCallbacks, TapCallbacks {
 
         tp.paint(
           canvas,
-          Offset(
-            center.dx - tp.width / 2,
-            center.dy - tp.height / 2 - lift,
-          ),
+          Offset(center.dx - tp.width / 2, center.dy - tp.height / 2 - lift),
         );
       }
     }

@@ -7,4 +7,3 @@ class FetchWordMatchDeckById {
 
   Future<WordMatchDeck?> call(String deckId) => _repo.fetchDeckById(deckId);
 }
-

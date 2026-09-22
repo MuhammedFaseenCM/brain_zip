@@ -194,6 +194,114 @@ void main() {
     ]);
   });
 
+  test(
+    'liveFillTarget fills an empty slot of the drag length, not the official word',
+    () {
+      final puzzle = PathWordsPuzzle(
+        id: 'decoy',
+        day: DateTime(2026, 9, 17),
+        size: 3,
+        letters: const ['b', 'o', 'n', 'd', 'c', 'a', 't', 'x', 'y'],
+        targets: const [
+          PathWordsTarget(
+            id: 'bond',
+            word: 'bond',
+            start: Cell(0, 0),
+            path: [Cell(0, 0), Cell(0, 1), Cell(0, 2), Cell(1, 0)],
+            colorIndex: 0,
+          ),
+          PathWordsTarget(
+            id: 'cat',
+            word: 'cat',
+            start: Cell(1, 1),
+            path: [Cell(1, 1), Cell(1, 2), Cell(2, 0)],
+            colorIndex: 1,
+          ),
+        ],
+      );
+
+      expect(
+        PathWordsRules.liveFillTarget(
+          puzzle: puzzle,
+          activePath: const [Cell(0, 0), Cell(0, 1), Cell(0, 2)],
+          completedTargetIds: {},
+        )?.id,
+        'cat',
+      );
+    },
+  );
+
+  test(
+    'liveFillTarget jumps to the next longer empty slot when the drag grows',
+    () {
+      final puzzle = PathWordsPuzzle(
+        id: 'decoy',
+        day: DateTime(2026, 9, 17),
+        size: 3,
+        letters: const ['b', 'o', 'n', 'd', 'c', 'a', 't', 'x', 'y'],
+        targets: const [
+          PathWordsTarget(
+            id: 'bond',
+            word: 'bond',
+            start: Cell(0, 0),
+            path: [Cell(0, 0), Cell(0, 1), Cell(0, 2), Cell(1, 0)],
+            colorIndex: 0,
+          ),
+          PathWordsTarget(
+            id: 'cat',
+            word: 'cat',
+            start: Cell(1, 1),
+            path: [Cell(1, 1), Cell(1, 2), Cell(2, 0)],
+            colorIndex: 1,
+          ),
+        ],
+      );
+
+      expect(
+        PathWordsRules.liveFillTarget(
+          puzzle: puzzle,
+          activePath: const [Cell(0, 0), Cell(0, 1), Cell(0, 2), Cell(1, 0)],
+          completedTargetIds: {},
+        )?.id,
+        'bond',
+      );
+    },
+  );
+
+  test('liveFillTarget skips completed slots', () {
+    final puzzle = PathWordsPuzzle(
+      id: 'decoy',
+      day: DateTime(2026, 9, 17),
+      size: 3,
+      letters: const ['b', 'o', 'n', 'd', 'c', 'a', 't', 'x', 'y'],
+      targets: const [
+        PathWordsTarget(
+          id: 'bond',
+          word: 'bond',
+          start: Cell(0, 0),
+          path: [Cell(0, 0), Cell(0, 1), Cell(0, 2), Cell(1, 0)],
+          colorIndex: 0,
+        ),
+        PathWordsTarget(
+          id: 'cat',
+          word: 'cat',
+          start: Cell(1, 1),
+          path: [Cell(1, 1), Cell(1, 2), Cell(2, 0)],
+          colorIndex: 1,
+        ),
+      ],
+    );
+
+    expect(
+      PathWordsRules.liveFillTarget(
+        puzzle: puzzle,
+        activePath: const [Cell(0, 0), Cell(0, 1), Cell(0, 2)],
+        completedTargetIds: {'cat'},
+      )?.id,
+      'bond',
+    );
+  });
+
   test('activeTarget matches a word from either end, else the live drag', () {
     expect(
       PathWordsRules.activeTarget(
@@ -218,6 +326,33 @@ void main() {
         completedTargetIds: {'t0'},
       )?.id,
       't1',
+    );
+  });
+
+  test('looksLikeFailedWordAttempt when length matches but path is wrong', () {
+    expect(
+      PathWordsRules.looksLikeFailedWordAttempt(
+        puzzle: puzzle,
+        path: const [Cell(0, 0), Cell(1, 0)],
+        completedTargetIds: {},
+      ),
+      isTrue,
+    );
+    expect(
+      PathWordsRules.looksLikeFailedWordAttempt(
+        puzzle: puzzle,
+        path: const [Cell(0, 0), Cell(0, 1)],
+        completedTargetIds: {},
+      ),
+      isFalse,
+    );
+    expect(
+      PathWordsRules.looksLikeFailedWordAttempt(
+        puzzle: puzzle,
+        path: const [Cell(0, 0)],
+        completedTargetIds: {},
+      ),
+      isFalse,
     );
   });
 }

@@ -11,62 +11,67 @@ void main() {
     level = ZipLevel(
       id: 't',
       size: 3,
-      numbers: {
-        const Cell(0, 0): 1,
-        const Cell(1, 1): 2,
-        const Cell(2, 2): 3,
-      },
+      numbers: {const Cell(0, 0): 1, const Cell(1, 1): 2, const Cell(2, 2): 3},
       walls: const [],
     );
     validator = PathValidator(level);
   });
 
   test('starts only on number 1', () {
+    expect(validator.tryExtend(path: const [], candidate: const Cell(0, 0)), [
+      const Cell(0, 0),
+    ]);
     expect(
-      validator.tryExtend(
-        path: const [],
-        candidate: const Cell(0, 0),
-        nextRequiredNumber: 1,
-      ),
-      [const Cell(0, 0)],
-    );
-    expect(
-      validator.tryExtend(
-        path: const [],
-        candidate: const Cell(1, 1),
-        nextRequiredNumber: 1,
-      ),
+      validator.tryExtend(path: const [], candidate: const Cell(1, 1)),
       isNull,
     );
   });
 
-  test('backtracks when revisiting earlier cell', () {
-    final path = [
-      const Cell(0, 0),
-      const Cell(0, 1),
-      const Cell(0, 2),
-    ];
+  test('LIFO backtrack only pops when revisiting the previous cell', () {
+    final path = [const Cell(0, 0), const Cell(0, 1), const Cell(0, 2)];
     expect(
-      validator.tryBacktrack(path: path, candidate: const Cell(0, 1)),
+      validator.tryLifoBacktrack(path: path, candidate: const Cell(0, 1)),
       [const Cell(0, 0), const Cell(0, 1)],
     );
-  });
-
-  test('rejects last number before the board is full', () {
-    final path = [
-      const Cell(0, 0),
-      const Cell(0, 1),
-      const Cell(1, 1), // 2
-      const Cell(1, 2),
-    ];
     expect(
-      validator.tryExtend(
-        path: path,
-        candidate: const Cell(2, 2), // 3 too early
-        nextRequiredNumber: 3,
-      ),
+      validator.tryLifoBacktrack(path: path, candidate: const Cell(0, 0)),
       isNull,
     );
+  });
+
+  test('tap backtrack truncates to any earlier cell', () {
+    final path = [const Cell(0, 0), const Cell(0, 1), const Cell(0, 2)];
+    expect(validator.tryBacktrack(path: path, candidate: const Cell(0, 1)), [
+      const Cell(0, 0),
+      const Cell(0, 1),
+    ]);
+  });
+
+  test('allows drawing through numbered cells out of order', () {
+    final path = [
+      const Cell(0, 0),
+      const Cell(1, 0),
+      const Cell(2, 0),
+      const Cell(2, 1),
+    ];
+    expect(validator.tryExtend(path: path, candidate: const Cell(2, 2)), [
+      ...path,
+      const Cell(2, 2),
+    ]);
+  });
+
+  test('can keep drawing after visiting the last number early', () {
+    final path = [
+      const Cell(0, 0),
+      const Cell(1, 0),
+      const Cell(2, 0),
+      const Cell(2, 1),
+      const Cell(2, 2),
+    ];
+    expect(validator.tryExtend(path: path, candidate: const Cell(1, 2)), [
+      ...path,
+      const Cell(1, 2),
+    ]);
   });
 
   test('wins only when path ends on last number with full board', () {
@@ -100,7 +105,7 @@ void main() {
     expect(validator.isWon(winning.sublist(0, 8)), isFalse);
   });
 
-  test('cannot extend after landing on last number', () {
+  test('cannot extend onto a cell already in the path', () {
     final full = [
       const Cell(0, 0),
       const Cell(1, 0),
@@ -113,12 +118,39 @@ void main() {
       const Cell(2, 2),
     ];
     expect(
-      validator.tryExtend(
-        path: full,
-        candidate: const Cell(2, 1),
-        nextRequiredNumber: 4,
-      ),
+      validator.tryExtend(path: full, candidate: const Cell(2, 1)),
       isNull,
     );
+  });
+
+  test('cannot enter an already drawn neighbor except the previous cell', () {
+    final path = [
+      const Cell(0, 0),
+      const Cell(0, 1),
+      const Cell(0, 2),
+      const Cell(1, 2),
+      const Cell(1, 1),
+    ];
+    expect(validator.canEnter(path: path, candidate: const Cell(1, 1)), isTrue);
+    expect(validator.canEnter(path: path, candidate: const Cell(1, 2)), isTrue);
+    expect(validator.canEnter(path: path, candidate: const Cell(2, 1)), isTrue);
+    expect(
+      validator.canEnter(path: path, candidate: const Cell(0, 1)),
+      isFalse,
+    );
+  });
+
+  test('live reach stops at already drawn cells except LIFO previous', () {
+    final path = [
+      const Cell(0, 0),
+      const Cell(0, 1),
+      const Cell(0, 2),
+      const Cell(1, 2),
+      const Cell(1, 1),
+    ];
+    expect(validator.liveReachCells(path: path, dRow: -1, dCol: 0), 0);
+    expect(validator.liveReachCells(path: path, dRow: 0, dCol: 1), 1);
+    expect(validator.liveReachCells(path: path, dRow: 1, dCol: 0), 1.5);
+    expect(validator.liveReachCells(path: path, dRow: 0, dCol: -1), 1.5);
   });
 }

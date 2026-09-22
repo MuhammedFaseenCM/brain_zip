@@ -22,4 +22,3 @@ sealed class WordMatchSelectState with _$WordMatchSelectState {
     String? error,
   }) = _WordMatchSelectState;
 }
-
