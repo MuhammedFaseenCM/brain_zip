@@ -1,5 +1,5 @@
-import 'package:brain_zip/domain/repositories/word_list_repository.dart';
-import 'package:brain_zip/domain/usecases/generate_daily_path_words.dart';
+import 'package:winklo/domain/repositories/word_list_repository.dart';
+import 'package:winklo/domain/usecases/generate_daily_path_words.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

@@ -1,6 +1,6 @@
-import 'package:brain_zip/domain/entities/cell.dart';
-import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
-import 'package:brain_zip/domain/path_words/path_words_rules.dart';
+import 'package:winklo/domain/entities/cell.dart';
+import 'package:winklo/domain/entities/path_words_puzzle.dart';
+import 'package:winklo/domain/path_words/path_words_rules.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 PathWordsPuzzle tinyPuzzle() {

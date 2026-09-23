@@ -1,4 +1,4 @@
-import 'package:brain_zip/domain/play_period.dart';
+import 'package:winklo/domain/play_period.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

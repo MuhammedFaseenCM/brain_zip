@@ -1,7 +1,7 @@
-import 'package:brain_zip/domain/entities/game_streak.dart';
-import 'package:brain_zip/domain/repositories/streak_repository.dart';
-import 'package:brain_zip/domain/usecases/get_streak.dart';
-import 'package:brain_zip/domain/usecases/record_daily_clear.dart';
+import 'package:winklo/domain/entities/game_streak.dart';
+import 'package:winklo/domain/repositories/streak_repository.dart';
+import 'package:winklo/domain/usecases/get_streak.dart';
+import 'package:winklo/domain/usecases/record_daily_clear.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

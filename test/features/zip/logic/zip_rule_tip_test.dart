@@ -1,7 +1,7 @@
-import 'package:brain_zip/domain/entities/cell.dart';
-import 'package:brain_zip/domain/entities/zip_level.dart';
-import 'package:brain_zip/features/zip/logic/path_validator.dart';
-import 'package:brain_zip/features/zip/logic/zip_rule_tip.dart';
+import 'package:winklo/domain/entities/cell.dart';
+import 'package:winklo/domain/entities/zip_level.dart';
+import 'package:winklo/features/zip/logic/path_validator.dart';
+import 'package:winklo/features/zip/logic/zip_rule_tip.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

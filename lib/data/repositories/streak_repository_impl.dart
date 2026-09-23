@@ -1,5 +1,5 @@
-import 'package:brain_zip/domain/entities/game_streak.dart';
-import 'package:brain_zip/domain/repositories/streak_repository.dart';
+import 'package:winklo/domain/entities/game_streak.dart';
+import 'package:winklo/domain/repositories/streak_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StreakRepositoryImpl implements StreakRepository {

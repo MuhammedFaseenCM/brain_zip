@@ -6,18 +6,18 @@
     "configurations": [
     
         {
-            "name": "brain_zip",
+            "name": "winklo",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "brain_zip (profile mode)",
+            "name": "winklo (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "brain_zip (release mode)",
+            "name": "winklo (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

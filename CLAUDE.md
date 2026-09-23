@@ -1,4 +1,4 @@
-## BrainZip — Project guide (BLoC + domain/data)
+## Winklo — Project guide (BLoC + domain/data)
 
 This repo uses **feature-first** organization with a clean separation of **domain** (pure business logic) and **data** (implementations).
 

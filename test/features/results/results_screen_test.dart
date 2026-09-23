@@ -1,7 +1,7 @@
-import 'package:brain_zip/core/strings/app_strings.dart';
-import 'package:brain_zip/core/theme/app_theme.dart';
-import 'package:brain_zip/features/results/results_args.dart';
-import 'package:brain_zip/features/results/results_screen.dart';
+import 'package:winklo/core/strings/app_strings.dart';
+import 'package:winklo/core/theme/app_theme.dart';
+import 'package:winklo/features/results/results_args.dart';
+import 'package:winklo/features/results/results_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';

@@ -5,12 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:brain_zip/app.dart';
-import 'package:brain_zip/core/dev_flags.dart';
-import 'package:brain_zip/core/di/app_repositories.dart';
-import 'package:brain_zip/core/strings/app_strings.dart';
-import 'package:brain_zip/domain/game_ids.dart';
-import 'package:brain_zip/domain/streak_calculator.dart';
+import 'package:winklo/app.dart';
+import 'package:winklo/core/dev_flags.dart';
+import 'package:winklo/core/di/app_repositories.dart';
+import 'package:winklo/core/strings/app_strings.dart';
+import 'package:winklo/domain/game_ids.dart';
+import 'package:winklo/domain/streak_calculator.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

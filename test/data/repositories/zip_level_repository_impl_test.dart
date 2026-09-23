@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:brain_zip/data/repositories/zip_level_repository_impl.dart';
+import 'package:winklo/data/repositories/zip_level_repository_impl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 

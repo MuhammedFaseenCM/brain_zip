@@ -103,7 +103,7 @@ Remove `flutter_riverpod` entirely. If resolver complains about versions, run `f
 
 - [ ] **Step 2: Fetch packages**
 
-Run: `cd /Users/muhammedfaseencm/brain_zip && flutter pub get`  
+Run: `cd /Users/muhammedfaseencm/winklo && flutter pub get`  
 Expected: exit 0; lockfile updated; no riverpod.
 
 - [ ] **Step 3: Sanity — existing pure tests still pass**
@@ -207,8 +207,8 @@ Same thin pattern for `GetBestPoints` / `GetBestTimeSeconds`.
 
 ```dart
 // test/domain/usecases/submit_score_test.dart
-import 'package:brain_zip/domain/repositories/score_repository.dart';
-import 'package:brain_zip/domain/usecases/submit_score.dart';
+import 'package:winklo/domain/repositories/score_repository.dart';
+import 'package:winklo/domain/usecases/submit_score.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -293,7 +293,7 @@ Expected: PASS.
 
 ```dart
 // test/data/repositories/score_repository_impl_test.dart
-import 'package:brain_zip/data/repositories/score_repository_impl.dart';
+import 'package:winklo/data/repositories/score_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -517,7 +517,7 @@ Future<void> main() async {
 ```dart
 // lib/features/home/cubit/home_state.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:brain_zip/domain/entities/zip_level.dart';
+import 'package:winklo/domain/entities/zip_level.dart';
 
 part 'home_state.freezed.dart';
 
@@ -535,9 +535,9 @@ class HomeState with _$HomeState {
 ```dart
 // test/features/home/cubit/home_cubit_test.dart
 import 'package:bloc_test/bloc_test.dart';
-import 'package:brain_zip/domain/usecases/get_best_points.dart';
-import 'package:brain_zip/domain/usecases/get_best_time_seconds.dart';
-import 'package:brain_zip/features/home/cubit/home_cubit.dart';
+import 'package:winklo/domain/usecases/get_best_points.dart';
+import 'package:winklo/domain/usecases/get_best_time_seconds.dart';
+import 'package:winklo/features/home/cubit/home_cubit.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

@@ -1,6 +1,6 @@
-import 'package:brain_zip/core/strings/app_strings.dart';
-import 'package:brain_zip/features/home/view/widgets/home_force_update_overlay.dart';
-import 'package:brain_zip/features/home/view/widgets/home_update_banner.dart';
+import 'package:winklo/core/strings/app_strings.dart';
+import 'package:winklo/features/home/view/widgets/home_force_update_overlay.dart';
+import 'package:winklo/features/home/view/widgets/home_update_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

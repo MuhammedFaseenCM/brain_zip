@@ -1,5 +1,5 @@
-import 'package:brain_zip/domain/entities/game_streak.dart';
-import 'package:brain_zip/domain/streak_calculator.dart';
+import 'package:winklo/domain/entities/game_streak.dart';
+import 'package:winklo/domain/streak_calculator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

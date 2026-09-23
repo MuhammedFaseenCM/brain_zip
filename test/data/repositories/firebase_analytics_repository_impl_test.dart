@@ -1,5 +1,5 @@
-import 'package:brain_zip/core/firebase/firebase_bootstrap.dart';
-import 'package:brain_zip/data/repositories/firebase_analytics_repository_impl.dart';
+import 'package:winklo/core/firebase/firebase_bootstrap.dart';
+import 'package:winklo/data/repositories/firebase_analytics_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

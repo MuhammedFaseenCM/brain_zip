@@ -1,4 +1,4 @@
-import 'package:brain_zip/domain/repositories/score_repository.dart';
+import 'package:winklo/domain/repositories/score_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ScoreRepositoryImpl implements ScoreRepository {

@@ -1,5 +1,5 @@
-import 'package:brain_zip/domain/entities/zip_level.dart';
-import 'package:brain_zip/features/zip/game/zip_game.dart';
+import 'package:winklo/domain/entities/zip_level.dart';
+import 'package:winklo/features/zip/game/zip_game.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

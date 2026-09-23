@@ -1,4 +1,4 @@
-name: brain_zip
+name: winklo
 description: "Solo Android mini-games: Zip, Word Match, and Category Race."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.

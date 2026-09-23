@@ -1,4 +1,4 @@
-import 'package:brain_zip/domain/repositories/word_list_repository.dart';
+import 'package:winklo/domain/repositories/word_list_repository.dart';
 import 'package:flutter/services.dart';
 
 class WordListRepositoryImpl implements WordListRepository {

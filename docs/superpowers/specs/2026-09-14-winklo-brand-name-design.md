@@ -36,10 +36,10 @@ Do **not** rename:
 
 - Zip game feature, levels, or Zip-specific UI copy (`playTodaysZip`, path puzzle branding)
 - Word Match / Category Race game titles
-- Dart package path `brain_zip` unless a separate migration is planned (out of scope for brand lock)
+- Dart package path `brain_zip` (deferred at brand lock; see `docs/superpowers/specs/2026-09-23-winklo-project-rename-design.md` for package/folder/GitHub rename)
 
 ## Out of scope
 
 - New logo / icon redesign (optional follow-up)
-- Full package rename (`com.…` / `package:brain_zip`)
+- Full package rename at brand-lock time (`com.…` / `package:brain_zip`) — covered later by `docs/superpowers/specs/2026-09-23-winklo-project-rename-design.md`
 - Trademark filing

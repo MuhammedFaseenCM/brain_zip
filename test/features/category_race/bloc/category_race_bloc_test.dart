@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:bloc_test/bloc_test.dart';
-import 'package:brain_zip/domain/entities/word_category.dart';
-import 'package:brain_zip/domain/usecases/fetch_categories.dart';
-import 'package:brain_zip/domain/usecases/submit_score.dart';
-import 'package:brain_zip/features/category_race/bloc/category_race_bloc.dart';
-import 'package:brain_zip/features/category_race/bloc/category_race_event.dart';
-import 'package:brain_zip/features/category_race/bloc/category_race_state.dart';
+import 'package:winklo/domain/entities/word_category.dart';
+import 'package:winklo/domain/usecases/fetch_categories.dart';
+import 'package:winklo/domain/usecases/submit_score.dart';
+import 'package:winklo/features/category_race/bloc/category_race_bloc.dart';
+import 'package:winklo/features/category_race/bloc/category_race_event.dart';
+import 'package:winklo/features/category_race/bloc/category_race_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

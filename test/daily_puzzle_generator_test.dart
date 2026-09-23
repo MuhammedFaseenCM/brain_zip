@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:brain_zip/domain/entities/cell.dart';
-import 'package:brain_zip/domain/play_period.dart';
-import 'package:brain_zip/features/zip/logic/daily_puzzle_generator.dart';
-import 'package:brain_zip/features/zip/logic/path_validator.dart';
+import 'package:winklo/domain/entities/cell.dart';
+import 'package:winklo/domain/play_period.dart';
+import 'package:winklo/features/zip/logic/daily_puzzle_generator.dart';
+import 'package:winklo/features/zip/logic/path_validator.dart';
 
 void main() {
   test('same day always yields the same puzzle', () {

@@ -19,6 +19,8 @@
 - Analyze with timed `dart analyze <changed files>` — never MCP `analyze_files`
 - Commits only when the user asks (skip commit steps unless explicitly requested)
 
+> **Note (2026-09-23):** The Dart package was later renamed from `brain_zip` to `winklo`; see `docs/superpowers/specs/2026-09-23-winklo-project-rename-design.md`. Constraints below reflect scope at brand-lock time.
+
 ---
 
 ## File structure map
@@ -58,9 +60,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:brain_zip/app.dart';
-import 'package:brain_zip/core/di/app_repositories.dart';
-import 'package:brain_zip/core/strings/app_strings.dart';
+import 'package:winklo/app.dart';
+import 'package:winklo/core/di/app_repositories.dart';
+import 'package:winklo/core/strings/app_strings.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

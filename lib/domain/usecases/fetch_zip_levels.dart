@@ -1,5 +1,5 @@
-import 'package:brain_zip/domain/entities/zip_level.dart';
-import 'package:brain_zip/domain/repositories/zip_level_repository.dart';
+import 'package:winklo/domain/entities/zip_level.dart';
+import 'package:winklo/domain/repositories/zip_level_repository.dart';
 
 class FetchZipLevels {
   FetchZipLevels(this._repo);

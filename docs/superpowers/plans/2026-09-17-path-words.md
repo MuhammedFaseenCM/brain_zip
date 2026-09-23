@@ -71,9 +71,9 @@
 - [ ] **Step 1: Write the failing entity test**
 
 ```dart
-import 'package:brain_zip/domain/entities/cell.dart';
-import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
-import 'package:brain_zip/domain/game_ids.dart';
+import 'package:winklo/domain/entities/cell.dart';
+import 'package:winklo/domain/entities/path_words_puzzle.dart';
+import 'package:winklo/domain/game_ids.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -235,7 +235,7 @@ abstract class WordListRepository {
 Test (`test/data/repositories/word_list_repository_impl_test.dart`):
 
 ```dart
-import 'package:brain_zip/data/repositories/word_list_repository_impl.dart';
+import 'package:winklo/data/repositories/word_list_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -337,9 +337,9 @@ Expected: PASS
 - [ ] **Step 1: Write failing rules tests**
 
 ```dart
-import 'package:brain_zip/domain/entities/cell.dart';
-import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
-import 'package:brain_zip/domain/path_words/path_words_rules.dart';
+import 'package:winklo/domain/entities/cell.dart';
+import 'package:winklo/domain/entities/path_words_puzzle.dart';
+import 'package:winklo/domain/path_words/path_words_rules.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 PathWordsPuzzle tinyPuzzle() {
