@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'core/router/app_router.dart';
 import 'core/strings/app_strings.dart';
+import 'core/theme/app_text_scale.dart';
 import 'core/theme/app_theme.dart';
 import 'domain/repositories/analytics_repository.dart';
 
@@ -26,6 +27,8 @@ class _WinkloAppState extends State<WinkloApp> {
       themeMode: ThemeMode.dark,
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) =>
+          AppTextScale(child: child ?? const SizedBox.shrink()),
     );
   }
 }

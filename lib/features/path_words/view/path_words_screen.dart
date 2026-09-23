@@ -77,6 +77,7 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
     return PathWordsBoardView(
       puzzle: puzzle,
       activePath: state.activePath,
+      placedPaths: state.placedPaths,
       completedPathsByTargetId: completedPaths,
       hintPath: PathWordsRules.hintedPath(
         puzzle: puzzle,
@@ -228,7 +229,9 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                 (state.status == PathWordsStatus.ready ||
                     state.status == PathWordsStatus.playing) &&
                 puzzle != null;
-            final canUndo = isReadyToPlay && state.activePath.isNotEmpty;
+            final canUndo =
+                isReadyToPlay &&
+                (state.activePath.isNotEmpty || state.placedPaths.isNotEmpty);
             final canHint = isReadyToPlay && state.hintsRemaining > 0;
 
             return Scaffold(
@@ -277,46 +280,68 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                                 available * 0.78,
                                 available,
                               );
-                              return Center(
-                                child:
-                                    SizedBox(
-                                          width: boardSide,
-                                          height: boardSide,
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              24,
-                                            ),
-                                            child: _BoardPane(
-                                              game: game,
-                                              status: state.status,
-                                              errorMessage: state.errorMessage,
-                                              onRetry: () => _bloc.add(
-                                                PathWordsEvent.started(
-                                                  date: widget.date,
+                              final showTip =
+                                  state.ruleTip != null && isReadyToPlay;
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Center(
+                                    child:
+                                        SizedBox(
+                                              width: boardSide,
+                                              height: boardSide,
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(24),
+                                                child: _BoardPane(
+                                                  game: game,
+                                                  status: state.status,
+                                                  errorMessage:
+                                                      state.errorMessage,
+                                                  onRetry: () => _bloc.add(
+                                                    PathWordsEvent.started(
+                                                      date: widget.date,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
+                                            )
+                                            .animate(
+                                              target:
+                                                  state.status ==
+                                                      PathWordsStatus
+                                                          .celebrating
+                                                  ? 1
+                                                  : 0,
+                                            )
+                                            .scaleXY(
+                                              begin: 1,
+                                              end: 1.045,
+                                              duration: 520.ms,
+                                              curve: Curves.easeOutBack,
+                                            )
+                                            .shimmer(
+                                              duration: 1600.ms,
+                                              color: Colors.white.withValues(
+                                                alpha: 0.28,
+                                              ),
                                             ),
-                                          ),
-                                        )
-                                        .animate(
-                                          target:
-                                              state.status ==
-                                                  PathWordsStatus.celebrating
-                                              ? 1
-                                              : 0,
-                                        )
-                                        .scaleXY(
-                                          begin: 1,
-                                          end: 1.045,
-                                          duration: 520.ms,
-                                          curve: Curves.easeOutBack,
-                                        )
-                                        .shimmer(
-                                          duration: 1600.ms,
-                                          color: Colors.white.withValues(
-                                            alpha: 0.28,
-                                          ),
+                                  ),
+                                  // Overlay so the tip never changes Column
+                                  // height or pushes the board upward.
+                                  if (showTip)
+                                    Positioned(
+                                      left: 0,
+                                      right: 0,
+                                      bottom: 0,
+                                      child: IgnorePointer(
+                                        child: GameRuleTipBanner(
+                                          message: state.ruleTip!,
+                                          accent: ZipColors.sky,
                                         ),
+                                      ),
+                                    ),
+                                ],
                               );
                             },
                           ),
@@ -331,15 +356,9 @@ class _PathWordsScreenState extends State<PathWordsScreen> {
                               PathWordsWordList(
                                 puzzle: puzzle,
                                 activePath: state.activePath,
+                                placedPaths: state.placedPaths,
                                 completedTargetIds: state.completedTargetIds,
                                 palette: PathWordsGame.pathColors,
-                              ),
-                            ],
-                            if (state.ruleTip != null && isReadyToPlay) ...[
-                              const SizedBox(height: 10),
-                              GameRuleTipBanner(
-                                message: state.ruleTip!,
-                                accent: ZipColors.sky,
                               ),
                             ],
                             if (!isReview) ...[

@@ -64,6 +64,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         day: day,
         puzzle: null,
         activePath: const [],
+        placedPaths: const [],
         completedTargetIds: const {},
         hintsRemaining: 3,
         hintRevealLength: 0,
@@ -98,6 +99,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
               for (final target in puzzle.targets) target.id,
             },
             activePath: const [],
+            placedPaths: const [],
             hintRevealLength: 0,
             hintFlashCell: null,
             errorMessage: null,
@@ -114,6 +116,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
           hintsRemaining: 3,
           hintRevealLength: 0,
           activePath: const [],
+          placedPaths: const [],
           completedTargetIds: const {},
           hintFlashCell: null,
           errorMessage: null,
@@ -144,7 +147,89 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     final puzzle = state.puzzle;
     if (puzzle == null) return;
 
-    final locked = PathWordsRules.lockedCells(puzzle, state.completedTargetIds);
+    final locked = PathWordsRules.blockedCells(
+      puzzle: puzzle,
+      completedTargetIds: state.completedTargetIds,
+      placedPaths: state.placedPaths,
+    );
+
+    // Resume only the in-progress stroke. A placed path stays put.
+    if (state.activePath.isNotEmpty) {
+      final path = state.activePath;
+      if (event.cell == path.last) {
+        if (state.hintFlashCell == null && state.ruleTip == null) return;
+        emit(state.copyWith(hintFlashCell: null, ruleTip: null));
+        return;
+      }
+
+      final popped = PathWordsRules.tryLifoBacktrack(
+        path: path,
+        candidate: event.cell,
+      );
+      if (popped != null) {
+        emit(
+          state.copyWith(
+            status: PathWordsStatus.playing,
+            activePath: popped,
+            hintFlashCell: null,
+            ruleTip: null,
+          ),
+        );
+        return;
+      }
+
+      final extended = PathWordsRules.tryExtend(
+        puzzle: puzzle,
+        path: path,
+        candidate: event.cell,
+        locked: locked,
+      );
+      if (extended != null) {
+        emit(
+          state.copyWith(
+            status: PathWordsStatus.playing,
+            activePath: extended,
+            hintFlashCell: null,
+            ruleTip: null,
+          ),
+        );
+        return;
+      }
+
+      final truncated = PathWordsRules.tryTruncate(
+        path: path,
+        candidate: event.cell,
+      );
+      if (truncated != null) {
+        emit(
+          state.copyWith(
+            status: PathWordsStatus.playing,
+            activePath: truncated,
+            hintFlashCell: null,
+            ruleTip: null,
+          ),
+        );
+        return;
+      }
+    }
+
+    final truncatedPlaced = PathWordsRules.truncatePlacedAt(
+      placedPaths: state.placedPaths,
+      cell: event.cell,
+    );
+    if (truncatedPlaced != null) {
+      emit(
+        state.copyWith(
+          status: PathWordsStatus.playing,
+          activePath: const [],
+          placedPaths: truncatedPlaced,
+          hintFlashCell: null,
+          ruleTip: null,
+        ),
+      );
+      return;
+    }
+
     final begun = PathWordsRules.tryBegin(
       puzzle: puzzle,
       cell: event.cell,
@@ -153,6 +238,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     );
 
     if (begun == null) {
+      // Invalid press (locked/blank) — keep any incomplete path as-is.
       if (state.hintFlashCell == null && state.ruleTip == null) return;
       emit(state.copyWith(hintFlashCell: null, ruleTip: null));
       return;
@@ -181,7 +267,26 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     if (puzzle == null) return;
     if (state.activePath.isEmpty) return;
 
-    final locked = PathWordsRules.lockedCells(puzzle, state.completedTargetIds);
+    final locked = PathWordsRules.blockedCells(
+      puzzle: puzzle,
+      completedTargetIds: state.completedTargetIds,
+      placedPaths: state.placedPaths,
+    );
+    final popped = PathWordsRules.tryLifoBacktrack(
+      path: state.activePath,
+      candidate: event.cell,
+    );
+    if (popped != null) {
+      emit(
+        state.copyWith(
+          status: PathWordsStatus.playing,
+          activePath: popped,
+          hintFlashCell: null,
+        ),
+      );
+      return;
+    }
+
     final next = PathWordsRules.tryExtend(
       puzzle: puzzle,
       path: state.activePath,
@@ -212,35 +317,53 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     if (puzzle == null) return;
     if (state.activePath.isEmpty) return;
 
-    final completed = PathWordsRules.completedTarget(
-      puzzle: puzzle,
-      path: state.activePath,
-      completedTargetIds: state.completedTargetIds,
-    );
-
-    if (completed == null) {
-      final failedAttempt = PathWordsRules.looksLikeFailedWordAttempt(
-        puzzle: puzzle,
-        path: state.activePath,
-        completedTargetIds: state.completedTargetIds,
+    if (state.activePath.length < 2) {
+      emit(
+        state.copyWith(
+          status: PathWordsStatus.playing,
+          activePath: const [],
+          hintFlashCell: null,
+          ruleTip: null,
+        ),
       );
-      final tip = failedAttempt ? AppStrings.pathWordsTipMatchList : null;
-      if (state.hintFlashCell == null && tip == null && state.ruleTip == null) {
-        return;
-      }
-      emit(state.copyWith(hintFlashCell: null, ruleTip: tip));
       return;
     }
 
-    final updatedCompleted = {...state.completedTargetIds, completed.id};
+    final stroke = PathWordsRules.commitStroke(
+      puzzle: puzzle,
+      cells: state.activePath,
+      completedTargetIds: state.completedTargetIds,
+      colorIndex: PathWordsRules.nextUnusedColorIndex(
+        puzzle: puzzle,
+        completedTargetIds: state.completedTargetIds,
+        placedPaths: state.placedPaths,
+        paletteLength: 8,
+      ),
+    );
+    final placed = [...state.placedPaths, stroke];
+    final updatedCompleted = stroke.targetId == null
+        ? state.completedTargetIds
+        : {...state.completedTargetIds, stroke.targetId!};
+    // Tip only after a finished stroke whose length matches a listed word
+    // (never while the finger is still drawing).
+    final failedAttempt =
+        stroke.targetId == null &&
+        PathWordsRules.looksLikeFailedWordAttempt(
+          puzzle: puzzle,
+          path: state.activePath,
+          completedTargetIds: state.completedTargetIds,
+        );
+    final tip = failedAttempt ? AppStrings.pathWordsTipMatchList : null;
+
     emit(
       state.copyWith(
         status: PathWordsStatus.playing,
         activePath: const [],
+        placedPaths: placed,
         completedTargetIds: updatedCompleted,
         hintFlashCell: null,
-        hintRevealLength: 0,
-        ruleTip: null,
+        hintRevealLength: stroke.isCorrect ? 0 : state.hintRevealLength,
+        ruleTip: tip,
       ),
     );
 
@@ -255,6 +378,24 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
         state.status != PathWordsStatus.playing) {
       return;
     }
+
+    if (state.placedPaths.isNotEmpty) {
+      final placed = state.placedPaths.sublist(0, state.placedPaths.length - 1);
+      emit(
+        state.copyWith(
+          status: PathWordsStatus.playing,
+          placedPaths: placed,
+          completedTargetIds: {
+            for (final stroke in placed)
+              if (stroke.targetId != null) stroke.targetId!,
+          },
+          hintFlashCell: null,
+          ruleTip: null,
+        ),
+      );
+      return;
+    }
+
     if (state.activePath.isEmpty) return;
 
     final undone = PathWordsRules.undoActive(state.activePath);
@@ -272,6 +413,23 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
     final puzzle = state.puzzle;
     if (puzzle == null) return;
     if (state.hintsRemaining <= 0) return;
+
+    if (PathWordsRules.hasIncorrectStroke(state.placedPaths)) {
+      final remaining = state.hintsRemaining - 1;
+      emit(
+        state.copyWith(
+          placedPaths: PathWordsRules.withoutIncorrect(state.placedPaths),
+          hintsRemaining: remaining,
+          hintFlashCell: null,
+          ruleTip: null,
+        ),
+      );
+      analytics.logHintUsed(
+        gameId: GameIds.pathWords,
+        hintsRemaining: remaining,
+      );
+      return;
+    }
 
     final nextLength = state.hintRevealLength + 1;
     final path = PathWordsRules.hintedPath(
@@ -306,6 +464,7 @@ class PathWordsBloc extends Bloc<PathWordsEvent, PathWordsState> {
       state.copyWith(
         status: PathWordsStatus.ready,
         activePath: const [],
+        placedPaths: const [],
         completedTargetIds: const {},
         hintsRemaining: 3,
         hintRevealLength: 0,

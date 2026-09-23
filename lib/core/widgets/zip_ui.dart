@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_layout.dart';
 import '../theme/app_theme.dart';
 
 /// Soft ink gradient + faint diagonal path motif behind Zip screens.
@@ -108,21 +109,39 @@ class ZipPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layout = AppLayout.of(context);
+    var style = FilledButton.styleFrom(padding: layout.buttonPadding);
+    if (backgroundColor != null) {
+      style = style.merge(
+        FilledButton.styleFrom(backgroundColor: backgroundColor),
+      );
+    }
+
     return SizedBox(
       width: double.infinity,
       child: FilledButton(
         onPressed: onPressed,
-        style: backgroundColor == null
-            ? null
-            : FilledButton.styleFrom(backgroundColor: backgroundColor),
+        style: style,
         child: icon == null
-            ? Text(label)
+            ? Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 20),
-                  const SizedBox(width: 8),
-                  Text(label),
+                  Icon(icon, size: layout.space(20)),
+                  SizedBox(width: layout.space(8)),
+                  Flexible(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
       ),
@@ -174,6 +193,8 @@ class ZipHudPill extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: emphasize ? ZipColors.ember : ZipColors.onInk,
             ),

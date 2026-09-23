@@ -1,5 +1,55 @@
 import 'cell.dart';
 
+/// A stroke released onto the board. [targetId] is set only when it matches
+/// a remaining solution path.
+class PathWordsStroke {
+  const PathWordsStroke({
+    required this.cells,
+    required this.colorIndex,
+    this.targetId,
+  });
+
+  final List<Cell> cells;
+  final int colorIndex;
+  final String? targetId;
+
+  bool get isCorrect => targetId != null;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! PathWordsStroke) return false;
+    if (colorIndex != other.colorIndex || targetId != other.targetId) {
+      return false;
+    }
+    if (cells.length != other.cells.length) return false;
+    for (var i = 0; i < cells.length; i++) {
+      if (cells[i] != other.cells[i]) return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode => Object.hash(colorIndex, targetId, Object.hashAll(cells));
+}
+
+/// Letters shown in one word-list row for a live or incorrect stroke.
+class PathWordsListFill {
+  const PathWordsListFill({
+    required this.letters,
+    required this.colorIndex,
+    required this.slotLength,
+  });
+
+  final List<String> letters;
+  final int colorIndex;
+  final int slotLength;
+
+  int get overflowCount {
+    final extra = letters.length - slotLength;
+    return extra > 0 ? extra : 0;
+  }
+}
+
 class PathWordsTarget {
   const PathWordsTarget({
     required this.id,
