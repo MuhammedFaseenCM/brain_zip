@@ -1,4 +1,4 @@
-import 'package:brain_zip/domain/repositories/analytics_repository.dart';
+import 'package:winklo/domain/repositories/analytics_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAnalyticsRepository extends Mock implements AnalyticsRepository {}

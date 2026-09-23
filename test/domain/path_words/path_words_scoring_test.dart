@@ -1,4 +1,4 @@
-import 'package:brain_zip/domain/path_words/path_words_scoring.dart';
+import 'package:winklo/domain/path_words/path_words_scoring.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

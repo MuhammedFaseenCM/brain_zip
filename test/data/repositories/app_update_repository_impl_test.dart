@@ -1,5 +1,5 @@
-import 'package:brain_zip/data/clients/remote_config_client.dart';
-import 'package:brain_zip/data/repositories/app_update_repository_impl.dart';
+import 'package:winklo/data/clients/remote_config_client.dart';
+import 'package:winklo/data/repositories/app_update_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

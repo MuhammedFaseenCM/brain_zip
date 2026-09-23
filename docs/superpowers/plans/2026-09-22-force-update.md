@@ -65,7 +65,7 @@
 - [ ] **Step 1: Write the failing test**
 
 ```dart
-import 'package:brain_zip/domain/app_version.dart';
+import 'package:winklo/domain/app_version.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -199,7 +199,7 @@ Then: `dart format lib/domain/app_version.dart test/domain/app_version_test.dart
 - [ ] **Step 1: Write the failing test**
 
 ```dart
-import 'package:brain_zip/domain/entities/app_update_decision.dart';
+import 'package:winklo/domain/entities/app_update_decision.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -290,9 +290,9 @@ abstract class AppUpdateRepository {
 - [ ] **Step 1: Write failing usecase tests**
 
 ```dart
-import 'package:brain_zip/domain/entities/app_update_decision.dart';
-import 'package:brain_zip/domain/repositories/app_update_repository.dart';
-import 'package:brain_zip/domain/usecases/check_app_update.dart';
+import 'package:winklo/domain/entities/app_update_decision.dart';
+import 'package:winklo/domain/repositories/app_update_repository.dart';
+import 'package:winklo/domain/usecases/check_app_update.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -463,7 +463,7 @@ class CheckAppUpdate {
 - [ ] **Step 1: Add dependencies**
 
 ```bash
-cd /Users/muhammedfaseencm/brain_zip
+cd /Users/muhammedfaseencm/winklo
 flutter pub add firebase_remote_config package_info_plus url_launcher
 ```
 

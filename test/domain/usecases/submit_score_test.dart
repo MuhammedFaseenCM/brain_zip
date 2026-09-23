@@ -1,5 +1,5 @@
-import 'package:brain_zip/domain/repositories/score_repository.dart';
-import 'package:brain_zip/domain/usecases/submit_score.dart';
+import 'package:winklo/domain/repositories/score_repository.dart';
+import 'package:winklo/domain/usecases/submit_score.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

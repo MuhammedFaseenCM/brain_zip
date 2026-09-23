@@ -1,7 +1,7 @@
-import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
-import 'package:brain_zip/domain/path_words/path_words_generator.dart';
-import 'package:brain_zip/domain/play_period.dart';
-import 'package:brain_zip/domain/repositories/word_list_repository.dart';
+import 'package:winklo/domain/entities/path_words_puzzle.dart';
+import 'package:winklo/domain/path_words/path_words_generator.dart';
+import 'package:winklo/domain/play_period.dart';
+import 'package:winklo/domain/repositories/word_list_repository.dart';
 
 class GenerateDailyPathWords {
   GenerateDailyPathWords(this._words, {this.period = PlayPeriod.daily});

@@ -1,4 +1,4 @@
-import 'package:brain_zip/domain/repositories/tutorial_repository.dart';
+import 'package:winklo/domain/repositories/tutorial_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TutorialRepositoryImpl implements TutorialRepository {

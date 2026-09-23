@@ -1,5 +1,5 @@
-import 'package:brain_zip/core/theme/app_theme.dart';
-import 'package:brain_zip/features/zip/game/zip_path_ribbon.dart';
+import 'package:winklo/core/theme/app_theme.dart';
+import 'package:winklo/features/zip/game/zip_path_ribbon.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

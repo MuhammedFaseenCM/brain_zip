@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:brain_zip/data/repositories/word_list_repository_impl.dart';
-import 'package:brain_zip/domain/entities/cell.dart';
-import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
-import 'package:brain_zip/domain/path_words/path_words_generator.dart';
-import 'package:brain_zip/domain/play_period.dart';
+import 'package:winklo/data/repositories/word_list_repository_impl.dart';
+import 'package:winklo/domain/entities/cell.dart';
+import 'package:winklo/domain/entities/path_words_puzzle.dart';
+import 'package:winklo/domain/path_words/path_words_generator.dart';
+import 'package:winklo/domain/play_period.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 int _turnCount(List<Cell> path) {

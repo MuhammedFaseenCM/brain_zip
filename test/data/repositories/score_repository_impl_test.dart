@@ -1,4 +1,4 @@
-import 'package:brain_zip/data/repositories/score_repository_impl.dart';
+import 'package:winklo/data/repositories/score_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -1,4 +1,4 @@
-import 'package:brain_zip/features/zip/game/zip_stroke.dart';
+import 'package:winklo/features/zip/game/zip_stroke.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

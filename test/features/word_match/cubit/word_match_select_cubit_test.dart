@@ -1,10 +1,10 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:brain_zip/domain/entities/word_match_deck.dart';
-import 'package:brain_zip/domain/entities/word_pair.dart';
-import 'package:brain_zip/domain/usecases/fetch_word_match_decks.dart';
-import 'package:brain_zip/domain/usecases/get_best_points.dart';
-import 'package:brain_zip/features/word_match/cubit/word_match_select_cubit.dart';
-import 'package:brain_zip/features/word_match/cubit/word_match_select_state.dart';
+import 'package:winklo/domain/entities/word_match_deck.dart';
+import 'package:winklo/domain/entities/word_pair.dart';
+import 'package:winklo/domain/usecases/fetch_word_match_decks.dart';
+import 'package:winklo/domain/usecases/get_best_points.dart';
+import 'package:winklo/features/word_match/cubit/word_match_select_cubit.dart';
+import 'package:winklo/features/word_match/cubit/word_match_select_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

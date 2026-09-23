@@ -1,9 +1,9 @@
-import 'package:brain_zip/core/di/app_repositories.dart';
-import 'package:brain_zip/core/strings/app_strings.dart';
-import 'package:brain_zip/core/theme/app_theme.dart';
-import 'package:brain_zip/domain/play_period.dart';
-import 'package:brain_zip/features/home/view/home_screen.dart';
-import 'package:brain_zip/features/zip/logic/daily_puzzle_generator.dart';
+import 'package:winklo/core/di/app_repositories.dart';
+import 'package:winklo/core/strings/app_strings.dart';
+import 'package:winklo/core/theme/app_theme.dart';
+import 'package:winklo/domain/play_period.dart';
+import 'package:winklo/features/home/view/home_screen.dart';
+import 'package:winklo/features/zip/logic/daily_puzzle_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';

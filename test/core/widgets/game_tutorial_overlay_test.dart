@@ -1,7 +1,7 @@
-import 'package:brain_zip/core/strings/app_strings.dart';
-import 'package:brain_zip/core/widgets/game_tutorial_overlay.dart';
-import 'package:brain_zip/core/widgets/tutorial_mini_board.dart';
-import 'package:brain_zip/domain/entities/cell.dart';
+import 'package:winklo/core/strings/app_strings.dart';
+import 'package:winklo/core/widgets/game_tutorial_overlay.dart';
+import 'package:winklo/core/widgets/tutorial_mini_board.dart';
+import 'package:winklo/domain/entities/cell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

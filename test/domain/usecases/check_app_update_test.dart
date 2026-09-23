@@ -1,6 +1,6 @@
-import 'package:brain_zip/domain/entities/app_update_decision.dart';
-import 'package:brain_zip/domain/repositories/app_update_repository.dart';
-import 'package:brain_zip/domain/usecases/check_app_update.dart';
+import 'package:winklo/domain/entities/app_update_decision.dart';
+import 'package:winklo/domain/repositories/app_update_repository.dart';
+import 'package:winklo/domain/usecases/check_app_update.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

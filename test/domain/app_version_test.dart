@@ -1,4 +1,4 @@
-import 'package:brain_zip/domain/app_version.dart';
+import 'package:winklo/domain/app_version.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

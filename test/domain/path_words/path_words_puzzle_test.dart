@@ -1,6 +1,6 @@
-import 'package:brain_zip/domain/entities/cell.dart';
-import 'package:brain_zip/domain/entities/path_words_puzzle.dart';
-import 'package:brain_zip/domain/game_ids.dart';
+import 'package:winklo/domain/entities/cell.dart';
+import 'package:winklo/domain/entities/path_words_puzzle.dart';
+import 'package:winklo/domain/game_ids.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

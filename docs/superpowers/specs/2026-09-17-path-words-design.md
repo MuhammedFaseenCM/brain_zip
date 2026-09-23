@@ -12,7 +12,7 @@
 1. Ship a new daily game **Path Words**: find listed words by tracing orthogonal paths on an **8×8** letter grid that is fully partitioned by the solution.
 2. Match **near–LinkedIn Wend** UX: start-cell markers, colored completed paths with direction arrows, word list with checkmarks, Undo, Hint, Reset, collapsible How to play.
 3. Use a **seeded daily generator** over a **bundled English word list** so each calendar day has a deterministic puzzle.
-4. Follow BrainZip architecture: feature-first UI + BLoC, pure domain rules, Flame as **thin renderer/input** only (Bloc owns play state).
+4. Follow Winklo architecture: feature-first UI + BLoC, pure domain rules, Flame as **thin renderer/input** only (Bloc owns play state).
 5. Reuse **SubmitScore**, **RecordDailyClear**, results screen, and home/routing patterns from Zip.
 
 ### Non-goals (v1)

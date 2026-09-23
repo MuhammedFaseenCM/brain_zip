@@ -1,4 +1,4 @@
-import 'package:brain_zip/data/repositories/word_list_repository_impl.dart';
+import 'package:winklo/data/repositories/word_list_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

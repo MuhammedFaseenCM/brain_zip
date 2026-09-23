@@ -2,7 +2,7 @@
 
 Date: 2026-09-22  
 Status: approved for planning  
-Reference: Urbania `force_update` + `minBuildNumber` (Firebase Remote Config), adapted to BrainZip BLoC architecture.
+Reference: Urbania `force_update` + `minBuildNumber` (Firebase Remote Config), adapted to Winklo BLoC architecture.
 
 ## Goal
 

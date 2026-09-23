@@ -1,8 +1,8 @@
-import 'package:brain_zip/core/strings/app_strings.dart';
-import 'package:brain_zip/core/widgets/game_tutorial_overlay.dart';
-import 'package:brain_zip/domain/game_ids.dart';
-import 'package:brain_zip/domain/repositories/tutorial_repository.dart';
-import 'package:brain_zip/features/zip/view/widgets/zip_tutorial.dart';
+import 'package:winklo/core/strings/app_strings.dart';
+import 'package:winklo/core/widgets/game_tutorial_overlay.dart';
+import 'package:winklo/domain/game_ids.dart';
+import 'package:winklo/domain/repositories/tutorial_repository.dart';
+import 'package:winklo/features/zip/view/widgets/zip_tutorial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';

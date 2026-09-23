@@ -1,15 +1,15 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:brain_zip/domain/entities/app_update_decision.dart';
-import 'package:brain_zip/domain/entities/game_streak.dart';
-import 'package:brain_zip/domain/game_ids.dart';
-import 'package:brain_zip/domain/play_period.dart';
-import 'package:brain_zip/domain/repositories/app_update_repository.dart';
-import 'package:brain_zip/domain/usecases/check_app_update.dart';
-import 'package:brain_zip/domain/usecases/get_best_points.dart';
-import 'package:brain_zip/domain/usecases/get_best_time_seconds.dart';
-import 'package:brain_zip/domain/usecases/get_streak.dart';
-import 'package:brain_zip/features/home/cubit/home_cubit.dart';
-import 'package:brain_zip/features/home/cubit/home_state.dart';
+import 'package:winklo/domain/entities/app_update_decision.dart';
+import 'package:winklo/domain/entities/game_streak.dart';
+import 'package:winklo/domain/game_ids.dart';
+import 'package:winklo/domain/play_period.dart';
+import 'package:winklo/domain/repositories/app_update_repository.dart';
+import 'package:winklo/domain/usecases/check_app_update.dart';
+import 'package:winklo/domain/usecases/get_best_points.dart';
+import 'package:winklo/domain/usecases/get_best_time_seconds.dart';
+import 'package:winklo/domain/usecases/get_streak.dart';
+import 'package:winklo/features/home/cubit/home_cubit.dart';
+import 'package:winklo/features/home/cubit/home_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

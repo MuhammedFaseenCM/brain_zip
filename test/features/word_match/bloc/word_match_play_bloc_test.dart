@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
-import 'package:brain_zip/domain/entities/word_match_deck.dart';
-import 'package:brain_zip/domain/entities/word_pair.dart';
-import 'package:brain_zip/domain/usecases/fetch_word_match_deck_by_id.dart';
-import 'package:brain_zip/domain/usecases/submit_score.dart';
-import 'package:brain_zip/features/word_match/bloc/word_match_play_bloc.dart';
-import 'package:brain_zip/features/word_match/bloc/word_match_play_event.dart';
-import 'package:brain_zip/features/word_match/bloc/word_match_play_state.dart';
+import 'package:winklo/domain/entities/word_match_deck.dart';
+import 'package:winklo/domain/entities/word_pair.dart';
+import 'package:winklo/domain/usecases/fetch_word_match_deck_by_id.dart';
+import 'package:winklo/domain/usecases/submit_score.dart';
+import 'package:winklo/features/word_match/bloc/word_match_play_bloc.dart';
+import 'package:winklo/features/word_match/bloc/word_match_play_event.dart';
+import 'package:winklo/features/word_match/bloc/word_match_play_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
